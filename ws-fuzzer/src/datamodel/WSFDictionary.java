@@ -31,7 +31,7 @@ public class WSFDictionary {
         
         String word = br.readLine();
         while(word != null){
-            if(word != "")
+            if(!word.equals(""))
                 this.words.add(word);
             word = br.readLine();
         }

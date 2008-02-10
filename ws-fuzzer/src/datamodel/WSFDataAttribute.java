@@ -7,7 +7,6 @@ package datamodel;
 
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMAttribute;
-import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
 
 /**
  *

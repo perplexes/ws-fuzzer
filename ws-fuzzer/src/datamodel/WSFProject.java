@@ -20,6 +20,7 @@ import utils.XSDUtils;
 public class WSFProject {
     
     private String name;
+    private String path;
     
     private String wsdlURI;
     private String wsdlRaw;
@@ -31,17 +32,30 @@ public class WSFProject {
     private WSDLUtils wsdlHelper;
     private XSDUtils xsdHelper;
     
-    public WSFProject(String wsdlURI) throws WSDLException{
+    public WSFProject(String name, String path, String wsdlURI) throws WSDLException{
+        
+        this.name = name;
+        this.path = path;
         this.wsdlURI = wsdlURI;
         
         wsdlHelper = new WSDLUtils(wsdlURI);
-        xsdHelper = new XSDUtils(wsdlHelper.getXmlSchemaFromTypes());
+        xsdHelper = new XSDUtils(getWsdlHelper().getXmlSchemaFromTypes());
+        wsdlHelper.setXSDHelper(xsdHelper);
         
         this.wsdlRaw = wsdlHelper.getWSDLRaw();
         this.wsdl4jDef = wsdlHelper.getWSDL4jDef();
         
         this.services = new ArrayList<WSFService>();
         this.testCases = new ArrayList<WSFTestCase>();
+    }
+    
+    public WSFProject loadProject(String name, String wsdlURI, String path){
+        // TODO: 
+        return null;
+    }
+    
+    public void saveProject(){
+        
     }
     
     public static void main(String[] args) throws MalformedURLException, URISyntaxException{
@@ -57,6 +71,92 @@ public class WSFProject {
         
         System.out.println(uri.replaceAll("^.*/", "").replaceAll("\\..*$", ""));
         
+    }
+
+    public WSDLUtils getWsdlHelper() {
+        return wsdlHelper;
+    }
+
+    public void setWsdlHelper(WSDLUtils wsdlHelper) {
+        this.wsdlHelper = wsdlHelper;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getWsdlURI() {
+        return wsdlURI;
+    }
+
+    public void setWsdlURI(String wsdlURI) {
+        this.wsdlURI = wsdlURI;
+    }
+
+    public String getWsdlRaw() {
+        return wsdlRaw;
+    }
+
+    public void setWsdlRaw(String wsdlRaw) {
+        this.wsdlRaw = wsdlRaw;
+    }
+
+    public Definition getWsdl4jDef() {
+        return wsdl4jDef;
+    }
+
+    public void setWsdl4jDef(Definition wsdl4jDef) {
+        this.wsdl4jDef = wsdl4jDef;
+    }
+
+    public ArrayList<WSFService> getServices() {
+        return services;
+    }
+
+    public void setServices(ArrayList<WSFService> services) {
+        this.services = services;
+        for(WSFService service : services){
+            service.setProject(this);
+        }
+    }
+
+    public ArrayList<WSFTestCase> getTestCases() {
+        return testCases;
+    }
+
+    public void setTestCases(ArrayList<WSFTestCase> testCases) {
+        this.testCases = testCases;
+        for(WSFTestCase testCase : testCases){
+            testCase.setProject(this);
+        }
+    }
+
+    public XSDUtils getXsdHelper() {
+        return xsdHelper;
+    }
+
+    public void setXsdHelper(XSDUtils xsdHelper) {
+        this.xsdHelper = xsdHelper;
+    }
+    
+    public void addService(WSFService service){
+        this.services.add(service);
+    }
+    
+    public void addTestCase(WSFTestCase testCase){
+        this.testCases.add(testCase);
     }
     
 }
