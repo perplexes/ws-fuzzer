@@ -5,10 +5,16 @@
 
 package client;
 
+import datamodel.WSFConfiguration;
+
 /**
  *
  * @author chang
  */
 public class WSFClient {
 
+    
+    public static void main(String[] args){
+        WSFConfiguration config = new WSFConfiguration();
+    }
 }
