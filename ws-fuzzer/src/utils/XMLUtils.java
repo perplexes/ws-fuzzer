@@ -21,12 +21,7 @@ import org.apache.axis2.util.XMLPrettyPrinter;
 public class XMLUtils {
 
     public static String prettify(String xmlString) throws XMLStreamException, Exception{
-        
-        XMLStreamReader xmlStreamReader = XMLInputFactory.newInstance().createXMLStreamReader(new StringReader(xmlString));
-        StAXOMBuilder builder = new StAXOMBuilder(xmlStreamReader);
-        
-        return toPrettifiedString(builder.getDocumentElement());
-        
+        return toPrettifiedString(toOMElement(xmlString));
     }
     
     public static String toPrettifiedString(OMElement element) throws Exception{
@@ -39,6 +34,14 @@ public class XMLUtils {
         
         return prettyXMLString;
         
+    }
+    
+    public static OMElement toOMElement(String xmlString) throws XMLStreamException{
+        
+        XMLStreamReader xmlStreamReader = XMLInputFactory.newInstance().createXMLStreamReader(new StringReader(xmlString));
+        StAXOMBuilder builder = new StAXOMBuilder(xmlStreamReader);
+        
+        return builder.getDocumentElement();
     }
     
 }
