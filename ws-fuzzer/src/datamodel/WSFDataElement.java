@@ -122,6 +122,17 @@ public class WSFDataElement {
         this.maxOccurs = maxOccurs;
     }
     
+    public void getAllInputSource(ArrayList<WSFInputSource> sources){
+        if(this.simpleType){
+            sources.add(source);
+            return;
+        }
+        
+        for(WSFDataElement element : dataElements){
+            element.getAllInputSource(sources);
+        }
+    }
+    
     // 
     public OMElement toOMElement(OMElement parent, boolean isMuster){
         
@@ -159,7 +170,7 @@ public class WSFDataElement {
     }
     
     public static void print(WSFDataElement element){
-        
+                
         System.out.println(element.toString());
         
         if(element.isSimpleType()){

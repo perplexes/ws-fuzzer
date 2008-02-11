@@ -6,12 +6,19 @@
 package client;
 
 import datamodel.WSFConfiguration;
+import datamodel.WSFDataElement;
+import datamodel.WSFDictionary;
 import datamodel.WSFDictionaryInfo;
+import datamodel.WSFInputSource;
 import datamodel.WSFOperation;
+import datamodel.WSFPort;
 import datamodel.WSFProject;
 import datamodel.WSFProjectInfo;
 import datamodel.WSFResult;
 import datamodel.WSFTestCase;
+import exceptions.UnSupportedException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import javax.wsdl.WSDLException;
 import javax.xml.stream.XMLStreamException;
@@ -41,6 +48,9 @@ public class WSFClient {
     
     
     public WSFClient(WSFTestCase testCase, int maxNOCPerHost, int maxNOCOverall) throws AxisFault{
+        
+        this.testcase = testCase;
+        
         ConfigurationContext configurationContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(System.getProperty("axis2.repo"), System.getProperty("axis2.xml"));
         configurationContext.setProperty(HTTPConstants.REUSE_HTTP_CLIENT, "true");
 
@@ -111,7 +121,7 @@ public class WSFClient {
        
     }
     
-    public static void main(String[] args) throws WSDLException{
+    public static void main(String[] args) throws WSDLException, UnSupportedException, FileNotFoundException, IOException, AxisFault, XMLStreamException{
         
         WSFConfiguration config1 = new WSFConfiguration();
         config1.setMaxNumberOfConnectionsPerHost(5);
@@ -130,5 +140,44 @@ public class WSFClient {
         
         WSFProject project = new WSFProject(projectInfo.getName(), config1.getProjectsDirectory(), projectInfo.getWSDLURI());
         
+        project.print();
+        
+        WSFPort port = project.getServices().get(0).getPorts().get(1);
+        port.print();
+        
+        WSFOperation operation = port.getOperations().get(0);
+        operation.print();
+        
+        WSFDictionary dictionary1 = new WSFDictionary("Currency_1", "test/dict1.txt");
+        WSFDictionary dictionary2 = new WSFDictionary("Currency_2", "test/dict2.txt");
+        
+        
+        WSFInputSource source1 = WSFInputSource.createInputSourceFromDictionary(dictionary1);
+        WSFInputSource source2 = WSFInputSource.createInputSourceFromDictionary(dictionary2);
+        
+        WSFInputSource source3 = WSFInputSource.createSourceFromDefaultValue("EUR");
+        WSFInputSource source4 = WSFInputSource.createSourceFromDefaultValue("USD");
+        
+        WSFDataElement data = operation.getInData();
+        data.getDataElements().get(0).setSource(source3);
+        data.getDataElements().get(1).setSource(source4);
+        
+        WSFTestCase testCase = new WSFTestCase("test", operation);
+        testCase.generateInputsVector();
+        
+        System.out.println(testCase.getInputsVector().size());
+        
+        WSFClient client = new WSFClient(testCase, config1.getMaxNumberOfConnectionsPerHost(), config1.getMaxNumberOfConnectionsOverall());
+        ArrayList<WSFResult> results = client.doJob();
+        
+        for(WSFResult result : results){
+            System.out.println();
+            System.out.println("Time: " + result.getTime());
+            System.out.println();
+            System.out.println("In:   \n" + result.getInRaw());
+            System.out.println("\n");
+            System.out.println("Out:  \n" + result.getOutRaw());
+            System.out.println();
+        }
     }
 }

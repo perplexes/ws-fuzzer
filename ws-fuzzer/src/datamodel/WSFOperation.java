@@ -187,4 +187,15 @@ public class WSFOperation {
     public void setHeaderData(WSFDataElement headerData) {
         this.headerData = headerData;
     }
+    
+    public void print(){
+        System.out.println("----------- Operation -----------");
+        System.out.println("QName: " + this.name);
+        System.out.println("MEP:   " + this.mep);
+        System.out.println("inMsg: " + this.inMessageQName);
+        WSFDataElement.print(inData);
+        System.out.println("outMsg:" + this.outMessageQName);
+        WSFDataElement.print(outData);
+        System.out.println();
+    }
 }

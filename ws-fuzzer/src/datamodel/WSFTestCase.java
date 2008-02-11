@@ -26,9 +26,10 @@ public class WSFTestCase {
     
     private WSFStatistic statistic;
 
-    public WSFTestCase(String name, WSFProject project){
+    public WSFTestCase(String name, WSFOperation operation){
         this.name = name;
-        this.project = project;
+        this.project = operation.getPort().getService().getProject();
+        this.operation = operation;
         inputsVector = new ArrayList<OMElement>();
         results = new ArrayList<WSFResult>();
     }
@@ -79,6 +80,28 @@ public class WSFTestCase {
 
     public void setStatistic(WSFStatistic statistic) {
         this.statistic = statistic;
+    }
+    
+    public void generateInputsVector(){
+        
+        ArrayList<WSFInputSource> sources = new ArrayList<WSFInputSource>();
+        
+        WSFDataElement data = operation.getInData();
+        
+        data.getAllInputSource(sources);
+        
+        while(true){
+            
+            this.inputsVector.add(data.toOMElement(null, false));
+            
+            int i = 0;
+            for(WSFInputSource source : sources){
+                if(source.isEnd())
+                    i++;
+            }
+            if(i == sources.size())
+                break;
+        }
     }
     
 }

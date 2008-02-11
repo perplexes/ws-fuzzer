@@ -120,4 +120,12 @@ public class WSFPort {
         this.bindingSOAPStyle = bindingSOAPStyle;
     }
     
+    public void print(){
+        System.out.println("-------- Port ----------");
+        System.out.println("name:        " + name);
+        System.out.println("bindingType: " + this.bindingType);
+        System.out.println("operation#:  " + this.operations.size());
+        System.out.println();
+    }
+    
 }
