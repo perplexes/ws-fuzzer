@@ -189,7 +189,7 @@ public class WSDLUtils {
                     }
 
                     // wsdl:Operaion
-                    op.setName(operation.getName());
+                    op.setName(new QName(wsdl4jDef.getTargetNamespace(),operation.getName()));
                     if (operation.getDocumentationElement() != null) {
                         op.setDocument(operation.getDocumentationElement().getTextContent());
                     }
