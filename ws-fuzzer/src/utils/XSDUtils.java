@@ -53,7 +53,7 @@ public class XSDUtils {
                 break;
             }
         }
-            
+        
         return schemaElement;
     }
     
