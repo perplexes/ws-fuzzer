@@ -183,8 +183,8 @@ public class WSFConfiguration {
         WSFConfiguration config1 = new WSFConfiguration();
         config1.setMaxNumberOfConnectionsPerHost(5);
         config1.setMaxNumberOfConnectionsOverall(10);
-        config1.addDictionary(new WSFDictionaryInfo("dict_1","path/to/dict1"));
-        config1.addDictionary(new WSFDictionaryInfo("dict_2","path/to/dict2"));
+        config1.addDictionary(new WSFDictionaryInfo("Currency_1","test/dict1.txt"));
+        config1.addDictionary(new WSFDictionaryInfo("Currency_2","test/dict2.txt"));
         config1.setProjectsDirectory("projects");
         config1.addProject(new WSFProjectInfo("project_1","wsdl_uri_1"));
         config1.addProject(new WSFProjectInfo("project_2","wsdl_uri_2"));

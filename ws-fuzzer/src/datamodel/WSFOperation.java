@@ -30,7 +30,7 @@ public class WSFOperation {
     
     private String bindingHttpLocation;         // if httpbinding
     
-    private String name;
+    private QName name;
     private String document;
     private String mep;
     
@@ -100,11 +100,11 @@ public class WSFOperation {
         this.bindingHttpLocation = bindingHttpLocation;
     }
 
-    public String getName() {
+    public QName getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(QName name) {
         this.name = name;
     }
 
