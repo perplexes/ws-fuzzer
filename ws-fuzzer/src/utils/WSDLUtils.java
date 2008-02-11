@@ -206,9 +206,9 @@ public class WSDLUtils {
                     if (operation.getInput().getMessage() != null) {
                         QName messageQName = operation.getInput().getMessage().getQName();
                         op.setInMessageQName(messageQName);
-                        op.setOutData(this.getDataElement(messageQName, null));
+                        op.setInData(this.getDataElement(messageQName, null));
                     }
-
+                    
                     wsfPort.addOperation(op);
                 }
                 wsfService.addPort(wsfPort);
@@ -248,7 +248,7 @@ public class WSDLUtils {
             dataElement.addDataElement(getDataElement(part));
         }
         
-        return null;
+        return dataElement;
     }
     
     private WSFDataElement getDataElement(Part part) throws UnSupportedException{
