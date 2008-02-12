@@ -4,6 +4,7 @@
 
 package gui;
 
+import java.awt.Dimension;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
 
@@ -16,7 +17,10 @@ public class WSFApplication extends SingleFrameApplication {
      * At startup create and show the main frame of the application.
      */
     @Override protected void startup() {
-        show(new WSFApplicationView(this));
+        WSFApplicationView appView = new WSFApplicationView(this);
+        
+        appView.getFrame().setPreferredSize(new Dimension(800,600));
+        show(appView);
     }
 
     /**

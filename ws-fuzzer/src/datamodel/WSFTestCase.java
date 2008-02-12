@@ -20,9 +20,14 @@ public class WSFTestCase {
     
     private WSFOperation operation;
     
-    private ArrayList<OMElement> inputsVector;
+    private ArrayList<OMElement> inputHeaderVector;
+    
+    private ArrayList<OMElement> inputDataVector;
     
     private ArrayList<WSFResult> results;
+    
+    private boolean executed;
+    private boolean finished;
     
     private WSFStatistic statistic;
 
@@ -30,7 +35,8 @@ public class WSFTestCase {
         this.name = name;
         this.project = operation.getPort().getService().getProject();
         this.operation = operation;
-        inputsVector = new ArrayList<OMElement>();
+        inputHeaderVector = new ArrayList<OMElement>();
+        inputDataVector = new ArrayList<OMElement>();
         results = new ArrayList<WSFResult>();
     }
     
@@ -58,12 +64,12 @@ public class WSFTestCase {
         this.operation = operation;
     }
 
-    public ArrayList<OMElement> getInputsVector() {
-        return inputsVector;
+    public ArrayList<OMElement> getInputDataVector() {
+        return inputDataVector;
     }
 
-    public void setInputsVector(ArrayList<OMElement> inputsVector) {
-        this.inputsVector = inputsVector;
+    public void setInputDataVector(ArrayList<OMElement> inputsVector) {
+        this.inputDataVector = inputsVector;
     }
 
     public ArrayList<WSFResult> getResults() {
@@ -86,13 +92,13 @@ public class WSFTestCase {
         
         ArrayList<WSFInputSource> sources = new ArrayList<WSFInputSource>();
         
-        WSFDataElement data = operation.getInData();
+        WSFDataElement data = operation.getRequestData();
         
         data.getAllInputSource(sources);
         
         while(true){
             
-            this.inputsVector.add(data.toOMElement(null, false));
+            this.inputDataVector.add(data.toOMElement(null, false));
             
             int i = 0;
             for(WSFInputSource source : sources){
@@ -102,6 +108,22 @@ public class WSFTestCase {
             if(i == sources.size())
                 break;
         }
+    }
+
+    public boolean isExecuted() {
+        return executed;
+    }
+
+    public void setExecuted(boolean executed) {
+        this.executed = executed;
+    }
+
+    public boolean isFinished() {
+        return finished;
+    }
+
+    public void setFinished(boolean finished) {
+        this.finished = finished;
     }
     
 }

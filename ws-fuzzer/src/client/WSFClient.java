@@ -92,7 +92,7 @@ public class WSFClient {
 
             ArrayList<WSFResult> results = new ArrayList<WSFResult>();
             WSFOperation operation = testcase.getOperation();
-            ArrayList<OMElement> payloads = testcase.getInputsVector();
+            ArrayList<OMElement> payloads = testcase.getInputDataVector();
             
             for (int i = 0; i < payloads.size(); i++) {
                 serviceClient.sendReceiveNonBlocking(operation.getName(), payloads.get(i), new AxisCallbackImpl(hook, results, i, Thread.currentThread()));
@@ -158,14 +158,14 @@ public class WSFClient {
         WSFInputSource source3 = WSFInputSource.createSourceFromDefaultValue("EUR");
         WSFInputSource source4 = WSFInputSource.createSourceFromDefaultValue("USD");
         
-        WSFDataElement data = operation.getInData();
+        WSFDataElement data = operation.getRequestData();
         data.getDataElements().get(0).setSource(source3);
         data.getDataElements().get(1).setSource(source4);
         
         WSFTestCase testCase = new WSFTestCase("test", operation);
         testCase.generateInputsVector();
         
-        System.out.println(testCase.getInputsVector().size());
+        System.out.println(testCase.getInputDataVector().size());
         
         WSFClient client = new WSFClient(testCase, config1.getMaxNumberOfConnectionsPerHost(), config1.getMaxNumberOfConnectionsOverall());
         ArrayList<WSFResult> results = client.doJob();

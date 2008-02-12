@@ -21,23 +21,30 @@ public class WSFOperation {
     
     private String bindingSoapAction;           // if soap binding
     private String bindingSOAPStyle;
-    private String bindingSOAPUse;
-    
-    private QName headerMessageQName;
-    private String headerMessagePart;
-    private String headerMessageUse;
-    private WSFDataElement headerData;
-    
+
     private String bindingHttpLocation;         // if httpbinding
     
     private QName name;
     private String document;
     private String mep;
     
-    private QName inMessageQName;
-    private WSFDataElement inData;
-    private QName outMessageQName;
-    private WSFDataElement outData;
+    private QName requestMessageQName;
+    private WSFDataElement requestData;
+    private String bindingRequestSOAPUse;
+    
+    private QName headerRequestMessageQName;
+    private String headerRequestMessagePart;
+    private String headerRequestMessageUse;
+    private WSFDataElement headerRequestData;
+    
+    private QName responseMessageQName;
+    private WSFDataElement responseData;
+    private String bindingResponseSOAPUse;
+    
+    private QName headerResponseMessageQName;
+    private String headerResponseMessagePart;
+    private String headerResponseMessageUse;
+    private WSFDataElement headerResponseData;
     
     
     public WSFOperation(WSFPort port){
@@ -84,12 +91,21 @@ public class WSFOperation {
         this.bindingSOAPStyle = bindingSOAPStyle;
     }
 
-    public String getBindingSOAPUse() {
-        return bindingSOAPUse;
+    public String getBindingRequestSOAPUse() {
+        return bindingRequestSOAPUse;
     }
 
-    public void setBindingSOAPUse(String bindingSOAPUse) {
-        this.bindingSOAPUse = bindingSOAPUse;
+    public void setBindingRequestSOAPUse(String bindingRequestSOAPUse) {
+        this.bindingRequestSOAPUse = bindingRequestSOAPUse;
+    }
+    
+    
+    public String getBindingResponseSOAPUse() {
+        return bindingResponseSOAPUse;
+    }
+
+    public void setBindingResponseSOAPUse(String bindingResponseSOAPUse) {
+        this.bindingResponseSOAPUse = bindingResponseSOAPUse;
     }
 
     public String getBindingHttpLocation() {
@@ -124,78 +140,111 @@ public class WSFOperation {
         this.mep = mep;
     }
 
-    public WSFDataElement getInData() {
-        return inData;
+    public WSFDataElement getRequestData() {
+        return requestData;
     }
 
-    public void setInData(WSFDataElement inData) {
-        this.inData = inData;
+    public void setRequestData(WSFDataElement requestData) {
+        this.requestData = requestData;
     }
 
-    public WSFDataElement getOutData() {
-        return outData;
+    public WSFDataElement getResponseData() {
+        return responseData;
     }
 
-    public void setOutData(WSFDataElement outData) {
-        this.outData = outData;
+    public void setResponseData(WSFDataElement responseData) {
+        this.responseData = responseData;
     }
 
-    public QName getInMessageQName() {
-        return inMessageQName;
+    public QName getRequestMessageQName() {
+        return requestMessageQName;
     }
 
-    public void setInMessageQName(QName inMessageQName) {
-        this.inMessageQName = inMessageQName;
+    public void setRequestMessageQName(QName requestMessageQName) {
+        this.requestMessageQName = requestMessageQName;
     }
 
-    public QName getOutMessageQName() {
-        return outMessageQName;
+    public QName getResponseMessageQName() {
+        return responseMessageQName;
     }
 
-    public void setOutMessageQName(QName outMessageQName) {
-        this.outMessageQName = outMessageQName;
+    public void setResponseMessageQName(QName responseMessageQName) {
+        this.responseMessageQName = responseMessageQName;
     }
 
-    public QName getHeaderMessageQName() {
-        return headerMessageQName;
+    public QName getHeaderRequestMessageQName() {
+        return headerRequestMessageQName;
     }
 
-    public void setHeaderMessageQName(QName headerMessageQName) {
-        this.headerMessageQName = headerMessageQName;
+    public void setHeaderRequestMessageQName(QName headerRequestMessageQName) {
+        this.headerRequestMessageQName = headerRequestMessageQName;
     }
 
-    public String getHeaderMessagePart() {
-        return headerMessagePart;
+    public String getHeaderRequestMessagePart() {
+        return headerRequestMessagePart;
     }
 
-    public void setHeaderMessagePart(String headerMessagePart) {
-        this.headerMessagePart = headerMessagePart;
+    public void setHeaderRequestMessagePart(String headerRequestMessagePart) {
+        this.headerRequestMessagePart = headerRequestMessagePart;
     }
 
-    public String getHeaderMessageUse() {
-        return headerMessageUse;
+    public String getHeaderRequestMessageUse() {
+        return headerRequestMessageUse;
     }
 
-    public void setHeaderMessageUse(String headerMessageUse) {
-        this.headerMessageUse = headerMessageUse;
+    public void setHeaderRequestMessageUse(String headerRequestMessageUse) {
+        this.headerRequestMessageUse = headerRequestMessageUse;
     }
 
-    public WSFDataElement getHeaderData() {
-        return headerData;
+    public WSFDataElement getHeaderRequestData() {
+        return headerRequestData;
     }
 
-    public void setHeaderData(WSFDataElement headerData) {
-        this.headerData = headerData;
+    public void setHeaderRequestData(WSFDataElement headerRequestData) {
+        this.headerRequestData = headerRequestData;
+    }
+    
+    
+    public QName getHeaderResponseMessageQName() {
+        return headerResponseMessageQName;
+    }
+
+    public void setHeaderResponseMessageQName(QName headerResponseMessageQName) {
+        this.headerResponseMessageQName = headerResponseMessageQName;
+    }
+
+    public String getHeaderResponseMessagePart() {
+        return headerResponseMessagePart;
+    }
+
+    public void setHeaderResponseMessagePart(String headerResponseMessagePart) {
+        this.headerResponseMessagePart = headerResponseMessagePart;
+    }
+
+    public String getHeaderResponseMessageUse() {
+        return headerResponseMessageUse;
+    }
+
+    public void setHeaderResponseMessageUse(String headerResponseMessageUse) {
+        this.headerResponseMessageUse = headerResponseMessageUse;
+    }
+
+    public WSFDataElement getHeaderResponseData() {
+        return headerResponseData;
+    }
+
+    public void setHeaderResponseData(WSFDataElement headerResponseData) {
+        this.headerResponseData = headerResponseData;
     }
     
     public void print(){
         System.out.println("----------- Operation -----------");
         System.out.println("QName: " + this.name);
         System.out.println("MEP:   " + this.mep);
-        System.out.println("inMsg: " + this.inMessageQName);
-        WSFDataElement.print(inData);
-        System.out.println("outMsg:" + this.outMessageQName);
-        WSFDataElement.print(outData);
+        System.out.println("inMsg: " + this.requestMessageQName);
+        WSFDataElement.print(requestData);
+        System.out.println("outMsg:" + this.responseMessageQName);
+        WSFDataElement.print(responseData);
         System.out.println();
     }
 }

@@ -168,17 +168,29 @@ public class WSDLUtils {
                         List<ExtensibilityElement> extensibilityElements = bindingOperation.getBindingInput().getExtensibilityElements();
                         for(ExtensibilityElement e : extensibilityElements){
                             if(e instanceof SOAPBody){
-                                op.setBindingSOAPUse(((SOAPBody)e).getUse());
+                                op.setBindingRequestSOAPUse(((SOAPBody)e).getUse());
                             }
                             if(e instanceof SOAPHeader){
-                                op.setHeaderMessageQName(((SOAPHeader)e).getMessage());
-                                op.setHeaderMessagePart(((SOAPHeader)e).getPart());
-                                op.setHeaderMessageUse(((SOAPHeader)e).getUse());
-                                op.setHeaderData(this.getDataElement(((SOAPHeader)e).getMessage(), ((SOAPHeader)e).getPart()));
+                                op.setHeaderRequestMessageQName(((SOAPHeader)e).getMessage());
+                                op.setHeaderRequestMessagePart(((SOAPHeader)e).getPart());
+                                op.setHeaderRequestMessageUse(((SOAPHeader)e).getUse());
+                                op.setHeaderRequestData(this.getDataElement(((SOAPHeader)e).getMessage(), ((SOAPHeader)e).getPart()));
                             }
                         }
                         
-                        op.setBindingSOAPUse(((SOAPBody) bindingOperation.getBindingInput().getExtensibilityElements().get(0)).getUse());
+                        extensibilityElements = bindingOperation.getBindingOutput().getExtensibilityElements();
+                        for(ExtensibilityElement e : extensibilityElements){
+                            if(e instanceof SOAPBody){
+                                op.setBindingResponseSOAPUse(((SOAPBody)e).getUse());
+                            }
+                            if(e instanceof SOAPHeader){
+                                op.setHeaderResponseMessageQName(((SOAPHeader)e).getMessage());
+                                op.setHeaderResponseMessagePart(((SOAPHeader)e).getPart());
+                                op.setHeaderResponseMessageUse(((SOAPHeader)e).getUse());
+                                op.setHeaderResponseData(this.getDataElement(((SOAPHeader)e).getMessage(), ((SOAPHeader)e).getPart()));
+                            }
+                        }
+                        
                         op.setSupported(true);
                     } else if (element instanceof HTTPBinding) {
                         op.setBindingOperationType("HTTPOperation");
@@ -198,15 +210,15 @@ public class WSDLUtils {
                     // Out Message
                     if (operation.getOutput().getMessage() != null) {
                         QName messageQName = operation.getOutput().getMessage().getQName();
-                        op.setOutMessageQName(messageQName);
-                        op.setOutData(this.getDataElement(messageQName, null));
+                        op.setResponseMessageQName(messageQName);
+                        op.setResponseData(this.getDataElement(messageQName, null));
                     }
                     
                     // In Message
                     if (operation.getInput().getMessage() != null) {
                         QName messageQName = operation.getInput().getMessage().getQName();
-                        op.setInMessageQName(messageQName);
-                        op.setInData(this.getDataElement(messageQName, null));
+                        op.setRequestMessageQName(messageQName);
+                        op.setRequestData(this.getDataElement(messageQName, null));
                     }
                     
                     wsfPort.addOperation(op);
