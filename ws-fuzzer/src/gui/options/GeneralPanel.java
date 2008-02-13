@@ -32,11 +32,12 @@ public class GeneralPanel extends javax.swing.JPanel {
     public void showFileChooserDialog(){
         
         if(fileChooserDialog == null){
-            JFrame mainFrame = WSFApplication.getApplication().getMainFrame();
-            fileChooserDialog = new FileChooserDialog(mainFrame, true, JFileChooser.DIRECTORIES_ONLY);
+//            JFrame mainFrame = WSFApplication.getApplication().getMainFrame();
+            fileChooserDialog = new FileChooserDialog(optionsDialog, false, JFileChooser.DIRECTORIES_ONLY);
             fileChooserDialog.setLocationRelativeTo(optionsDialog);
         }
-        WSFApplication.getApplication().show(fileChooserDialog);
+        fileChooserDialog.setVisible(true);
+//        WSFApplication.getApplication().show(fileChooserDialog);
         
     }
     

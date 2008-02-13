@@ -42,6 +42,7 @@
   <SubComponents>
     <Component class="javax.swing.JFileChooser" name="fileChooser">
       <Properties>
+        <Property name="dialogTitle" type="java.lang.String" resourceKey="fileChooser.dialogTitle"/>
         <Property name="name" type="java.lang.String" value="fileChooser" noResource="true"/>
       </Properties>
     </Component>

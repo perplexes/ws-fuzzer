@@ -7,6 +7,9 @@ package gui;
 import java.awt.Dimension;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
+import javax.swing.plaf.metal.MetalLookAndFeel;
+import com.sun.java.swing.plaf.gtk.GTKLookAndFeel;
+import com.sun.java.swing.plaf.motif.MotifLookAndFeel;
 
 /**
  * The main class of the application.

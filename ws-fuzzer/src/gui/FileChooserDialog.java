@@ -16,7 +16,7 @@ import javax.swing.JFileChooser;
 public class FileChooserDialog extends javax.swing.JDialog {
     
     /** Creates new form FileChooserDialog */
-    public FileChooserDialog(java.awt.Frame parent, boolean modal, int selectionMode) {
+    public FileChooserDialog(JDialog parent, boolean modal, int selectionMode) {
         super(parent, modal);
         initComponents();
         fileChooser.setFileSelectionMode(selectionMode);
@@ -35,6 +35,8 @@ public class FileChooserDialog extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setName("Form"); // NOI18N
 
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getResourceMap(FileChooserDialog.class);
+        fileChooser.setDialogTitle(resourceMap.getString("fileChooser.dialogTitle")); // NOI18N
         fileChooser.setName("fileChooser"); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -63,7 +65,7 @@ public class FileChooserDialog extends javax.swing.JDialog {
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                FileChooserDialog dialog = new FileChooserDialog(new javax.swing.JFrame(), true, JFileChooser.FILES_ONLY);
+                FileChooserDialog dialog = new FileChooserDialog(null, true, JFileChooser.FILES_ONLY);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     public void windowClosing(java.awt.event.WindowEvent e) {
                         System.exit(0);
