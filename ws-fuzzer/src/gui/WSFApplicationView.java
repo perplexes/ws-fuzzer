@@ -4,6 +4,8 @@
 
 package gui;
 
+import gui.options.OptionsDialog;
+import gui.project.NewProjectDialog;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
@@ -82,6 +84,26 @@ public class WSFApplicationView extends FrameView {
     }
 
     @Action
+    public void showNewProjectDialog(){
+        if(newProjectDialog == null){
+            JFrame mainFrame = WSFApplication.getApplication().getMainFrame();
+            newProjectDialog = new NewProjectDialog(mainFrame, true);
+            newProjectDialog.setLocationRelativeTo(mainFrame);
+        }
+        WSFApplication.getApplication().show(newProjectDialog);
+    }
+    
+    @Action
+    public void showOptionsDialog(){
+        if(optionsDialog == null){
+            JFrame mainFrame = WSFApplication.getApplication().getMainFrame();
+            optionsDialog = new OptionsDialog(mainFrame, true);
+            optionsDialog.setLocationRelativeTo(mainFrame);
+        }
+        WSFApplication.getApplication().show(optionsDialog);
+    }
+    
+    @Action
     public void showAboutBox() {
         if (aboutBox == null) {
             JFrame mainFrame = WSFApplication.getApplication().getMainFrame();
@@ -106,6 +128,7 @@ public class WSFApplicationView extends FrameView {
         jSplitPane1 = new javax.swing.JSplitPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTree1 = new javax.swing.JTree();
+        displayPanel = new javax.swing.JPanel();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
@@ -124,6 +147,8 @@ public class WSFApplicationView extends FrameView {
         jToolBar1.setRollover(true);
         jToolBar1.setName("jToolBar1"); // NOI18N
 
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getActionMap(WSFApplicationView.class, this);
+        newProjectButton.setAction(actionMap.get("showNewProjectDialog")); // NOI18N
         org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getResourceMap(WSFApplicationView.class);
         newProjectButton.setText(resourceMap.getString("newProjectButton.text")); // NOI18N
         newProjectButton.setFocusable(false);
@@ -132,6 +157,7 @@ public class WSFApplicationView extends FrameView {
         newProjectButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar1.add(newProjectButton);
 
+        optionButton.setAction(actionMap.get("showOptionsDialog")); // NOI18N
         optionButton.setText(resourceMap.getString("optionButton.text")); // NOI18N
         optionButton.setFocusable(false);
         optionButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -149,6 +175,21 @@ public class WSFApplicationView extends FrameView {
         jScrollPane1.setViewportView(jTree1);
 
         jSplitPane1.setLeftComponent(jScrollPane1);
+
+        displayPanel.setName("displayPanel"); // NOI18N
+
+        javax.swing.GroupLayout displayPanelLayout = new javax.swing.GroupLayout(displayPanel);
+        displayPanel.setLayout(displayPanelLayout);
+        displayPanelLayout.setHorizontalGroup(
+            displayPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 672, Short.MAX_VALUE)
+        );
+        displayPanelLayout.setVerticalGroup(
+            displayPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 459, Short.MAX_VALUE)
+        );
+
+        jSplitPane1.setRightComponent(displayPanel);
 
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
@@ -170,7 +211,6 @@ public class WSFApplicationView extends FrameView {
         fileMenu.setText(resourceMap.getString("fileMenu.text")); // NOI18N
         fileMenu.setName("fileMenu"); // NOI18N
 
-        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getActionMap(WSFApplicationView.class, this);
         exitMenuItem.setAction(actionMap.get("quit")); // NOI18N
         exitMenuItem.setName("exitMenuItem"); // NOI18N
         fileMenu.add(exitMenuItem);
@@ -229,6 +269,7 @@ public class WSFApplicationView extends FrameView {
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel displayPanel;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JToolBar jToolBar1;
@@ -250,4 +291,6 @@ public class WSFApplicationView extends FrameView {
     private int busyIconIndex = 0;
 
     private JDialog aboutBox;
+    private JDialog optionsDialog;
+    private JDialog newProjectDialog;
 }
