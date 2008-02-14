@@ -6,15 +6,43 @@
 
 package gui.options;
 
+import datamodel.WSFConfiguration;
+import gui.WSFApplication;
+
 /**
  *
  * @author  chang
  */
 public class NetworkPanel extends javax.swing.JPanel {
     
+    private boolean changed;
+    
     /** Creates new form NetworkPanel */
     public NetworkPanel() {
         initComponents();
+        
+        postInit();
+    }
+    
+    private void postInit(){
+        
+        changed = false;
+        
+        WSFConfiguration config = WSFApplication.getApplication().getWSFConfiguration();
+        maxNOCPerHostSpinner.setValue(config.getMaxNumberOfConnectionsPerHost());
+        maxNOCOverallSpinner.setValue(config.getMaxNumberOfConnectionsOverall());
+    }
+    
+    public void saveChanges(){
+        
+        if(!changed)
+            return;
+        
+        WSFConfiguration config = WSFApplication.getApplication().getWSFConfiguration();
+        config.setMaxNumberOfConnectionsPerHost((Integer)maxNOCPerHostSpinner.getValue());
+        config.setMaxNumberOfConnectionsOverall((Integer)maxNOCOverallSpinner.getValue());
+        
+        changed = false;
     }
     
     /** This method is called from within the constructor to
@@ -45,11 +73,6 @@ public class NetworkPanel extends javax.swing.JPanel {
         maxNOCOverallSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 maxNOCOverallSpinnerStateChanged(evt);
-            }
-        });
-        maxNOCOverallSpinner.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                maxNOCOverallSpinnerPropertyChange(evt);
             }
         });
 
@@ -110,17 +133,10 @@ public class NetworkPanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void maxNOCOverallSpinnerPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_maxNOCOverallSpinnerPropertyChange
-        
-        int maxNOCPerHost = (Integer)maxNOCPerHostSpinner.getValue();
-        int maxNOCOverall = (Integer)maxNOCOverallSpinner.getValue();
-        
-        if( maxNOCPerHost > maxNOCOverall ){
-            maxNOCPerHostSpinner.setValue(maxNOCOverall);
-        }
-    }//GEN-LAST:event_maxNOCOverallSpinnerPropertyChange
-
     private void maxNOCPerHostSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_maxNOCPerHostSpinnerStateChanged
+        
+        this.changed = true;
+        
         int maxNOCPerHost = (Integer)maxNOCPerHostSpinner.getValue();
         int maxNOCOverall = (Integer)maxNOCOverallSpinner.getValue();
         
@@ -130,6 +146,9 @@ public class NetworkPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_maxNOCPerHostSpinnerStateChanged
 
     private void maxNOCOverallSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_maxNOCOverallSpinnerStateChanged
+        
+        this.changed = true;
+        
         int maxNOCPerHost = (Integer)maxNOCPerHostSpinner.getValue();
         int maxNOCOverall = (Integer)maxNOCOverallSpinner.getValue();
         

@@ -5,9 +5,13 @@
 
 package datamodel;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
 import utils.XMLUtils;
@@ -23,28 +27,37 @@ public class WSFConfiguration {
     
     private ArrayList<WSFDictionaryInfo> dictionaries;
     
-    private String projectsDirectory;
+    private File projectsDirectory;
     private ArrayList<WSFProjectInfo> projects;
     
-    public WSFConfiguration(){
+    private boolean changed;
+    private File file;
+    
+    public WSFConfiguration(File file){
+        
+        changed = false;
+        this.file = file;
+        
         dictionaries = new ArrayList<WSFDictionaryInfo>();
         projects = new ArrayList<WSFProjectInfo>();
     }
     
-    public WSFConfiguration(OMElement wsfConfigurationElement){
+    public static WSFConfiguration createWSFConfiguration(OMElement wsfConfigurationElement, File file){
         
-        dictionaries = new ArrayList<WSFDictionaryInfo>();
-        projects = new ArrayList<WSFProjectInfo>();
+        WSFConfiguration conf = new WSFConfiguration(file);
+        
+        conf.dictionaries = new ArrayList<WSFDictionaryInfo>();
+        conf.projects = new ArrayList<WSFProjectInfo>();
         
         OMElement connectionsElement = wsfConfigurationElement.getFirstChildWithName(new QName("","connections"));
         
-        maxNumberOfConnectionsPerHost = Integer.parseInt(connectionsElement.getFirstChildWithName(new QName("","perhost")).getText());
-        maxNumberOfConnectionsOverall = Integer.parseInt(connectionsElement.getFirstChildWithName(new QName("","overall")).getText());
+        conf.maxNumberOfConnectionsPerHost = Integer.parseInt(connectionsElement.getFirstChildWithName(new QName("","perhost")).getText());
+        conf.maxNumberOfConnectionsOverall = Integer.parseInt(connectionsElement.getFirstChildWithName(new QName("","overall")).getText());
         
         OMElement dictionariesElement = wsfConfigurationElement.getFirstChildWithName(new QName("","dictionaries"));
         Iterator dictionariesIterator =  dictionariesElement.getChildElements();
         while(dictionariesIterator.hasNext()){
-            dictionaries.add(new WSFDictionaryInfo((OMElement)dictionariesIterator.next()));
+            conf.dictionaries.add(new WSFDictionaryInfo((OMElement)dictionariesIterator.next()));
         }
         
         OMElement projectsElement = wsfConfigurationElement.getFirstChildWithName(new QName("","projects"));
@@ -52,20 +65,37 @@ public class WSFConfiguration {
         while(projectsIterator.hasNext()){
             OMElement element = (OMElement)projectsIterator.next();
             if(element.getLocalName().equalsIgnoreCase("directory")){
-                projectsDirectory = element.getText();
+                conf.projectsDirectory = new File(element.getText());
                 continue;
             }
             
-            projects.add(new WSFProjectInfo(element));
-            
+            conf.projects.add(new WSFProjectInfo(element));   
         }
+        
+        conf.changed = false;
+        
+        return conf;
+    }
+    
+    public static WSFConfiguration createWSFConfigruation(File xmlFile) throws FileNotFoundException, XMLStreamException{
+        OMElement wsfConfigurationElement = XMLUtils.toOMElement(xmlFile);
+        return createWSFConfiguration(wsfConfigurationElement, xmlFile);
     }
 
+    public boolean isChanged(){
+        return changed;
+    }
+    
+    public void setChanged(boolean changed){
+        this.changed = changed;
+    }
+    
     public int getMaxNumberOfConnectionsPerHost() {
         return maxNumberOfConnectionsPerHost;
     }
 
     public void setMaxNumberOfConnectionsPerHost(int maxNumberOfConnectionsPerHost) {
+        changed = true;
         this.maxNumberOfConnectionsPerHost = maxNumberOfConnectionsPerHost;
     }
 
@@ -74,6 +104,7 @@ public class WSFConfiguration {
     }
 
     public void setMaxNumberOfConnectionsOverall(int maxNumberOfConnectionsOverall) {
+        changed = true;
         this.maxNumberOfConnectionsOverall = maxNumberOfConnectionsOverall;
     }
 
@@ -82,14 +113,16 @@ public class WSFConfiguration {
     }
 
     public void setDictionaries(ArrayList<WSFDictionaryInfo> dictionaries) {
+        changed = true;
         this.dictionaries = dictionaries;
     }
 
-    public String getProjectsDirectory() {
+    public File getProjectsDirectory() {
         return projectsDirectory;
     }
 
-    public void setProjectsDirectory(String projectsDirectory) {
+    public void setProjectsDirectory(File projectsDirectory) {
+        changed = true;
         this.projectsDirectory = projectsDirectory;
     }
 
@@ -98,18 +131,26 @@ public class WSFConfiguration {
     }
 
     public void setProjects(ArrayList<WSFProjectInfo> projects) {
+        changed = true;
         this.projects = projects;
     }
     
     public void addDictionary(WSFDictionaryInfo dict){
+        changed = true;
         this.dictionaries.add(dict);
     }
     
     public void removeDictionary(String name){
+        changed = true;
         for(WSFDictionaryInfo dict : dictionaries ){
             if(dict.getName().equalsIgnoreCase(name))
                 dictionaries.remove(dict);
         }
+    }
+    
+    public void removeDictionary(int i){
+        changed = true;
+        dictionaries.remove(i);
     }
     
     public boolean hasDictionary(String name){
@@ -122,10 +163,12 @@ public class WSFConfiguration {
     }
     
     public void addProject(WSFProjectInfo proj){
+        changed = true;
         this.projects.add(proj);
     }
     
     public void removeProject(String name){
+        changed = true;
         for(WSFProjectInfo proj : projects){
             if(proj.getName().equalsIgnoreCase(name)){
                 projects.remove(proj);
@@ -170,7 +213,7 @@ public class WSFConfiguration {
         // projects
         OMElement projectsElement = omDOMFactory.createOMElement(new QName("", "projects"), wsfConfigurationElement);
         OMElement projectsDirectoryElement = omDOMFactory.createOMElement(new QName("", "directory"), projectsElement);
-        projectsDirectoryElement.setText(this.projectsDirectory);
+        projectsDirectoryElement.setText(this.projectsDirectory.getAbsolutePath());
         for(WSFProjectInfo proj : this.projects){
             projectsElement.addChild(proj.toOMElement(parent));
         }
@@ -178,14 +221,24 @@ public class WSFConfiguration {
         return wsfConfigurationElement;
     }
     
+    public void saveChanges() throws IOException, XMLStreamException{
+        
+        if(!this.changed || this.file == null)
+            return;
+        
+        XMLUtils.saveToFile(this.toOMElement(null), file);
+        
+        this.changed = false;
+    }
+    
     public static void main(String[] args) throws Exception{
         
-        WSFConfiguration config1 = new WSFConfiguration();
+        WSFConfiguration config1 = new WSFConfiguration(null);
         config1.setMaxNumberOfConnectionsPerHost(5);
         config1.setMaxNumberOfConnectionsOverall(10);
         config1.addDictionary(new WSFDictionaryInfo("Currency_1","test/dict1.txt"));
         config1.addDictionary(new WSFDictionaryInfo("Currency_2","test/dict2.txt"));
-        config1.setProjectsDirectory("projects");
+        config1.setProjectsDirectory(new File("projects"));
         config1.addProject(new WSFProjectInfo("project_1","wsdl_uri_1"));
         config1.addProject(new WSFProjectInfo("project_2","wsdl_uri_2"));
         
@@ -198,7 +251,7 @@ public class WSFConfiguration {
         
         OMElement element = XMLUtils.toOMElement(XMLUtils.toPrettifiedString(config1.toOMElement(null)));
         System.out.println(element);
-        WSFConfiguration config2 = new WSFConfiguration(element);
+        WSFConfiguration config2 = WSFConfiguration.createWSFConfiguration(element, null);
         System.out.println(XMLUtils.toPrettifiedString(config2.toOMElement(null)));
     }
 }

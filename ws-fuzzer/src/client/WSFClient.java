@@ -17,6 +17,7 @@ import datamodel.WSFProjectInfo;
 import datamodel.WSFResult;
 import datamodel.WSFTestCase;
 import exceptions.UnSupportedException;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -123,12 +124,12 @@ public class WSFClient {
     
     public static void main(String[] args) throws WSDLException, UnSupportedException, FileNotFoundException, IOException, AxisFault, XMLStreamException{
         
-        WSFConfiguration config1 = new WSFConfiguration();
+        WSFConfiguration config1 = new WSFConfiguration(null);
         config1.setMaxNumberOfConnectionsPerHost(5);
         config1.setMaxNumberOfConnectionsOverall(10);
         config1.addDictionary(new WSFDictionaryInfo("Currency_1","test/dict1.txt"));
         config1.addDictionary(new WSFDictionaryInfo("Currency_2","test/dict2.txt"));
-        config1.setProjectsDirectory("projects");
+        config1.setProjectsDirectory(new File("projects"));
         
         String wsdlURI = null;
         wsdlURI = "http://localhost/~chang/tmp/CurrencyConvertor.asmx%3fwsdl";

@@ -4,18 +4,52 @@
 
 package gui;
 
+import datamodel.WSFConfiguration;
+import datamodel.WSFProject;
 import java.awt.Dimension;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.stream.XMLStreamException;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
-import javax.swing.plaf.metal.MetalLookAndFeel;
-import com.sun.java.swing.plaf.gtk.GTKLookAndFeel;
-import com.sun.java.swing.plaf.motif.MotifLookAndFeel;
 
 /**
  * The main class of the application.
  */
 public class WSFApplication extends SingleFrameApplication {
 
+    
+    private final String configurationFilePath = "./configuration.xml";
+    private WSFConfiguration configuration;
+    private ArrayList<WSFProject> projects;
+    
+    public ArrayList<WSFProject> getProjects(){
+        return projects;
+    }
+    
+    protected void initialize(String[] args){
+        try {
+            File configurationFile = new File(configurationFilePath);
+            configuration = WSFConfiguration.createWSFConfigruation(configurationFile);
+            
+            projects = new ArrayList<WSFProject>();
+                    
+        } catch (FileNotFoundException ex) {
+            
+//            Logger.getLogger(WSFApplication.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (XMLStreamException ex) {
+            
+//            Logger.getLogger(WSFApplication.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public WSFConfiguration getWSFConfiguration(){
+        return this.configuration;
+    }
+    
     /**
      * At startup create and show the main frame of the application.
      */
@@ -42,10 +76,13 @@ public class WSFApplication extends SingleFrameApplication {
         return Application.getInstance(WSFApplication.class);
     }
 
+    
+    
     /**
      * Main method launching the application.
      */
     public static void main(String[] args) {
         launch(WSFApplication.class, args);
     }
+    
 }

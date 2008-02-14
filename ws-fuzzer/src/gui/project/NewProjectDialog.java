@@ -6,6 +6,17 @@
 
 package gui.project;
 
+import datamodel.WSFProject;
+import datamodel.WSFProjectInfo;
+import gui.WSFApplication;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.jdesktop.application.Action;
+import org.jdesktop.application.Task;
+
 /**
  *
  * @author  chang
@@ -16,6 +27,80 @@ public class NewProjectDialog extends javax.swing.JDialog {
     public NewProjectDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        
+        enableOKButton();
+        
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                projectNameTextField.setText("");
+                wsdlURLTextField.setText("");
+            }
+        });
+    }
+    
+    @Action
+    public void cancelButtonPressed(){
+        this.dispose();
+    }
+    
+    @Action
+    public Task creatProject() {
+        this.okButton.setEnabled(false);
+        
+        return new CreateProject(WSFApplication.getApplication());
+    }
+
+    public class CreateProject extends Task<WSFProject, Void> {
+
+        private WSFApplication app;
+        private File path;
+        private String projectName;
+        private String wsdlURL;
+        private WSFProjectInfo projectInfo;
+
+        public CreateProject(WSFApplication app) {
+
+            super(app);
+
+            this.app = app;
+            this.projectName = projectNameTextField.getText();
+            this.wsdlURL = wsdlURLTextField.getText();
+            this.path = new File(app.getWSFConfiguration().getProjectsDirectory().getAbsolutePath()+File.separator+projectName);
+            
+            projectInfo = new WSFProjectInfo(projectName, path.getAbsolutePath());
+        }
+
+        @Override
+        protected WSFProject doInBackground() throws Exception {
+            return new WSFProject(projectName, path, wsdlURL);
+        }
+
+        @Override
+        protected void succeeded(WSFProject project) {
+            
+            app.getWSFConfiguration().addProject(projectInfo);
+            app.getProjects().add(project);
+            
+            System.out.println("new project war created!");
+            
+            close();
+        }
+
+        @Override
+        protected void failed(Throwable cause) {
+//            showMessage("Unexpected Error occured!");
+//            okButton.setEnabled(true);
+//            buttonCancel.setEnabled(true);
+        }
+
+        @Override
+        protected void finished() {
+        }
+    }
+    
+    @Action
+    public void close(){
+        this.dispose();
     }
     
     /** This method is called from within the constructor to
@@ -30,8 +115,8 @@ public class NewProjectDialog extends javax.swing.JDialog {
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         projectNameTextField = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        okButton = new javax.swing.JButton();
+        cancelButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getResourceMap(NewProjectDialog.class);
@@ -41,6 +126,16 @@ public class NewProjectDialog extends javax.swing.JDialog {
 
         wsdlURLTextField.setText(resourceMap.getString("wsdlURLTextField.text")); // NOI18N
         wsdlURLTextField.setName("wsdlURLTextField"); // NOI18N
+        wsdlURLTextField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                wsdlURLTextFieldFocusLost(evt);
+            }
+        });
+        wsdlURLTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                wsdlURLTextFieldKeyTyped(evt);
+            }
+        });
 
         jLabel1.setText(resourceMap.getString("jLabel1.text")); // NOI18N
         jLabel1.setName("jLabel1"); // NOI18N
@@ -50,12 +145,20 @@ public class NewProjectDialog extends javax.swing.JDialog {
 
         projectNameTextField.setText(resourceMap.getString("projectNameTextField.text")); // NOI18N
         projectNameTextField.setName("projectNameTextField"); // NOI18N
+        projectNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                projectNameTextFieldKeyTyped(evt);
+            }
+        });
 
-        jButton1.setText(resourceMap.getString("jButton1.text")); // NOI18N
-        jButton1.setName("jButton1"); // NOI18N
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getActionMap(NewProjectDialog.class, this);
+        okButton.setAction(actionMap.get("creatProject")); // NOI18N
+        okButton.setText(resourceMap.getString("okButton.text")); // NOI18N
+        okButton.setName("okButton"); // NOI18N
 
-        jButton2.setText(resourceMap.getString("jButton2.text")); // NOI18N
-        jButton2.setName("jButton2"); // NOI18N
+        cancelButton.setAction(actionMap.get("close")); // NOI18N
+        cancelButton.setText(resourceMap.getString("cancelButton.text")); // NOI18N
+        cancelButton.setName("cancelButton"); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -73,9 +176,9 @@ public class NewProjectDialog extends javax.swing.JDialog {
                             .addComponent(projectNameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 333, Short.MAX_VALUE)
                             .addComponent(wsdlURLTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 333, Short.MAX_VALUE)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(okButton, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -91,13 +194,41 @@ public class NewProjectDialog extends javax.swing.JDialog {
                     .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2))
+                    .addComponent(okButton)
+                    .addComponent(cancelButton))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void wsdlURLTextFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_wsdlURLTextFieldFocusLost
+
+            // TODO add your handling code here:
+            String name = projectNameTextField.getText();
+            String path = wsdlURLTextField.getText();
+            
+        try {
+            URI uri = new URI(path);
+            if (!path.equalsIgnoreCase("") && name.equalsIgnoreCase("")) {
+                name = uri.getPath().replaceAll("^.*/", "").replaceFirst("\\?.*$", "").replaceFirst("\\.[^.]*$", "");
+                projectNameTextField.setText(name);
+                enableOKButton();
+            }
+        } catch (URISyntaxException ex) {
+            
+        }
+    }//GEN-LAST:event_wsdlURLTextFieldFocusLost
+
+    private void wsdlURLTextFieldKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_wsdlURLTextFieldKeyTyped
+        // TODO add your handling code here:
+        enableOKButton();
+    }//GEN-LAST:event_wsdlURLTextFieldKeyTyped
+
+    private void projectNameTextFieldKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_projectNameTextFieldKeyTyped
+        // TODO add your handling code here:
+        enableOKButton();
+    }//GEN-LAST:event_projectNameTextFieldKeyTyped
     
     /**
      * @param args the command line arguments
@@ -116,11 +247,21 @@ public class NewProjectDialog extends javax.swing.JDialog {
         });
     }
     
+    public void enableOKButton(){
+        String name = projectNameTextField.getText();
+        String path = wsdlURLTextField.getText();
+        
+        if(!name.equalsIgnoreCase("") && !path.equalsIgnoreCase(""))
+            okButton.setEnabled(true);
+        else 
+            okButton.setEnabled(false);
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton cancelButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JButton okButton;
     private javax.swing.JTextField projectNameTextField;
     private javax.swing.JTextField wsdlURLTextField;
     // End of variables declaration//GEN-END:variables

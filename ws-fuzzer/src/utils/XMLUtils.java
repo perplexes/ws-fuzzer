@@ -6,6 +6,11 @@
 package utils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.StringReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -42,6 +47,26 @@ public class XMLUtils {
         StAXOMBuilder builder = new StAXOMBuilder(xmlStreamReader);
         
         return builder.getDocumentElement();
+    }
+    
+    public static OMElement toOMElement(File xmlFile) throws FileNotFoundException, XMLStreamException{
+        
+        XMLStreamReader xmlStreamReader = XMLInputFactory.newInstance().createXMLStreamReader(new FileReader(xmlFile));
+        StAXOMBuilder builder = new StAXOMBuilder(xmlStreamReader);
+        
+        OMElement element = builder.getDocumentElement();
+//        xmlStreamReader.close();
+        
+        return element;
+    }
+    
+    public static void saveToFile(OMElement element, File file) throws IOException, XMLStreamException, Exception{
+        if(file.exists() && file.canWrite()){
+            FileWriter writer = new FileWriter(file);
+            writer.write(toPrettifiedString(element));
+            writer.flush();
+            writer.close();
+        }
     }
     
 }

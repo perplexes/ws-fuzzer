@@ -6,6 +6,7 @@
 package datamodel;
 
 import exceptions.UnSupportedException;
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ import utils.XSDUtils;
 public class WSFProject {
     
     private String name;
-    private String path;
+    private File path;
     
     private String wsdlURI;
     private String wsdlRaw;
@@ -33,7 +34,7 @@ public class WSFProject {
     private WSDLUtils wsdlHelper;
     private XSDUtils xsdHelper;
     
-    public WSFProject(String name, String path, String wsdlURI) throws WSDLException, UnSupportedException{
+    public WSFProject(String name, File path, String wsdlURI) throws WSDLException, UnSupportedException{
         
         this.name = name;
         this.path = path;
@@ -92,11 +93,11 @@ public class WSFProject {
         this.name = name;
     }
 
-    public String getPath() {
+    public File getPath() {
         return path;
     }
 
-    public void setPath(String path) {
+    public void setPath(File path) {
         this.path = path;
     }
 

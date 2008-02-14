@@ -6,11 +6,10 @@
 
 package gui.options;
 
-import gui.FileChooserDialog;
+import datamodel.WSFConfiguration;
 import gui.WSFApplication;
+import java.io.File;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import org.jdesktop.application.Action;
 
 /**
@@ -19,6 +18,7 @@ import org.jdesktop.application.Action;
  */
 public class GeneralPanel extends javax.swing.JPanel {
     
+    private boolean changed;
     
     
     /** Creates new form GeneralPanel */
@@ -26,18 +26,38 @@ public class GeneralPanel extends javax.swing.JPanel {
         initComponents();
         
         this.optionsDialog = optionsDialog;
+        
+        postInit();
     }
+    
+    private void postInit(){
+        
+        fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
+        
+        changed = false;
+        
+        WSFConfiguration config = WSFApplication.getApplication().getWSFConfiguration();
+        projectsSavePathTextField.setText(config.getProjectsDirectory().getAbsolutePath());
+    }
+    
+    public void saveChanges(){
+        if(!changed)
+            return;
+        
+        WSFConfiguration config = WSFApplication.getApplication().getWSFConfiguration();
+        config.setProjectsDirectory(new File(projectsSavePathTextField.getText()));
+        
+        changed = false;
+    }
+    
     
     @Action
     public void showFileChooserDialog(){
         
-        if(fileChooserDialog == null){
-//            JFrame mainFrame = WSFApplication.getApplication().getMainFrame();
-            fileChooserDialog = new FileChooserDialog(optionsDialog, false, JFileChooser.DIRECTORIES_ONLY);
-            fileChooserDialog.setLocationRelativeTo(optionsDialog);
+        if(fileChooser.showOpenDialog(jPanel1) == 0){
+            projectsSavePathTextField.setText(fileChooser.getSelectedFile().getAbsolutePath());
+            changed = true;
         }
-        fileChooserDialog.setVisible(true);
-//        WSFApplication.getApplication().show(fileChooserDialog);
         
     }
     
@@ -49,9 +69,13 @@ public class GeneralPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        fileChooser = new javax.swing.JFileChooser();
         jPanel1 = new javax.swing.JPanel();
-        jTextField1 = new javax.swing.JTextField();
+        projectsSavePathTextField = new javax.swing.JTextField();
         fileChooserButton = new javax.swing.JButton();
+
+        fileChooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.setName("fileChooser"); // NOI18N
 
         setName("Form"); // NOI18N
 
@@ -59,8 +83,8 @@ public class GeneralPanel extends javax.swing.JPanel {
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jPanel1.border.title"))); // NOI18N
         jPanel1.setName("jPanel1"); // NOI18N
 
-        jTextField1.setText(resourceMap.getString("jTextField1.text")); // NOI18N
-        jTextField1.setName("jTextField1"); // NOI18N
+        projectsSavePathTextField.setText(resourceMap.getString("projectsSavePathTextField.text")); // NOI18N
+        projectsSavePathTextField.setName("projectsSavePathTextField"); // NOI18N
 
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getActionMap(GeneralPanel.class, this);
         fileChooserButton.setAction(actionMap.get("showFileChooserDialog")); // NOI18N
@@ -73,7 +97,7 @@ public class GeneralPanel extends javax.swing.JPanel {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 403, Short.MAX_VALUE)
+                .addComponent(projectsSavePathTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 403, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(fileChooserButton)
                 .addContainerGap())
@@ -82,7 +106,7 @@ public class GeneralPanel extends javax.swing.JPanel {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(projectsSavePathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(fileChooserButton))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -97,17 +121,17 @@ public class GeneralPanel extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(127, Short.MAX_VALUE))
+                .addContainerGap(123, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JFileChooser fileChooser;
     private javax.swing.JButton fileChooserButton;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField projectsSavePathTextField;
     // End of variables declaration//GEN-END:variables
     
     private JDialog optionsDialog;
-    private JDialog fileChooserDialog;
 }

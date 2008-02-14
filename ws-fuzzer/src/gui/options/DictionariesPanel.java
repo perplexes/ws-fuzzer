@@ -6,6 +6,16 @@
 
 package gui.options;
 
+import datamodel.WSFConfiguration;
+import datamodel.WSFDictionary;
+import datamodel.WSFDictionaryInfo;
+import gui.WSFApplication;
+import java.io.File;
+import java.util.Stack;
+import java.util.Vector;
+import javax.swing.table.DefaultTableModel;
+import org.jdesktop.application.Action;
+
 /**
  *
  * @author  chang
@@ -14,7 +24,122 @@ public class DictionariesPanel extends javax.swing.JPanel {
     
     /** Creates new form DictionariesPanel */
     public DictionariesPanel() {
+        
         initComponents();
+        
+        postInit();
+    }
+    
+    private void postInit(){
+        
+        fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
+        
+        DefaultTableModel model = createTableModel();
+        dictionariesTable.setModel(model);
+        
+        enableAddButton();
+        
+    }
+    
+    private DefaultTableModel createTableModel(){
+        
+        Vector<String> columnNames = new Vector<String>();
+        columnNames.add("Name");
+        columnNames.add("Path");
+        columnNames.add("Select");
+        
+        Vector rows = new Vector();
+        WSFConfiguration config = WSFApplication.getApplication().getWSFConfiguration();
+        
+        for(WSFDictionaryInfo dict : config.getDictionaries()){
+            Vector row = new Vector();
+            row.add(dict.getName());
+            row.add(dict.getPath());
+            row.add(false);
+            
+            rows.add(row);
+        }
+        
+        return new DefaultTableModel(rows, columnNames){
+            @Override
+            public Class<?> getColumnClass(int columnIndex){
+                if(columnIndex == 2)
+                    return Boolean.class;
+                
+                return String.class;
+            }
+        };
+    }
+    
+    @Action
+    public void showFileChooserDialog(){
+        
+        if(fileChooser.showOpenDialog(jPanel1) == 0){
+            dictionaryPathTextField.setText(fileChooser.getSelectedFile().getAbsolutePath());
+            dictionaryNameTextField.setText(fileChooser.getSelectedFile().getName());
+            enableAddButton();
+        }
+    }
+    
+    @Action
+    public void removeDictionaries(){
+        
+        WSFConfiguration config = WSFApplication.getApplication().getWSFConfiguration();
+        
+        DefaultTableModel model = (DefaultTableModel) dictionariesTable.getModel();
+        
+        Stack<Integer> indexes = new Stack<Integer>();
+        for(int i=0; i<model.getDataVector().size(); i++){
+            Vector row = (Vector)model.getDataVector().get(i);
+            if((Boolean)row.get(2))
+                indexes.push(i);
+        }
+        
+        while(!indexes.empty()){
+            int i = indexes.pop();
+            model.removeRow(i);
+            config.removeDictionary(i);
+            System.out.println("remove: "+ i);
+        }
+    }
+    
+    @Action
+    public void addDictionary(){
+        String path = dictionaryPathTextField.getText();
+        String name = dictionaryNameTextField.getText();
+        
+        WSFDictionaryInfo dict = new WSFDictionaryInfo(name, path);
+        
+        WSFConfiguration config = WSFApplication.getApplication().getWSFConfiguration();
+        config.addDictionary(dict);
+        
+        Vector row = new Vector();
+        row.add(name);
+        row.add(path);
+        row.add(false);
+        
+        ((DefaultTableModel)dictionariesTable.getModel()).addRow(row);
+        
+        dictionaryNameTextField.setText("");
+        dictionaryPathTextField.setText("");
+        enableAddButton();
+    }
+    
+    public void enableAddButton(){
+        
+        String name = dictionaryNameTextField.getText();
+        String path = dictionaryPathTextField.getText();
+        
+        if(name.equals("") || path.equalsIgnoreCase("")){
+            addDictionaryButton.setEnabled(false);
+            return;
+        }
+        
+        addDictionaryButton.setEnabled(true);
+    }
+    
+    public void saveChanges(){
+        return;
     }
     
     /** This method is called from within the constructor to
@@ -25,36 +150,24 @@ public class DictionariesPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        fileChooser = new javax.swing.JFileChooser();
         jPanel1 = new javax.swing.JPanel();
         dictionaryNameTextField = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        fileChooserButton = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         dictionaryPathTextField = new javax.swing.JTextField();
-        jButton2 = new javax.swing.JButton();
+        addDictionaryButton = new javax.swing.JButton();
+        jPanel2 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        dictionariesTable = new javax.swing.JTable();
+        removeButton = new javax.swing.JButton();
+
+        fileChooser.setName("fileChooser"); // NOI18N
 
         setName("Form"); // NOI18N
 
         org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getResourceMap(DictionariesPanel.class);
-        jScrollPane1.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jScrollPane1.border.title"))); // NOI18N
-        jScrollPane1.setName("jScrollPane1"); // NOI18N
-
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null},
-                {null, null},
-                {null, null},
-                {null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2"
-            }
-        ));
-        jTable1.setName("jTable1"); // NOI18N
-        jScrollPane1.setViewportView(jTable1);
-
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jPanel1.border.title"))); // NOI18N
         jPanel1.setName("jPanel1"); // NOI18N
 
@@ -64,17 +177,25 @@ public class DictionariesPanel extends javax.swing.JPanel {
         jLabel1.setText(resourceMap.getString("jLabel1.text")); // NOI18N
         jLabel1.setName("jLabel1"); // NOI18N
 
-        jButton1.setText(resourceMap.getString("jButton1.text")); // NOI18N
-        jButton1.setName("jButton1"); // NOI18N
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getActionMap(DictionariesPanel.class, this);
+        fileChooserButton.setAction(actionMap.get("showFileChooserDialog")); // NOI18N
+        fileChooserButton.setText(resourceMap.getString("fileChooserButton.text")); // NOI18N
+        fileChooserButton.setName("fileChooserButton"); // NOI18N
 
         jLabel2.setText(resourceMap.getString("jLabel2.text")); // NOI18N
         jLabel2.setName("jLabel2"); // NOI18N
 
         dictionaryPathTextField.setText(resourceMap.getString("dictionaryPathTextField.text")); // NOI18N
         dictionaryPathTextField.setName("dictionaryPathTextField"); // NOI18N
+        dictionaryPathTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                dictionaryPathTextFieldPropertyChange(evt);
+            }
+        });
 
-        jButton2.setText(resourceMap.getString("jButton2.text")); // NOI18N
-        jButton2.setName("jButton2"); // NOI18N
+        addDictionaryButton.setAction(actionMap.get("addDictionary")); // NOI18N
+        addDictionaryButton.setText(resourceMap.getString("addDictionaryButton.text")); // NOI18N
+        addDictionaryButton.setName("addDictionaryButton"); // NOI18N
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -87,14 +208,12 @@ public class DictionariesPanel extends javax.swing.JPanel {
                     .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(dictionaryNameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 266, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton2))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(dictionaryPathTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 279, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1)))
+                    .addComponent(dictionaryPathTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE)
+                    .addComponent(dictionaryNameTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(addDictionaryButton)
+                    .addComponent(fileChooserButton))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -104,12 +223,56 @@ public class DictionariesPanel extends javax.swing.JPanel {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(dictionaryPathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
+                    .addComponent(fileChooserButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(jButton2)
+                    .addComponent(addDictionaryButton)
                     .addComponent(dictionaryNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jPanel2.border.title"))); // NOI18N
+        jPanel2.setName("jPanel2"); // NOI18N
+
+        jScrollPane1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        jScrollPane1.setName("jScrollPane1"); // NOI18N
+
+        dictionariesTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3"
+            }
+        ));
+        dictionariesTable.setName("dictionariesTable"); // NOI18N
+        jScrollPane1.setViewportView(dictionariesTable);
+
+        removeButton.setAction(actionMap.get("removeDictionaries")); // NOI18N
+        removeButton.setText(resourceMap.getString("removeButton.text")); // NOI18N
+        removeButton.setName("removeButton"); // NOI18N
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
+                    .addComponent(removeButton, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 91, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(removeButton)
                 .addContainerGap())
         );
 
@@ -118,28 +281,36 @@ public class DictionariesPanel extends javax.swing.JPanel {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE))
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    private void dictionaryPathTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_dictionaryPathTextFieldPropertyChange
+        // TODO add your handling code here:
+        enableAddButton();
+    }//GEN-LAST:event_dictionaryPathTextFieldPropertyChange
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton addDictionaryButton;
+    private javax.swing.JTable dictionariesTable;
     private javax.swing.JTextField dictionaryNameTextField;
     private javax.swing.JTextField dictionaryPathTextField;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JFileChooser fileChooser;
+    private javax.swing.JButton fileChooserButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JButton removeButton;
     // End of variables declaration//GEN-END:variables
     
 }

@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.5" maxVersion="1.5" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+  <NonVisualComponents>
+    <Component class="javax.swing.JFileChooser" name="fileChooser">
+      <Properties>
+        <Property name="fileSelectionMode" type="int" value="1"/>
+        <Property name="name" type="java.lang.String" value="fileChooser" noResource="true"/>
+      </Properties>
+    </Component>
+  </NonVisualComponents>
   <Properties>
     <Property name="name" type="java.lang.String" value="Form" noResource="true"/>
   </Properties>
@@ -25,7 +33,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
-              <EmptySpace pref="125" max="32767" attributes="0"/>
+              <EmptySpace pref="121" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -35,7 +43,7 @@
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Directory of Projects">
+            <TitledBorder title="Save Path of Projects">
               <Property name="titleX" resourceKey="jPanel1.border.title"/>
             </TitledBorder>
           </Border>
@@ -48,7 +56,7 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="1" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jTextField1" pref="403" max="32767" attributes="0"/>
+                  <Component id="projectsSavePathTextField" pref="403" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="fileChooserButton" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -59,7 +67,7 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="jTextField1" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="projectsSavePathTextField" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="fileChooserButton" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
@@ -68,10 +76,10 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JTextField" name="jTextField1">
+        <Component class="javax.swing.JTextField" name="projectsSavePathTextField">
           <Properties>
-            <Property name="text" type="java.lang.String" resourceKey="jTextField1.text"/>
-            <Property name="name" type="java.lang.String" value="jTextField1" noResource="true"/>
+            <Property name="text" type="java.lang.String" resourceKey="projectsSavePathTextField.text"/>
+            <Property name="name" type="java.lang.String" value="projectsSavePathTextField" noResource="true"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="fileChooserButton">

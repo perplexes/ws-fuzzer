@@ -6,7 +6,12 @@
 
 package gui.options;
 
+import datamodel.WSFConfiguration;
+import gui.WSFApplication;
+import java.io.IOException;
 import javax.swing.JPanel;
+import javax.xml.stream.XMLStreamException;
+import org.jdesktop.application.Action;
 
 /**
  *
@@ -31,9 +36,9 @@ public class OptionsDialog extends javax.swing.JDialog {
         jScrollPane1 = new javax.swing.JScrollPane();
         optionsList = new javax.swing.JList();
         displayPanel = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        okButton = new javax.swing.JButton();
+        applayButton = new javax.swing.JButton();
+        cancelButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getResourceMap(OptionsDialog.class);
@@ -54,24 +59,27 @@ public class OptionsDialog extends javax.swing.JDialog {
                 optionsListValueChanged(evt);
             }
         });
-        optionsList.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                optionsListPropertyChange(evt);
-            }
-        });
         jScrollPane1.setViewportView(optionsList);
 
         displayPanel.setName("displayPanel"); // NOI18N
         displayPanel.setLayout(new java.awt.GridLayout(0, 1));
 
-        jButton1.setText(resourceMap.getString("jButton1.text")); // NOI18N
-        jButton1.setName("jButton1"); // NOI18N
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getActionMap(OptionsDialog.class, this);
+        okButton.setAction(actionMap.get("okButtonPressed")); // NOI18N
+        okButton.setText(resourceMap.getString("okButton.text")); // NOI18N
+        okButton.setName("okButton"); // NOI18N
 
-        jButton2.setText(resourceMap.getString("jButton2.text")); // NOI18N
-        jButton2.setName("jButton2"); // NOI18N
+        applayButton.setAction(actionMap.get("applyChanges")); // NOI18N
+        applayButton.setText(resourceMap.getString("applayButton.text")); // NOI18N
+        applayButton.setName("applayButton"); // NOI18N
 
-        jButton3.setText(resourceMap.getString("jButton3.text")); // NOI18N
-        jButton3.setName("jButton3"); // NOI18N
+        cancelButton.setText(resourceMap.getString("cancelButton.text")); // NOI18N
+        cancelButton.setName("cancelButton"); // NOI18N
+        cancelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelButtonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -83,11 +91,11 @@ public class OptionsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(applayButton, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(okButton, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(displayPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 474, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -100,44 +108,15 @@ public class OptionsDialog extends javax.swing.JDialog {
                         .addComponent(displayPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jButton1)
-                            .addComponent(jButton2)
-                            .addComponent(jButton3)))
+                            .addComponent(okButton)
+                            .addComponent(applayButton)
+                            .addComponent(cancelButton)))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 359, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void optionsListPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_optionsListPropertyChange
-        
-        if("Network".equalsIgnoreCase(evt.getPropertyName())){
-            
-                showNetworkOptions();
-                System.out.println("network options");
-                System.out.println(evt.getNewValue());
-                System.out.println(evt.getOldValue());
-                System.out.println("");
-            
-        }else if("Dictionaries".equalsIgnoreCase(evt.getPropertyName())){
-            
-                showDictionariesOptions();
-                System.out.println("dictionaries options");
-                System.out.println(evt.getNewValue());
-                System.out.println(evt.getOldValue());
-                System.out.println("");
-            
-        }else if("General".equalsIgnoreCase(evt.getPropertyName())){
-            
-                showGeneralOptions();
-                System.out.println("general options");
-                System.out.println(evt.getNewValue());
-                System.out.println(evt.getOldValue());
-                System.out.println("");
-            
-        }
-    }//GEN-LAST:event_optionsListPropertyChange
 
     private void optionsListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_optionsListValueChanged
         // TODO add your handling code here:
@@ -157,6 +136,33 @@ public class OptionsDialog extends javax.swing.JDialog {
             default:        // do nothing
         }
     }//GEN-LAST:event_optionsListValueChanged
+
+    private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+}//GEN-LAST:event_cancelButtonActionPerformed
+    
+    @Action
+    public void okButtonPressed() throws IOException, XMLStreamException{
+        applyChanges();
+        this.dispose();
+    }
+    
+    @Action
+    public void applyChanges() throws IOException, XMLStreamException{
+        
+        if(networkPanel!=null)
+            networkPanel.saveChanges();
+        
+        if(dictionariesPanel!=null)
+            dictionariesPanel.saveChanges();
+        
+        if(generalPanel!=null)
+            generalPanel.saveChanges();
+        
+        WSFConfiguration config = WSFApplication.getApplication().getWSFConfiguration();
+        config.saveChanges();
+    }
     
     private void showNetworkOptions(){
         
@@ -223,15 +229,15 @@ public class OptionsDialog extends javax.swing.JDialog {
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton applayButton;
+    private javax.swing.JButton cancelButton;
     private javax.swing.JPanel displayPanel;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JButton okButton;
     private javax.swing.JList optionsList;
     // End of variables declaration//GEN-END:variables
     
-    private JPanel networkPanel;
-    private JPanel dictionariesPanel;
-    private JPanel generalPanel;
+    private NetworkPanel networkPanel;
+    private DictionariesPanel dictionariesPanel;
+    private GeneralPanel generalPanel;
 }
