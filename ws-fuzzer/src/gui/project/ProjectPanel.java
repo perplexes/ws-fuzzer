@@ -6,15 +6,70 @@
 
 package gui.project;
 
+import datamodel.WSFProject;
+import org.jdesktop.application.Action;
+
 /**
  *
  * @author  chang
  */
 public class ProjectPanel extends javax.swing.JPanel {
     
+    private WSFProject project;
+    
     /** Creates new form ProjectPanel */
-    public ProjectPanel() {
+    public ProjectPanel(WSFProject project) {
+        
+        this.project = project;
         initComponents();
+        
+        postInit();
+    }
+    
+    private void postInit(){
+        showProjectInfoPanel();
+    }
+    
+    public void setProject(WSFProject project){
+        this.project = project;
+        
+        if(projectInfoPanel != null){
+            projectInfoPanel.setProject(project);
+        }
+        
+        if(wsdlRawPanel != null){
+            wsdlRawPanel.setWSDLRaw(project.getWsdlRaw());
+        }
+    }
+    
+    @Action
+    public void showProjectInfoPanel(){
+        if(projectInfoPanel == null){
+            projectInfoPanel = new ProjectInfoPanel(project);
+        }
+        displayPanel.removeAll();
+        displayPanel.add(projectInfoPanel);
+        
+        infoButton.setSelected(true);
+        wsdlRawButton.setSelected(false);
+        
+        displayPanel.revalidate();
+        displayPanel.repaint();
+    }
+    
+    @Action
+    public void showWSDLRawPanel(){
+        if(wsdlRawPanel == null){
+            wsdlRawPanel = new WSDLRawPanel(project.getWsdlRaw());
+        }
+        displayPanel.removeAll();
+        displayPanel.add(wsdlRawPanel);
+        
+        infoButton.setSelected(false);
+        wsdlRawButton.setSelected(true);
+        
+        displayPanel.revalidate();
+        displayPanel.repaint();
     }
     
     /** This method is called from within the constructor to
@@ -26,10 +81,10 @@ public class ProjectPanel extends javax.swing.JPanel {
     private void initComponents() {
 
         jToolBar1 = new javax.swing.JToolBar();
-        jButton1 = new javax.swing.JButton();
+        infoButton = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JToolBar.Separator();
-        jButton2 = new javax.swing.JButton();
-        jPanel1 = new javax.swing.JPanel();
+        wsdlRawButton = new javax.swing.JButton();
+        displayPanel = new javax.swing.JPanel();
 
         setName("Form"); // NOI18N
 
@@ -37,60 +92,59 @@ public class ProjectPanel extends javax.swing.JPanel {
         jToolBar1.setRollover(true);
         jToolBar1.setName("jToolBar1"); // NOI18N
 
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getActionMap(ProjectPanel.class, this);
+        infoButton.setAction(actionMap.get("showProjectInfoPanel")); // NOI18N
         org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getResourceMap(ProjectPanel.class);
-        jButton1.setText(resourceMap.getString("jButton1.text")); // NOI18N
-        jButton1.setFocusable(false);
-        jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jButton1.setName("jButton1"); // NOI18N
-        jButton1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(jButton1);
+        infoButton.setText(resourceMap.getString("infoButton.text")); // NOI18N
+        infoButton.setFocusable(false);
+        infoButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        infoButton.setName("infoButton"); // NOI18N
+        infoButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(infoButton);
 
         jSeparator1.setName("jSeparator1"); // NOI18N
         jToolBar1.add(jSeparator1);
 
-        jButton2.setText(resourceMap.getString("jButton2.text")); // NOI18N
-        jButton2.setFocusable(false);
-        jButton2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jButton2.setName("jButton2"); // NOI18N
-        jButton2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(jButton2);
+        wsdlRawButton.setAction(actionMap.get("showWSDLRawPanel")); // NOI18N
+        wsdlRawButton.setText(resourceMap.getString("wsdlRawButton.text")); // NOI18N
+        wsdlRawButton.setFocusable(false);
+        wsdlRawButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        wsdlRawButton.setName("wsdlRawButton"); // NOI18N
+        wsdlRawButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(wsdlRawButton);
 
-        jPanel1.setName("jPanel1"); // NOI18N
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 666, Short.MAX_VALUE)
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 424, Short.MAX_VALUE)
-        );
+        displayPanel.setName("displayPanel"); // NOI18N
+        displayPanel.setLayout(new java.awt.GridLayout(0, 1));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 666, Short.MAX_VALUE)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(displayPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 642, Short.MAX_VALUE)
+                    .addComponent(jToolBar1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 642, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(displayPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel displayPanel;
+    private javax.swing.JButton infoButton;
     private javax.swing.JToolBar.Separator jSeparator1;
     private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JButton wsdlRawButton;
     // End of variables declaration//GEN-END:variables
     
+    private ProjectInfoPanel projectInfoPanel;
+    private WSDLRawPanel wsdlRawPanel;
 }

@@ -143,13 +143,13 @@ public class OptionsDialog extends javax.swing.JDialog {
 }//GEN-LAST:event_cancelButtonActionPerformed
     
     @Action
-    public void okButtonPressed() throws IOException, XMLStreamException{
+    public void okButtonPressed() throws IOException, XMLStreamException, Exception{
         applyChanges();
         this.dispose();
     }
     
     @Action
-    public void applyChanges() throws IOException, XMLStreamException{
+    public void applyChanges() throws IOException, XMLStreamException, Exception{
         
         if(networkPanel!=null)
             networkPanel.saveChanges();

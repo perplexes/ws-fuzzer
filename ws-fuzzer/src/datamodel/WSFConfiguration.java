@@ -169,9 +169,10 @@ public class WSFConfiguration {
     
     public void removeProject(String name){
         changed = true;
-        for(WSFProjectInfo proj : projects){
-            if(proj.getName().equalsIgnoreCase(name)){
-                projects.remove(proj);
+        
+        for(int i=0; i<projects.size(); i++){
+             if(projects.get(i).getName().equalsIgnoreCase(name)){
+                projects.remove(i);
             }
         }
     }
@@ -221,7 +222,7 @@ public class WSFConfiguration {
         return wsfConfigurationElement;
     }
     
-    public void saveChanges() throws IOException, XMLStreamException{
+    public void saveChanges() throws IOException, XMLStreamException, Exception{
         
         if(!this.changed || this.file == null)
             return;

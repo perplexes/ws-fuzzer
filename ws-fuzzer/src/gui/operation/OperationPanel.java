@@ -1,11 +1,12 @@
 /*
  * OperationPanel.java
  *
- * Created on February 12, 2008, 12:45 AM
+ * Created on February 15, 2008, 2:38 AM
  */
 
 package gui.operation;
 
+import datamodel.WSFOperation;
 import org.jdesktop.application.Action;
 
 /**
@@ -13,17 +14,97 @@ import org.jdesktop.application.Action;
  * @author  chang
  */
 public class OperationPanel extends javax.swing.JPanel {
-    
+    private WSFOperation operation;
     /** Creates new form OperationPanel */
-    public OperationPanel() {
+    public OperationPanel(WSFOperation operation) {
+        this.operation = operation;
+        
         initComponents();
+        
+        showOperation();
+    }
+    
+    
+    public void setOperation(WSFOperation operation){
+        this.operation = operation;
+        showOperation();
+    }
+    
+    private void showOperation(){
+        
+        showInformationPanel();
+        
+        if(!operation.isSupported()){
+            simpleTestButton.setEnabled(false);
+            makeTestCaseButton.setEnabled(false);
+        }else{
+            simpleTestButton.setEnabled(true);
+            makeTestCaseButton.setEnabled(true);
+        }
     }
     
     @Action
-    public void schowFileSchooser(){
+    public void showMakeTestCasePanel(){
+        if(makeTestCasePanel == null){
+            makeTestCasePanel = new MakeTestCasePanel(operation);
+        }else{
+            makeTestCasePanel.setOperation(operation);
+        }
         
+        if(makeTestCasePanel.getParent() != displayPanel){
+            displayPanel.removeAll();
+            displayPanel.add(makeTestCasePanel);
+        }
+        
+        informationButton.setSelected(false);
+        simpleTestButton.setSelected(false);
+        makeTestCaseButton.setSelected(true);
+        
+        displayPanel.revalidate();
+        displayPanel.repaint();
     }
     
+    @Action
+    public void showSimpleTestPanel(){
+        if(simpleTestPanel == null){
+            simpleTestPanel = new SimpleTestPanel(operation);
+        }else{
+            simpleTestPanel.setOperation(operation);
+        }
+        
+        if(simpleTestPanel.getParent() != displayPanel){
+            displayPanel.removeAll();
+            displayPanel.add(simpleTestPanel);
+        }
+        
+        informationButton.setSelected(false);
+        simpleTestButton.setSelected(true);
+        makeTestCaseButton.setSelected(false);
+        
+        displayPanel.revalidate();
+        displayPanel.repaint();
+    }
+    
+    @Action
+    public void showInformationPanel(){
+        if(informationPanel == null){
+            informationPanel = new InformationPanel(operation);
+        }else{
+            informationPanel.setOperation(operation);
+        }
+        
+        if(informationPanel.getParent() != displayPanel){
+            displayPanel.removeAll();
+            displayPanel.add(informationPanel);
+        }
+        
+        informationButton.setSelected(true);
+        simpleTestButton.setSelected(false);
+        makeTestCaseButton.setSelected(false);
+        
+        displayPanel.revalidate();
+        displayPanel.repaint();
+    }
     
     /** This method is called from within the constructor to
      * initialize the form.
@@ -33,184 +114,87 @@ public class OperationPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jSplitPane1 = new javax.swing.JSplitPane();
-        jPanel1 = new javax.swing.JPanel();
-        jSplitPane2 = new javax.swing.JSplitPane();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTree1 = new javax.swing.JTree();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTree2 = new javax.swing.JTree();
-        jPanel3 = new javax.swing.JPanel();
-        jRadioButton1 = new javax.swing.JRadioButton();
-        jComboBox1 = new javax.swing.JComboBox();
-        jTextField1 = new javax.swing.JTextField();
-        jRadioButton2 = new javax.swing.JRadioButton();
-        jPanel2 = new javax.swing.JPanel();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        jToolBar1 = new javax.swing.JToolBar();
+        informationButton = new javax.swing.JButton();
+        jSeparator1 = new javax.swing.JToolBar.Separator();
+        simpleTestButton = new javax.swing.JButton();
+        jSeparator2 = new javax.swing.JToolBar.Separator();
+        makeTestCaseButton = new javax.swing.JButton();
+        displayPanel = new javax.swing.JPanel();
 
         setName("Form"); // NOI18N
 
+        jToolBar1.setFloatable(false);
+        jToolBar1.setRollover(true);
+        jToolBar1.setName("jToolBar1"); // NOI18N
+
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getActionMap(OperationPanel.class, this);
+        informationButton.setAction(actionMap.get("showInformationPanel")); // NOI18N
         org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getResourceMap(OperationPanel.class);
-        jButton2.setText(resourceMap.getString("jButton2.text")); // NOI18N
-        jButton2.setName("jButton2"); // NOI18N
+        informationButton.setText(resourceMap.getString("informationButton.text")); // NOI18N
+        informationButton.setFocusable(false);
+        informationButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        informationButton.setName("informationButton"); // NOI18N
+        informationButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(informationButton);
 
-        jButton3.setText(resourceMap.getString("jButton3.text")); // NOI18N
-        jButton3.setName("jButton3"); // NOI18N
+        jSeparator1.setName("jSeparator1"); // NOI18N
+        jToolBar1.add(jSeparator1);
 
-        jSplitPane1.setDividerLocation(240);
-        jSplitPane1.setDividerSize(4);
-        jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-        jSplitPane1.setResizeWeight(0.5);
-        jSplitPane1.setName("jSplitPane1"); // NOI18N
+        simpleTestButton.setAction(actionMap.get("showSimpleTestPanel")); // NOI18N
+        simpleTestButton.setText(resourceMap.getString("simpleTestButton.text")); // NOI18N
+        simpleTestButton.setFocusable(false);
+        simpleTestButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        simpleTestButton.setName("simpleTestButton"); // NOI18N
+        simpleTestButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(simpleTestButton);
 
-        jPanel1.setName("jPanel1"); // NOI18N
+        jSeparator2.setName("jSeparator2"); // NOI18N
+        jToolBar1.add(jSeparator2);
 
-        jSplitPane2.setDividerSize(4);
-        jSplitPane2.setResizeWeight(0.5);
-        jSplitPane2.setName("jSplitPane2"); // NOI18N
+        makeTestCaseButton.setAction(actionMap.get("showMakeTestCasePanel")); // NOI18N
+        makeTestCaseButton.setText(resourceMap.getString("makeTestCaseButton.text")); // NOI18N
+        makeTestCaseButton.setFocusable(false);
+        makeTestCaseButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        makeTestCaseButton.setName("makeTestCaseButton"); // NOI18N
+        makeTestCaseButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(makeTestCaseButton);
 
-        jScrollPane1.setBorder(javax.swing.BorderFactory.createTitledBorder("Request"));
-        jScrollPane1.setName("jScrollPane1"); // NOI18N
-        jScrollPane1.setPreferredSize(new java.awt.Dimension(91, 215));
-
-        jTree1.setName("jTree1"); // NOI18N
-        jScrollPane1.setViewportView(jTree1);
-
-        jSplitPane2.setLeftComponent(jScrollPane1);
-
-        jScrollPane2.setBorder(javax.swing.BorderFactory.createTitledBorder("Response"));
-        jScrollPane2.setName("jScrollPane2"); // NOI18N
-        jScrollPane2.setPreferredSize(new java.awt.Dimension(91, 215));
-
-        jTree2.setName("jTree2"); // NOI18N
-        jScrollPane2.setViewportView(jTree2);
-
-        jSplitPane2.setRightComponent(jScrollPane2);
-
-        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Input Definition"));
-        jPanel3.setName("jPanel3"); // NOI18N
-        jPanel3.setPreferredSize(null);
-
-        jRadioButton1.setName("jRadioButton1"); // NOI18N
-
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "From Dictionary", "Item 2", "Item 3", "Item 4" }));
-        jComboBox1.setName("jComboBox1"); // NOI18N
-
-        jTextField1.setText(resourceMap.getString("jTextField1.text")); // NOI18N
-        jTextField1.setName("jTextField1"); // NOI18N
-
-        jRadioButton2.setName("jRadioButton2"); // NOI18N
-
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jRadioButton1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 274, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jRadioButton2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jComboBox1, 0, 286, Short.MAX_VALUE))
-        );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jRadioButton1)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jRadioButton2)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jSplitPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 648, Short.MAX_VALUE)
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addComponent(jSplitPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 172, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
-
-        jSplitPane1.setTopComponent(jPanel1);
-
-        jPanel2.setName("jPanel2"); // NOI18N
-
-        jScrollPane3.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jScrollPane3.border.title"))); // NOI18N
-        jScrollPane3.setName("jScrollPane3"); // NOI18N
-
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jTextArea1.setName("jTextArea1"); // NOI18N
-        jScrollPane3.setViewportView(jTextArea1);
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 648, Short.MAX_VALUE)
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 187, Short.MAX_VALUE)
-        );
-
-        jSplitPane1.setRightComponent(jPanel2);
+        displayPanel.setName("displayPanel"); // NOI18N
+        displayPanel.setLayout(new java.awt.GridLayout(0, 1));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap(417, Short.MAX_VALUE)
-                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(displayPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 585, Short.MAX_VALUE)
+                    .addComponent(jToolBar1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 585, Short.MAX_VALUE))
                 .addContainerGap())
-            .addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 648, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 431, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton3)
-                    .addComponent(jButton2)))
+                .addComponent(displayPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 423, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JComboBox jComboBox1;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton2;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JSplitPane jSplitPane1;
-    private javax.swing.JSplitPane jSplitPane2;
-    private javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTree jTree1;
-    private javax.swing.JTree jTree2;
+    private javax.swing.JPanel displayPanel;
+    private javax.swing.JButton informationButton;
+    private javax.swing.JToolBar.Separator jSeparator1;
+    private javax.swing.JToolBar.Separator jSeparator2;
+    private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JButton makeTestCaseButton;
+    private javax.swing.JButton simpleTestButton;
     // End of variables declaration//GEN-END:variables
     
+    private InformationPanel informationPanel;
+    private SimpleTestPanel simpleTestPanel;
+    private MakeTestCasePanel makeTestCasePanel;
 }

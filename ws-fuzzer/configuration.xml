@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsfconfiguration>
+    <connections>
+        <perhost>18</perhost>
+        <overall>20</overall>
+    </connections>
+    <dictionaries>
+        <dictionary>
+            <name>dict1.txt</name>
+            <path>/home/chang/work/netbeans/ws-fuzzer/test/dict1.txt</path>
+        </dictionary>
+        <dictionary>
+            <name>dict2.txt</name>
+            <path>/home/chang/work/netbeans/ws-fuzzer/test/dict2.txt</path>
+        </dictionary>
+    </dictionaries>
+    <projects>
+        <directory>/home/chang/work/netbeans/ws-fuzzer/projects</directory>
+        <project>
+            <name>CurrencyConvertor</name>
+            <wsdluri>http://localhost/~chang/tmp/CurrencyConvertor.asmx%3fwsdl</wsdluri>
+        </project>
+        <project>
+            <name>AmortizationCalculator</name>
+            <wsdluri>http://localhost/~chang/tmp/AmortizationCalculator.cfc%3fwsdl</wsdluri>
+        </project>
+        <project>
+            <name>xwatchlists</name>
+            <wsdluri>http://localhost/~chang/tmp/xwatchlists.asmx%3fWSDL</wsdluri>
+        </project>
+    </projects>
+</wsfconfiguration>

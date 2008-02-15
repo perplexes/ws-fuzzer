@@ -31,6 +31,21 @@ public class WSFPort {
     
     private ArrayList<WSFOperation> operations;
     
+    
+    public void print(){
+        System.out.println("-------- Port ----------");
+        System.out.println("name:                 " + name);
+        System.out.println("supported:            " + supported);
+        System.out.println("portAddressType:      " + portAddressType);
+        System.out.println("portLocation:         " + portLocation);
+        System.out.println("bindingType:          " + this.bindingType);
+        System.out.println("bindingSOAPTransport: " + this.bindingSOAPTransport);
+        System.out.println("bindingHTTPVerb:      " + this.bindingHTTPVerb);
+        System.out.println("bindingSOAPStyle:     " + this.bindingSOAPStyle);
+        System.out.println("operation#:           " + this.operations.size());
+        System.out.println();
+    }
+    
     public WSFPort(WSFService service){
         this.service = service;
         operations = new ArrayList<WSFOperation>();
@@ -120,12 +135,7 @@ public class WSFPort {
         this.bindingSOAPStyle = bindingSOAPStyle;
     }
     
-    public void print(){
-        System.out.println("-------- Port ----------");
-        System.out.println("name:        " + name);
-        System.out.println("bindingType: " + this.bindingType);
-        System.out.println("operation#:  " + this.operations.size());
-        System.out.println();
+    public String toString(){
+        return this.name + " : Port";
     }
-    
 }

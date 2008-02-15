@@ -47,6 +47,19 @@ public class WSFOperation {
     private WSFDataElement headerResponseData;
     
     
+    public void print(){
+        System.out.println("----------- Operation -----------");
+        System.out.println("QName: " + this.name);
+        System.out.println("MEP:   " + this.mep);
+        System.out.println("inHeader: " + this.headerRequestMessageQName);
+        System.out.println("inMsg: " + this.requestMessageQName);
+        WSFDataElement.print(requestData);
+        System.out.println("outHeader: " + this.headerResponseMessageQName);
+        System.out.println("outMsg:" + this.responseMessageQName);
+        WSFDataElement.print(responseData);
+        System.out.println();
+    }
+    
     public WSFOperation(WSFPort port){
         this.port = port;
     }
@@ -64,7 +77,10 @@ public class WSFOperation {
     }
 
     public void setSupported(boolean supported) {
-        this.supported = supported;
+        if(!this.port.isSupported())
+            this.supported = false;
+        else
+            this.supported = supported;
     }
 
     public String getBindingOperationType() {
@@ -237,14 +253,8 @@ public class WSFOperation {
         this.headerResponseData = headerResponseData;
     }
     
-    public void print(){
-        System.out.println("----------- Operation -----------");
-        System.out.println("QName: " + this.name);
-        System.out.println("MEP:   " + this.mep);
-        System.out.println("inMsg: " + this.requestMessageQName);
-        WSFDataElement.print(requestData);
-        System.out.println("outMsg:" + this.responseMessageQName);
-        WSFDataElement.print(responseData);
-        System.out.println();
+    
+    public String toString(){
+        return this.name.getLocalPart();
     }
 }

@@ -65,4 +65,8 @@ public class WSFService {
     public void addPort(WSFPort port){
         this.ports.add(port);
     }
+    
+    public String toString(){
+        return this.getName().getLocalPart()+" : Service";
+    }
 }

@@ -6,13 +6,19 @@
 package datamodel;
 
 import exceptions.UnSupportedException;
+import exceptions.WSFProjectNotFoundException;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import javax.wsdl.Definition;
 import javax.wsdl.WSDLException;
+import javax.xml.stream.XMLStreamException;
 import utils.WSDLUtils;
+import utils.XMLUtils;
 import utils.XSDUtils;
 
 /**
@@ -34,7 +40,7 @@ public class WSFProject {
     private WSDLUtils wsdlHelper;
     private XSDUtils xsdHelper;
     
-    public WSFProject(String name, File path, String wsdlURI) throws WSDLException, UnSupportedException{
+    public WSFProject(String name, File path, String wsdlURI) throws WSDLException, UnSupportedException, XMLStreamException, Exception{
         
         this.name = name;
         this.path = path;
@@ -44,7 +50,7 @@ public class WSFProject {
         xsdHelper = new XSDUtils(getWsdlHelper().getXmlSchemaFromTypes());
         wsdlHelper.setXSDHelper(xsdHelper);
         
-        this.wsdlRaw = wsdlHelper.getWSDLRaw();
+        this.wsdlRaw = XMLUtils.prettify(wsdlHelper.getWSDLRaw());
         this.wsdl4jDef = wsdlHelper.getWSDL4jDef();
         
         this.services = new ArrayList<WSFService>();
@@ -53,13 +59,49 @@ public class WSFProject {
         setServices(wsdlHelper.getServices());
     }
     
-    public WSFProject loadProject(String name, String wsdlURI, String path){
-        // TODO: 
-        return null;
+    public WSFProject(WSFProjectInfo projectInfo, File parentDirectory) throws WSDLException, UnSupportedException, WSFProjectNotFoundException, XMLStreamException, Exception{
+        
+        this.name = projectInfo.getName();
+        this.path = new File(parentDirectory, this.name);
+        
+        if(!path.exists()){
+            throw new WSFProjectNotFoundException("Directory for Project \""+this.name+"\" doesn't exist!");
+        }
+        
+        this.wsdlURI = projectInfo.getWSDLURI();
+        
+        File wsdlFile = new File(path, name+".wsdl");
+        
+        wsdlHelper = new WSDLUtils(wsdlFile.getAbsolutePath());
+        xsdHelper = new XSDUtils(getWsdlHelper().getXmlSchemaFromTypes());
+        wsdlHelper.setXSDHelper(xsdHelper);
+        
+        this.wsdlRaw = XMLUtils.prettify(wsdlHelper.getWSDLRaw());
+        this.wsdl4jDef = wsdlHelper.getWSDL4jDef();
+        
+        this.services = new ArrayList<WSFService>();
+        this.testCases = new ArrayList<WSFTestCase>();
+        
+        setServices(wsdlHelper.getServices());
     }
     
-    public void saveProject(){
+    public boolean save() throws IOException{
+        if(!path.exists()){
+            if(!path.mkdirs()){
+                return false;
+            }
+        }
         
+        File wsdlFile = new File(path, name+".wsdl");
+        
+        if(!wsdlFile.exists()){
+            FileWriter writer = new FileWriter(wsdlFile);
+            writer.write(wsdlRaw);
+            writer.flush();
+            writer.close();
+        }
+        
+        return true;
     }
     
     public static void main(String[] args) throws MalformedURLException, URISyntaxException{
@@ -113,8 +155,8 @@ public class WSFProject {
         return wsdlRaw;
     }
 
-    public void setWsdlRaw(String wsdlRaw) {
-        this.wsdlRaw = wsdlRaw;
+    public void setWsdlRaw(String wsdlRaw) throws XMLStreamException, Exception {
+        this.wsdlRaw = XMLUtils.prettify(wsdlRaw);
     }
 
     public Definition getWsdl4jDef() {
@@ -170,6 +212,10 @@ public class WSFProject {
         System.out.println("services#:   " + services.size());
         System.out.println("(1.S)ports#: " + services.get(0).getPorts().size());
         System.out.println();
+    }
+    
+    public String toString(){
+        return this.name;
     }
     
 }

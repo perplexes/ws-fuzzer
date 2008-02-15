@@ -9,11 +9,15 @@ package gui.project;
 import datamodel.WSFProject;
 import datamodel.WSFProjectInfo;
 import gui.WSFApplication;
+import gui.WSFApplicationView;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.xml.stream.XMLStreamException;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.Task;
 
@@ -46,7 +50,7 @@ public class NewProjectDialog extends javax.swing.JDialog {
     @Action
     public Task creatProject() {
         this.okButton.setEnabled(false);
-        
+        this.cancelButton.setEnabled(false);
         return new CreateProject(WSFApplication.getApplication());
     }
 
@@ -67,7 +71,7 @@ public class NewProjectDialog extends javax.swing.JDialog {
             this.wsdlURL = wsdlURLTextField.getText();
             this.path = new File(app.getWSFConfiguration().getProjectsDirectory().getAbsolutePath()+File.separator+projectName);
             
-            projectInfo = new WSFProjectInfo(projectName, path.getAbsolutePath());
+            projectInfo = new WSFProjectInfo(projectName, wsdlURL);
         }
 
         @Override
@@ -77,20 +81,28 @@ public class NewProjectDialog extends javax.swing.JDialog {
 
         @Override
         protected void succeeded(WSFProject project) {
-            
-            app.getWSFConfiguration().addProject(projectInfo);
-            app.getProjects().add(project);
-            
-            System.out.println("new project war created!");
+            try{
+                project.save();
+                app.getWSFConfiguration().addProject(projectInfo);
+                app.getProjects().add(project);
+                app.getWSFConfiguration().saveChanges();
+                ((WSFApplicationView)app.getMainView()).addNewProjectToTree(project);
+            } catch (IOException ex) {
+//                Logger.getLogger(NewProjectDialog.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (XMLStreamException ex) {
+//                Logger.getLogger(NewProjectDialog.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex) {
+//                Logger.getLogger(NewProjectDialog.class.getName()).log(Level.SEVERE, null, ex);
+            } 
             
             close();
         }
 
         @Override
         protected void failed(Throwable cause) {
-//            showMessage("Unexpected Error occured!");
-//            okButton.setEnabled(true);
-//            buttonCancel.setEnabled(true);
+            showMessage("Unexpected Error occured!");
+            okButton.setEnabled(true);
+            cancelButton.setEnabled(true);
         }
 
         @Override
@@ -98,8 +110,18 @@ public class NewProjectDialog extends javax.swing.JDialog {
         }
     }
     
+    private void showMessage(String msg) {
+        JOptionPane.showMessageDialog(this, msg, "Information", JOptionPane.INFORMATION_MESSAGE);
+    }
+    
     @Action
     public void close(){
+        projectNameTextField.setText("");
+        wsdlURLTextField.setText("");
+
+        okButton.setEnabled(true);
+        cancelButton.setEnabled(true);
+
         this.dispose();
     }
     
