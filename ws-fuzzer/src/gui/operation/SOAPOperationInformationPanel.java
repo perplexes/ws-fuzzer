@@ -7,6 +7,10 @@
 package gui.operation;
 
 import datamodel.WSFOperation;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import utils.JTreeUtils;
 
 /**
  *
@@ -19,15 +23,36 @@ public class SOAPOperationInformationPanel extends javax.swing.JPanel {
     /** Creates new form SOAPOperationInformationPanel */
     public SOAPOperationInformationPanel(WSFOperation operation) {
         this.operation = operation;
+        
         initComponents();
+        
         showOperation();
     }
+    
     public void setOperation(WSFOperation operation){
         this.operation = operation;
         showOperation();
     }
     private void showOperation(){
         
+        
+        operationNameLabel.setText(operation.getName().getLocalPart());
+        mepLabel.setText(operation.getMEP());
+        serviceAddressLabel.setText(operation.getPort().getPortLocation());
+        soapActionLabel.setText(operation.getBindingSoapAction());
+        soapStyleLabel.setText(operation.getBindingSOAPStyle());
+        
+        DefaultMutableTreeNode requestTreeNode = operation.getRequestTreeNode();
+        DefaultMutableTreeNode responseTreeNode = operation.getResponseTreeNode();
+        
+        DefaultTreeModel requestMessageTreeModel = new DefaultTreeModel(requestTreeNode);
+        DefaultTreeModel responseMessageTreeModel = new DefaultTreeModel(responseTreeNode);
+        
+        requestMessageTree.setModel(requestMessageTreeModel);
+        responseMessageTree.setModel(responseMessageTreeModel);
+        
+        JTreeUtils.expandAll(requestMessageTree, new TreePath(requestTreeNode.getPath()));
+        JTreeUtils.expandAll(responseMessageTree, new TreePath(responseTreeNode.getPath()));
     }
     
     /** This method is called from within the constructor to
@@ -38,35 +63,162 @@ public class SOAPOperationInformationPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanel1 = new javax.swing.JPanel();
+        soapActionLabel = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        operationNameLabel = new javax.swing.JLabel();
+        soapStyleLabel = new javax.swing.JLabel();
+        mepLabel = new javax.swing.JLabel();
+        serviceAddressLabel = new javax.swing.JLabel();
+        jSplitPane1 = new javax.swing.JSplitPane();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        requestMessageTree = new javax.swing.JTree();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        responseMessageTree = new javax.swing.JTree();
 
         setName("Form"); // NOI18N
 
         org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getResourceMap(SOAPOperationInformationPanel.class);
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jPanel1.border.title"))); // NOI18N
+        jPanel1.setName("jPanel1"); // NOI18N
+
+        soapActionLabel.setText(resourceMap.getString("soapActionLabel.text")); // NOI18N
+        soapActionLabel.setName("soapActionLabel"); // NOI18N
+
+        jLabel3.setText(resourceMap.getString("jLabel3.text")); // NOI18N
+        jLabel3.setName("jLabel3"); // NOI18N
+
+        jLabel2.setText(resourceMap.getString("jLabel2.text")); // NOI18N
+        jLabel2.setName("jLabel2"); // NOI18N
+
+        jLabel9.setText(resourceMap.getString("jLabel9.text")); // NOI18N
+        jLabel9.setName("jLabel9"); // NOI18N
+
         jLabel1.setText(resourceMap.getString("jLabel1.text")); // NOI18N
         jLabel1.setName("jLabel1"); // NOI18N
+
+        jLabel4.setText(resourceMap.getString("jLabel4.text")); // NOI18N
+        jLabel4.setName("jLabel4"); // NOI18N
+
+        operationNameLabel.setText(resourceMap.getString("operationNameLabel.text")); // NOI18N
+        operationNameLabel.setName("operationNameLabel"); // NOI18N
+
+        soapStyleLabel.setText(resourceMap.getString("soapStyleLabel.text")); // NOI18N
+        soapStyleLabel.setName("soapStyleLabel"); // NOI18N
+
+        mepLabel.setText(resourceMap.getString("mepLabel.text")); // NOI18N
+        mepLabel.setName("mepLabel"); // NOI18N
+
+        serviceAddressLabel.setText(resourceMap.getString("serviceAddressLabel.text")); // NOI18N
+        serviceAddressLabel.setName("serviceAddressLabel"); // NOI18N
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel9))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(soapActionLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
+                    .addComponent(serviceAddressLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
+                    .addComponent(soapStyleLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
+                    .addComponent(mepLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
+                    .addComponent(operationNameLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel9)
+                    .addComponent(operationNameLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(mepLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(soapStyleLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(soapActionLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(serviceAddressLabel))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jSplitPane1.setDividerLocation(-1);
+        jSplitPane1.setDividerSize(4);
+        jSplitPane1.setResizeWeight(0.5);
+        jSplitPane1.setName("jSplitPane1"); // NOI18N
+
+        jScrollPane1.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jScrollPane1.border.title"))); // NOI18N
+        jScrollPane1.setName("jScrollPane1"); // NOI18N
+
+        requestMessageTree.setName("requestMessageTree"); // NOI18N
+        requestMessageTree.setRootVisible(false);
+        jScrollPane1.setViewportView(requestMessageTree);
+
+        jSplitPane1.setLeftComponent(jScrollPane1);
+
+        jScrollPane2.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jScrollPane2.border.title"))); // NOI18N
+        jScrollPane2.setName("jScrollPane2"); // NOI18N
+
+        responseMessageTree.setName("responseMessageTree"); // NOI18N
+        responseMessageTree.setRootVisible(false);
+        jScrollPane2.setViewportView(responseMessageTree);
+
+        jSplitPane1.setRightComponent(jScrollPane2);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(41, 41, 41)
-                .addComponent(jLabel1)
-                .addContainerGap(284, Short.MAX_VALUE))
+            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 523, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(35, 35, 35)
-                .addComponent(jLabel1)
-                .addContainerGap(248, Short.MAX_VALUE))
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 209, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JSplitPane jSplitPane1;
+    private javax.swing.JLabel mepLabel;
+    private javax.swing.JLabel operationNameLabel;
+    private javax.swing.JTree requestMessageTree;
+    private javax.swing.JTree responseMessageTree;
+    private javax.swing.JLabel serviceAddressLabel;
+    private javax.swing.JLabel soapActionLabel;
+    private javax.swing.JLabel soapStyleLabel;
     // End of variables declaration//GEN-END:variables
     
 }

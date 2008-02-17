@@ -7,6 +7,7 @@
 package gui.operation;
 
 import datamodel.WSFOperation;
+import javax.swing.JPanel;
 import org.jdesktop.application.Action;
 
 /**
@@ -15,8 +16,11 @@ import org.jdesktop.application.Action;
  */
 public class OperationPanel extends javax.swing.JPanel {
     private WSFOperation operation;
+    
+    private JPanel currentPanel;
+    
     /** Creates new form OperationPanel */
-    public OperationPanel(WSFOperation operation) {
+    public OperationPanel(WSFOperation operation) throws Exception {
         this.operation = operation;
         
         initComponents();
@@ -25,26 +29,49 @@ public class OperationPanel extends javax.swing.JPanel {
     }
     
     
-    public void setOperation(WSFOperation operation){
+    public void setOperation(WSFOperation operation) throws Exception{
         this.operation = operation;
         showOperation();
     }
     
-    private void showOperation(){
-        
-        showInformationPanel();
-        
+    private void showOperation() throws Exception{
         if(!operation.isSupported()){
+            showInformationPanel();
             simpleTestButton.setEnabled(false);
             makeTestCaseButton.setEnabled(false);
-        }else{
-            simpleTestButton.setEnabled(true);
-            makeTestCaseButton.setEnabled(true);
+            return;
+        }
+        
+        if( displayPanel.getComponentCount() == 0 ){
+            showInformationPanel();
+        }
+        
+        simpleTestButton.setEnabled(true);
+        makeTestCaseButton.setEnabled(true);
+        
+        simpleTestButton.setEnabled(true);
+        makeTestCaseButton.setEnabled(true);
+        
+        
+        if(displayPanel.getComponent(0) == makeTestCasePanel){
+            makeTestCasePanel.setOperation(operation);
+            return;
+        }
+        
+        if(displayPanel.getComponent(0) == simpleTestPanel){
+            simpleTestPanel.setOperation(operation);
+            return;
+        }
+        
+        if(displayPanel.getComponent(0) == informationPanel){
+            informationPanel.setOperation(operation);
+            return;
         }
     }
     
     @Action
-    public void showMakeTestCasePanel(){
+    public void showMakeTestCasePanel() throws Exception{
+        
         if(makeTestCasePanel == null){
             makeTestCasePanel = new MakeTestCasePanel(operation);
         }else{

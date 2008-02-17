@@ -7,6 +7,7 @@ package datamodel;
 
 
 import java.util.ArrayList;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
@@ -145,7 +146,7 @@ public class WSFDataElement {
             omElement = omDOMFactory.createOMElement(this.name, parent);
         
         if(this.simpleType){
-            omElement.setText(isMuster ? ( source==null ? "undefined" : source.toString() ) : ( source == null ? "undefined" : source.getNextValue() ) );
+            omElement.setText(isMuster ? "[WSF_INPUT_DEFINITION_BEGINN]" + ( source==null ? "undefined" : (source.getInputSourceType() == WSFInputSource.INPUT_FROM_FIXED_VALUE ? ("FixedValue( " + source.toString() + " )" ) : ("FromDictionary( " + source.toString() + " )" ))) + "[WSF_INPUT_DEFINITION_END]" : ( source.getNextValue() ) );
             return omElement;
         }
         
@@ -160,12 +161,33 @@ public class WSFDataElement {
         return omElement;
     }
     
+    public DefaultMutableTreeNode toTreeNode(DefaultMutableTreeNode parent){
+        
+        DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode(this);
+        
+        if(parent != null)
+            parent.add(treeNode);
+        
+        if(this.simpleType)
+            return treeNode;
+        
+        for(WSFDataAttribute dataAttribute : dataAttributes){
+            // TODO: to support attribute
+        }
+        
+        for(WSFDataElement dataElement : dataElements) {
+            dataElement.toTreeNode(treeNode);
+        }
+        
+        return treeNode;
+    }
+    
     @Override
     public String toString(){
         
         if(this.simpleType)
-            return "["+this.minOccurs+".."+this.maxOccurs+"] "+this.name.getLocalPart()+" : "+this.type.getLocalPart()+" { "+" }";
-        
+//            return "["+this.minOccurs+".."+this.maxOccurs+"] "+this.name.getLocalPart()+" : "+this.type.getLocalPart()+" { "+ ( source == null ? "undefined" : (source.getInputSourceType() == WSFInputSource.INPUT_FROM_FIXED_VALUE ? "FixedValue("+ source.toString() +")" : "FromDictionary("+ source.toString() +")" ) ) +" }";
+            return "["+this.minOccurs+".."+this.maxOccurs+"] "+this.name.getLocalPart()+" : "+this.type.getLocalPart();
         return "["+this.minOccurs+".."+this.maxOccurs+"] "+this.name.getLocalPart();
     }
     
@@ -180,5 +202,26 @@ public class WSFDataElement {
         for(WSFDataElement dataElement : element.getDataElements()){
             print(dataElement);
         }
+    }
+    
+    public boolean isInputDefinitionComplete(){
+        if(this.isSimpleType() && this.source != null){
+            return true;
+        }
+        
+        if(this.isSimpleType() && this.source == null){
+            return false;
+        }
+        
+        for(WSFDataAttribute dataAttribute : dataAttributes){
+            // TODO: to support attribute
+        }
+        
+        for(WSFDataElement dataElement : dataElements) {
+            if(!dataElement.isInputDefinitionComplete())
+                return false;
+        }
+        
+        return true;
     }
 }

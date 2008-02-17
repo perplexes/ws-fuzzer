@@ -3,42 +3,92 @@
  *
  * Created on February 12, 2008, 12:45 AM
  */
-
 package gui.operation;
 
+import datamodel.WSFConfiguration;
+import datamodel.WSFDataElement;
+import datamodel.WSFDictionaryInfo;
+import datamodel.WSFInputSource;
 import datamodel.WSFOperation;
+import gui.WSFApplication;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import org.jdesktop.application.Action;
+import utils.JTreeUtils;
 
 /**
  *
  * @author  chang
  */
-public class MakeTestCasePanel extends javax.swing.JPanel {
-    
+public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyChangeListener {
+
     private WSFOperation operation;
-    
+    private DefaultComboBoxModel dictionaryComboBoxModel;
+    private HTMLDocument styledDocument;
+
     /** Creates new form MakeTestCasePanel */
-    public MakeTestCasePanel(WSFOperation operation) {
+    public MakeTestCasePanel(WSFOperation operation) throws Exception {
         initComponents();
         this.operation = operation;
+
+        postInit();
+
         showOperation();
     }
-    
-    public void setOperation(WSFOperation operation){
+
+    private void postInit() {
+        buttonGroup1.add(fixedValueRadioButton);
+        buttonGroup1.add(fromDictionaryRadioButton);
+        fixedValueRadioButton.setSelected(true);
+
+        setDictionaries();
+
+        WSFConfiguration config = WSFApplication.getApplication().getWSFConfiguration();
+        config.addPropertyChangeListener("dictionaries", this);
+
+        previewTextPane.setEditorKit(new HTMLEditorKit() );
+    }
+
+    public void setOperation(WSFOperation operation) throws Exception {
         this.operation = operation;
         showOperation();
     }
-    
-    private void showOperation(){
-        
+
+    private void showOperation() throws Exception {
+        DefaultMutableTreeNode requestTreeNode = operation.getRequestTreeNode();
+        DefaultMutableTreeNode responseTreeNode = operation.getResponseTreeNode();
+
+        DefaultTreeModel requestMessageTreeModel = new DefaultTreeModel(requestTreeNode);
+        DefaultTreeModel responseMessageTreeModel = new DefaultTreeModel(responseTreeNode);
+
+        requestMessageTree.setModel(requestMessageTreeModel);
+        responseMessageTree.setModel(responseMessageTreeModel);
+
+        JTreeUtils.expandAll(requestMessageTree, new TreePath(requestTreeNode.getPath()));
+        JTreeUtils.expandAll(responseMessageTree, new TreePath(responseTreeNode.getPath()));
+
+        disableInputdefinition();
+
+        previewTextPane.setText(operation.getPreview());
+        tryEnableGenerateTestCaseButton();
     }
     
     @Action
-    public void schowFileSchooser(){
-        
+    public void generateTestCase(){
+        System.out.println("generate test case");
     }
-    
-    
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -47,28 +97,31 @@ public class MakeTestCasePanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButton2 = new javax.swing.JButton();
+        buttonGroup1 = new javax.swing.ButtonGroup();
+        generateTestCaseButton = new javax.swing.JButton();
         jSplitPane1 = new javax.swing.JSplitPane();
         jPanel1 = new javax.swing.JPanel();
         jSplitPane2 = new javax.swing.JSplitPane();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTree1 = new javax.swing.JTree();
+        requestMessageTree = new javax.swing.JTree();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTree2 = new javax.swing.JTree();
-        jPanel3 = new javax.swing.JPanel();
-        jRadioButton1 = new javax.swing.JRadioButton();
-        jComboBox1 = new javax.swing.JComboBox();
-        jTextField1 = new javax.swing.JTextField();
-        jRadioButton2 = new javax.swing.JRadioButton();
+        responseMessageTree = new javax.swing.JTree();
+        inputDefinitionPanel = new javax.swing.JPanel();
+        fixedValueRadioButton = new javax.swing.JRadioButton();
+        fromDictionaryComboBox = new javax.swing.JComboBox();
+        fixedValueTextField = new javax.swing.JTextField();
+        fromDictionaryRadioButton = new javax.swing.JRadioButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        previewTextPane = new javax.swing.JTextPane();
 
         setName("Form"); // NOI18N
 
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getActionMap(MakeTestCasePanel.class, this);
+        generateTestCaseButton.setAction(actionMap.get("generateTestCase")); // NOI18N
         org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getResourceMap(MakeTestCasePanel.class);
-        jButton2.setText(resourceMap.getString("jButton2.text")); // NOI18N
-        jButton2.setName("jButton2"); // NOI18N
+        generateTestCaseButton.setText(resourceMap.getString("generateTestCaseButton.text")); // NOI18N
+        generateTestCaseButton.setName("generateTestCaseButton"); // NOI18N
 
         jSplitPane1.setDividerLocation(240);
         jSplitPane1.setDividerSize(4);
@@ -86,8 +139,15 @@ public class MakeTestCasePanel extends javax.swing.JPanel {
         jScrollPane1.setName("jScrollPane1"); // NOI18N
         jScrollPane1.setPreferredSize(new java.awt.Dimension(91, 215));
 
-        jTree1.setName("jTree1"); // NOI18N
-        jScrollPane1.setViewportView(jTree1);
+        requestMessageTree.setMaximumSize(new java.awt.Dimension(10000, 10000));
+        requestMessageTree.setName("requestMessageTree"); // NOI18N
+        requestMessageTree.setRootVisible(false);
+        requestMessageTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
+            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
+                requestMessageTreeValueChanged(evt);
+            }
+        });
+        jScrollPane1.setViewportView(requestMessageTree);
 
         jSplitPane2.setLeftComponent(jScrollPane1);
 
@@ -95,46 +155,70 @@ public class MakeTestCasePanel extends javax.swing.JPanel {
         jScrollPane2.setName("jScrollPane2"); // NOI18N
         jScrollPane2.setPreferredSize(new java.awt.Dimension(91, 215));
 
-        jTree2.setName("jTree2"); // NOI18N
-        jScrollPane2.setViewportView(jTree2);
+        responseMessageTree.setMaximumSize(new java.awt.Dimension(10000, 10000));
+        responseMessageTree.setName("responseMessageTree"); // NOI18N
+        responseMessageTree.setRootVisible(false);
+        jScrollPane2.setViewportView(responseMessageTree);
 
         jSplitPane2.setRightComponent(jScrollPane2);
 
-        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Input Definition"));
-        jPanel3.setName("jPanel3"); // NOI18N
+        inputDefinitionPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Input Definition"));
+        inputDefinitionPanel.setName("inputDefinitionPanel"); // NOI18N
 
-        jRadioButton1.setName("jRadioButton1"); // NOI18N
+        fixedValueRadioButton.setName("fixedValueRadioButton"); // NOI18N
+        fixedValueRadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fixedValueRadioButtonActionPerformed(evt);
+            }
+        });
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "From Dictionary", "Item 2", "Item 3", "Item 4" }));
-        jComboBox1.setName("jComboBox1"); // NOI18N
+        fromDictionaryComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "From Dictionary", "Item 2", "Item 3", "Item 4" }));
+        fromDictionaryComboBox.setToolTipText(resourceMap.getString("fromDictionaryComboBox.toolTipText")); // NOI18N
+        fromDictionaryComboBox.setName("fromDictionaryComboBox"); // NOI18N
+        fromDictionaryComboBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                fromDictionaryComboBoxItemStateChanged(evt);
+            }
+        });
 
-        jTextField1.setText(resourceMap.getString("jTextField1.text")); // NOI18N
-        jTextField1.setName("jTextField1"); // NOI18N
+        fixedValueTextField.setText(resourceMap.getString("fixedValueTextField.text")); // NOI18N
+        fixedValueTextField.setToolTipText(resourceMap.getString("fixedValueTextField.toolTipText")); // NOI18N
+        fixedValueTextField.setName("fixedValueTextField"); // NOI18N
+        fixedValueTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fixedValueTextFieldActionPerformed(evt);
+            }
+        });
 
-        jRadioButton2.setName("jRadioButton2"); // NOI18N
+        fromDictionaryRadioButton.setName("fromDictionaryRadioButton"); // NOI18N
+        fromDictionaryRadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fromDictionaryRadioButtonActionPerformed(evt);
+            }
+        });
 
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
+        javax.swing.GroupLayout inputDefinitionPanelLayout = new javax.swing.GroupLayout(inputDefinitionPanel);
+        inputDefinitionPanel.setLayout(inputDefinitionPanelLayout);
+        inputDefinitionPanelLayout.setHorizontalGroup(
+            inputDefinitionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(inputDefinitionPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jRadioButton1)
+                .addComponent(fixedValueRadioButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 274, Short.MAX_VALUE)
+                .addComponent(fixedValueTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 274, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jRadioButton2)
+                .addComponent(fromDictionaryRadioButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jComboBox1, 0, 286, Short.MAX_VALUE))
+                .addComponent(fromDictionaryComboBox, 0, 286, Short.MAX_VALUE))
         );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jRadioButton1)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jRadioButton2)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        inputDefinitionPanelLayout.setVerticalGroup(
+            inputDefinitionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(inputDefinitionPanelLayout.createSequentialGroup()
+                .addGroup(inputDefinitionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(fixedValueRadioButton)
+                    .addComponent(fixedValueTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(fromDictionaryRadioButton)
+                    .addComponent(fromDictionaryComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -142,7 +226,7 @@ public class MakeTestCasePanel extends javax.swing.JPanel {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(inputDefinitionPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jSplitPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 648, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
@@ -150,7 +234,7 @@ public class MakeTestCasePanel extends javax.swing.JPanel {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addComponent(jSplitPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 172, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(inputDefinitionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         jSplitPane1.setTopComponent(jPanel1);
@@ -160,10 +244,9 @@ public class MakeTestCasePanel extends javax.swing.JPanel {
         jScrollPane3.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jScrollPane3.border.title"))); // NOI18N
         jScrollPane3.setName("jScrollPane3"); // NOI18N
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jTextArea1.setName("jTextArea1"); // NOI18N
-        jScrollPane3.setViewportView(jTextArea1);
+        previewTextPane.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        previewTextPane.setName("previewTextPane"); // NOI18N
+        jScrollPane3.setViewportView(previewTextPane);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -184,7 +267,7 @@ public class MakeTestCasePanel extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(456, Short.MAX_VALUE)
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(generateTestCaseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
             .addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 648, Short.MAX_VALUE)
         );
@@ -193,28 +276,200 @@ public class MakeTestCasePanel extends javax.swing.JPanel {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 431, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton2))
+                .addComponent(generateTestCaseButton))
         );
     }// </editor-fold>//GEN-END:initComponents
-    
-    
+    private void fixedValueRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fixedValueRadioButtonActionPerformed
+        // TODO add your handling code here:
+        fixedValueTextField.setEnabled(true);
+        fixedValueTextField.grabFocus();
+        fromDictionaryComboBox.setEnabled(false);
+    }//GEN-LAST:event_fixedValueRadioButtonActionPerformed
+
+    private void fromDictionaryRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fromDictionaryRadioButtonActionPerformed
+        // TODO add your handling code here:
+        fixedValueTextField.setEnabled(false);
+        fromDictionaryComboBox.setEnabled(true);
+        fromDictionaryComboBox.grabFocus();
+    }//GEN-LAST:event_fromDictionaryRadioButtonActionPerformed
+
+    private void requestMessageTreeValueChanged(javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_requestMessageTreeValueChanged
+        // TODO add your handling code here:
+
+        TreePath treePath = evt.getNewLeadSelectionPath();
+        
+        if(treePath == null)    
+            return;
+        
+        if (treePath != null && !(((DefaultMutableTreeNode) treePath.getLastPathComponent()).getUserObject() instanceof WSFDataElement)) {
+            disableInputdefinition();
+            return;
+        }
+
+        WSFDataElement element = ((WSFDataElement) ((DefaultMutableTreeNode)treePath.getLastPathComponent()).getUserObject());
+        if (element.isSimpleType()) {
+
+            if (element.getSource() != null) {
+
+                WSFInputSource source = element.getSource();
+
+                if (source.getInputSourceType() == WSFInputSource.INPUT_FROM_DICTIONARY) {
+                    enableFromDictionaryInputDefinition();
+                    DefaultComboBoxModel model = (DefaultComboBoxModel) fromDictionaryComboBox.getModel();
+
+                    fromDictionaryComboBox.setSelectedIndex(WSFApplication.getApplication().getWSFConfiguration().getDictionaryIndex(source.toString()) + 1);
+                    fixedValueTextField.setText("undefined");
+                }
+                if (source.getInputSourceType() == WSFInputSource.INPUT_FROM_FIXED_VALUE) {
+                    enableFixedInputDefinition();
+                    fixedValueTextField.setText(source.toString());
+                    fromDictionaryComboBox.setSelectedIndex(0);
+                }
+            } else {
+
+                fixedValueTextField.setText("undefined");
+                enableFixedInputDefinition();
+            }
+        } else {
+            disableInputdefinition();
+        }
+    }//GEN-LAST:event_requestMessageTreeValueChanged
+
+    private void fixedValueTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fixedValueTextFieldActionPerformed
+        // TODO add your handling code here:
+        try {
+            setInputDefinition();
+        } catch (FileNotFoundException ex) {
+//            Logger.getLogger(MakeTestCasePanel.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+//            Logger.getLogger(MakeTestCasePanel.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+//            Logger.getLogger(MakeTestCasePanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_fixedValueTextFieldActionPerformed
+
+    private void fromDictionaryComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_fromDictionaryComboBoxItemStateChanged
+        // TODO add your handling code here:
+        try {
+            setInputDefinition();
+        } catch (FileNotFoundException ex) {
+//            Logger.getLogger(MakeTestCasePanel.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+//            Logger.getLogger(MakeTestCasePanel.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+//            Logger.getLogger(MakeTestCasePanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_fromDictionaryComboBoxItemStateChanged
+
+    private void setInputDefinition() throws FileNotFoundException, IOException, Exception {
+
+//        if (targetTreePath == null) {
+//            return;
+//        }
+
+        WSFDataElement element = ((WSFDataElement) ((DefaultMutableTreeNode)requestMessageTree.getSelectionPath().getLastPathComponent()).getUserObject());
+
+        if (!element.isSimpleType()) {
+            return;
+        }
+
+        WSFInputSource source = null;
+
+        if (fixedValueTextField.isEnabled()) {
+            String fixedValue = fixedValueTextField.getText().trim();
+            if (fixedValue.equalsIgnoreCase("") || fixedValue.equalsIgnoreCase("undefined")) {
+                source = null;
+            } else {
+                source = WSFInputSource.createSourceFromDefaultValue(fixedValue);
+            }
+        }
+
+        if (fromDictionaryComboBox.isEnabled()) {
+            if (fromDictionaryComboBox.getSelectedIndex() == -1 || fromDictionaryComboBox.getSelectedIndex() == 0) {
+                source = null;
+            } else {
+                source = WSFInputSource.createInputSourceFromDictionary(((WSFDictionaryInfo) fromDictionaryComboBox.getSelectedItem()).getDictionary());
+            }
+        }
+        element.setSource(source);
+
+        previewTextPane.setText(operation.getPreview());
+        
+        tryEnableGenerateTestCaseButton();
+    }
+
+    private void enableFixedInputDefinition() {
+        fixedValueRadioButton.setEnabled(true);
+        fromDictionaryRadioButton.setEnabled(true);
+
+        fixedValueRadioButton.setSelected(true);
+
+        fixedValueTextField.setEnabled(true);
+        fromDictionaryComboBox.setEnabled(false);
+    }
+
+    private void enableFromDictionaryInputDefinition() {
+        fixedValueRadioButton.setEnabled(true);
+        fromDictionaryRadioButton.setEnabled(true);
+
+        fromDictionaryRadioButton.setSelected(true);
+
+        fixedValueTextField.setEnabled(false);
+        fromDictionaryComboBox.setEnabled(true);
+    }
+
+    private void disableInputdefinition() {
+        fixedValueRadioButton.setEnabled(false);
+        fromDictionaryRadioButton.setEnabled(false);
+
+        fixedValueTextField.setEnabled(false);
+        fromDictionaryComboBox.setEnabled(false);
+
+        fixedValueTextField.setText("undefined");
+        fromDictionaryComboBox.setSelectedIndex(0);
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton2;
-    private javax.swing.JComboBox jComboBox1;
+    private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.JRadioButton fixedValueRadioButton;
+    private javax.swing.JTextField fixedValueTextField;
+    private javax.swing.JComboBox fromDictionaryComboBox;
+    private javax.swing.JRadioButton fromDictionaryRadioButton;
+    private javax.swing.JButton generateTestCaseButton;
+    private javax.swing.JPanel inputDefinitionPanel;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JSplitPane jSplitPane2;
-    private javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTree jTree1;
-    private javax.swing.JTree jTree2;
+    private javax.swing.JTextPane previewTextPane;
+    private javax.swing.JTree requestMessageTree;
+    private javax.swing.JTree responseMessageTree;
     // End of variables declaration//GEN-END:variables
+
+
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getPropertyName().equalsIgnoreCase("dictionaries")) {
+            setDictionaries();
+        }
+    }
     
+    private void tryEnableGenerateTestCaseButton(){
+        if(operation.isInputDefinitionComplete())
+            generateTestCaseButton.setEnabled(true);
+        else
+            generateTestCaseButton.setEnabled(false);
+    }
+    private void setDictionaries() {
+
+        Vector dictionaries = new Vector();
+        dictionaries.add("From Dictionary");
+        for (WSFDictionaryInfo dictInfo : WSFApplication.getApplication().getWSFConfiguration().getDictionaries()) {
+            dictionaries.add(dictInfo);
+        }
+
+        dictionaryComboBoxModel = new DefaultComboBoxModel(dictionaries);
+        fromDictionaryComboBox.setModel(dictionaryComboBoxModel);
+    }
 }

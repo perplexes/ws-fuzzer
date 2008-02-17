@@ -16,6 +16,36 @@ public class StringUtils {
     private StringUtils() {
 
     }
+    
+    public static String prepareXmlForHtml(String string) {
+        
+        string = substitute(string, "&", "&amp;");
+        string = substitute(string, "\"", "&quot;");
+        string = substitute(string, "<", "&lt;");
+        string = substitute(string, ">", "&gt;");
+        
+        string = substitute(string, "\n", "<br/>");
+        string = substitute(string, "\r", "<br/>"); // Carriage return
+        string = substitute(string, "<br/><br/>", "<br/>"); 
+        
+        string = substitute(string, " ", "&nbsp;");
+        string = substitute(string, "&nbsp;&nbsp;", "&nbsp;");
+        
+        
+        string = substitute(string, "&amp;gt;", "&gt;");
+        string = substitute(string, "&amp;lt;", "&lt;");
+        
+//        string = string.replaceAll("[WSF_INPUT_DEFINITION_BEGINN](.*)>&gt;(.*)[WSF_INPUT_DEFINITION_END]", "[WSF_INPUT_DEFINITION_BEGINN]\1>\2[WSF_INPUT_DEFINITION_END]");
+        
+        string = substitute(string, "[WSF_INPUT_DEFINITION_BEGINN]", "<b>");
+        string = substitute(string, "[WSF_INPUT_DEFINITION_END]", "</b>");
+        
+        
+        string = "<html><head></head><body>"+string+"</body></html>";
+        
+//        System.out.println(string);
+        return string;
+    }
 
     /**
      * escape all special characters

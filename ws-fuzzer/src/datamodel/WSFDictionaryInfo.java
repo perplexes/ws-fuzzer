@@ -5,6 +5,8 @@
 
 package datamodel;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
@@ -18,6 +20,8 @@ public class WSFDictionaryInfo {
 
     private String name;
     private String path;
+    
+    private WSFDictionary dictionary;
 
     public WSFDictionaryInfo(String name, String path){
         this.name = name;
@@ -29,6 +33,13 @@ public class WSFDictionaryInfo {
         this.path = element.getFirstChildWithName(new QName("","path")).getText();
     }
 
+    public WSFDictionary getDictionary() throws FileNotFoundException, IOException{
+        if(dictionary==null)
+            dictionary = new WSFDictionary(name, path);
+        
+        return dictionary;
+    }
+    
     public String getName() {
         return name;
     }
@@ -64,6 +75,10 @@ public class WSFDictionaryInfo {
         pathElement.setText(this.path);
             
         return dictionaryElement;
+    }
+    
+    public String toString(){
+        return this.name;
     }
     
     public static void main(String[] args) throws Exception{

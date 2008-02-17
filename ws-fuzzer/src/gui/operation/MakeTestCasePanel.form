@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.5" maxVersion="1.5" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+  <NonVisualComponents>
+    <Component class="javax.swing.ButtonGroup" name="buttonGroup1">
+    </Component>
+  </NonVisualComponents>
   <Properties>
     <Property name="name" type="java.lang.String" value="Form" noResource="true"/>
   </Properties>
@@ -20,7 +24,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace pref="456" max="32767" attributes="0"/>
-              <Component id="jButton2" min="-2" pref="180" max="-2" attributes="0"/>
+              <Component id="generateTestCaseButton" min="-2" pref="180" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
           <Component id="jSplitPane1" alignment="1" pref="648" max="32767" attributes="0"/>
@@ -31,16 +35,19 @@
           <Group type="102" alignment="1" attributes="0">
               <Component id="jSplitPane1" pref="431" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jButton2" min="-2" max="-2" attributes="0"/>
+              <Component id="generateTestCaseButton" min="-2" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
   </Layout>
   <SubComponents>
-    <Component class="javax.swing.JButton" name="jButton2">
+    <Component class="javax.swing.JButton" name="generateTestCaseButton">
       <Properties>
-        <Property name="text" type="java.lang.String" resourceKey="jButton2.text"/>
-        <Property name="name" type="java.lang.String" value="jButton2" noResource="true"/>
+        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+          <action class="gui.operation.MakeTestCasePanel" id="generateTestCase" methodName="generateTestCase"/>
+        </Property>
+        <Property name="text" type="java.lang.String" resourceKey="generateTestCaseButton.text"/>
+        <Property name="name" type="java.lang.String" value="generateTestCaseButton" noResource="true"/>
       </Properties>
     </Component>
     <Container class="javax.swing.JSplitPane" name="jSplitPane1">
@@ -67,7 +74,7 @@
           <Layout>
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jPanel3" alignment="1" max="32767" attributes="0"/>
+                  <Component id="inputDefinitionPanel" alignment="1" max="32767" attributes="0"/>
                   <Component id="jSplitPane2" alignment="0" pref="648" max="32767" attributes="0"/>
               </Group>
             </DimensionLayout>
@@ -76,7 +83,7 @@
                   <Group type="102" alignment="1" attributes="0">
                       <Component id="jSplitPane2" pref="172" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jPanel3" min="-2" pref="62" max="-2" attributes="0"/>
+                      <Component id="inputDefinitionPanel" min="-2" pref="62" max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -114,10 +121,17 @@
 
                   <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
                   <SubComponents>
-                    <Component class="javax.swing.JTree" name="jTree1">
+                    <Component class="javax.swing.JTree" name="requestMessageTree">
                       <Properties>
-                        <Property name="name" type="java.lang.String" value="jTree1" noResource="true"/>
+                        <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                          <Dimension value="[10000, 10000]"/>
+                        </Property>
+                        <Property name="name" type="java.lang.String" value="requestMessageTree" noResource="true"/>
+                        <Property name="rootVisible" type="boolean" value="false"/>
                       </Properties>
+                      <Events>
+                        <EventHandler event="valueChanged" listener="javax.swing.event.TreeSelectionListener" parameters="javax.swing.event.TreeSelectionEvent" handler="requestMessageTreeValueChanged"/>
+                      </Events>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -144,23 +158,27 @@
 
                   <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
                   <SubComponents>
-                    <Component class="javax.swing.JTree" name="jTree2">
+                    <Component class="javax.swing.JTree" name="responseMessageTree">
                       <Properties>
-                        <Property name="name" type="java.lang.String" value="jTree2" noResource="true"/>
+                        <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                          <Dimension value="[10000, 10000]"/>
+                        </Property>
+                        <Property name="name" type="java.lang.String" value="responseMessageTree" noResource="true"/>
+                        <Property name="rootVisible" type="boolean" value="false"/>
                       </Properties>
                     </Component>
                   </SubComponents>
                 </Container>
               </SubComponents>
             </Container>
-            <Container class="javax.swing.JPanel" name="jPanel3">
+            <Container class="javax.swing.JPanel" name="inputDefinitionPanel">
               <Properties>
                 <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                   <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
                     <TitledBorder title="Input Definition"/>
                   </Border>
                 </Property>
-                <Property name="name" type="java.lang.String" value="jPanel3" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="inputDefinitionPanel" noResource="true"/>
               </Properties>
 
               <Layout>
@@ -168,13 +186,13 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace min="-2" max="-2" attributes="0"/>
-                          <Component id="jRadioButton1" min="-2" max="-2" attributes="0"/>
+                          <Component id="fixedValueRadioButton" min="-2" max="-2" attributes="0"/>
                           <EmptySpace min="-2" max="-2" attributes="0"/>
-                          <Component id="jTextField1" pref="274" max="32767" attributes="0"/>
+                          <Component id="fixedValueTextField" pref="274" max="32767" attributes="0"/>
                           <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                          <Component id="jRadioButton2" min="-2" max="-2" attributes="0"/>
+                          <Component id="fromDictionaryRadioButton" min="-2" max="-2" attributes="0"/>
                           <EmptySpace min="-2" max="-2" attributes="0"/>
-                          <Component id="jComboBox1" pref="286" max="32767" attributes="0"/>
+                          <Component id="fromDictionaryComboBox" pref="286" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -182,10 +200,10 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="jRadioButton1" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="jTextField1" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="jRadioButton2" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="jComboBox1" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="fixedValueRadioButton" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="fixedValueTextField" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="fromDictionaryRadioButton" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="fromDictionaryComboBox" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="32767" attributes="0"/>
                       </Group>
@@ -193,12 +211,15 @@
                 </DimensionLayout>
               </Layout>
               <SubComponents>
-                <Component class="javax.swing.JRadioButton" name="jRadioButton1">
+                <Component class="javax.swing.JRadioButton" name="fixedValueRadioButton">
                   <Properties>
-                    <Property name="name" type="java.lang.String" value="jRadioButton1" noResource="true"/>
+                    <Property name="name" type="java.lang.String" value="fixedValueRadioButton" noResource="true"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="fixedValueRadioButtonActionPerformed"/>
+                  </Events>
                 </Component>
-                <Component class="javax.swing.JComboBox" name="jComboBox1">
+                <Component class="javax.swing.JComboBox" name="fromDictionaryComboBox">
                   <Properties>
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                       <StringArray count="4">
@@ -208,19 +229,30 @@
                         <StringItem index="3" value="Item 4"/>
                       </StringArray>
                     </Property>
-                    <Property name="name" type="java.lang.String" value="jComboBox1" noResource="true"/>
+                    <Property name="toolTipText" type="java.lang.String" resourceKey="fromDictionaryComboBox.toolTipText"/>
+                    <Property name="name" type="java.lang.String" value="fromDictionaryComboBox" noResource="true"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="fromDictionaryComboBoxItemStateChanged"/>
+                  </Events>
                 </Component>
-                <Component class="javax.swing.JTextField" name="jTextField1">
+                <Component class="javax.swing.JTextField" name="fixedValueTextField">
                   <Properties>
-                    <Property name="text" type="java.lang.String" resourceKey="jTextField1.text"/>
-                    <Property name="name" type="java.lang.String" value="jTextField1" noResource="true"/>
+                    <Property name="text" type="java.lang.String" resourceKey="fixedValueTextField.text"/>
+                    <Property name="toolTipText" type="java.lang.String" resourceKey="fixedValueTextField.toolTipText"/>
+                    <Property name="name" type="java.lang.String" value="fixedValueTextField" noResource="true"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="fixedValueTextFieldActionPerformed"/>
+                  </Events>
                 </Component>
-                <Component class="javax.swing.JRadioButton" name="jRadioButton2">
+                <Component class="javax.swing.JRadioButton" name="fromDictionaryRadioButton">
                   <Properties>
-                    <Property name="name" type="java.lang.String" value="jRadioButton2" noResource="true"/>
+                    <Property name="name" type="java.lang.String" value="fromDictionaryRadioButton" noResource="true"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="fromDictionaryRadioButtonActionPerformed"/>
+                  </Events>
                 </Component>
               </SubComponents>
             </Container>
@@ -266,11 +298,14 @@
 
               <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
               <SubComponents>
-                <Component class="javax.swing.JTextArea" name="jTextArea1">
+                <Component class="javax.swing.JTextPane" name="previewTextPane">
                   <Properties>
-                    <Property name="columns" type="int" value="20"/>
-                    <Property name="rows" type="int" value="5"/>
-                    <Property name="name" type="java.lang.String" value="jTextArea1" noResource="true"/>
+                    <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                      <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                        <EmptyBorder/>
+                      </Border>
+                    </Property>
+                    <Property name="name" type="java.lang.String" value="previewTextPane" noResource="true"/>
                   </Properties>
                 </Component>
               </SubComponents>

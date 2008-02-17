@@ -13,14 +13,15 @@ import java.util.ArrayList;
  */
 public class WSFInputSource {
     
-    public final static int INPUT_FROM_DEFAULT_VALUE = 0;
+    public final static int INPUT_FROM_FIXED_VALUE = 0;
     public final static int INPUT_FROM_DICTIONARY = 1;
 	
-    private int inputSource;
+    private int inputSourceType;
     private boolean isEnd;
 
     private String defaultValue;
 
+    private String dictionaryName;
     private ArrayList<String> words;
     
     private int counter;
@@ -29,11 +30,15 @@ public class WSFInputSource {
         super();
     }
     
+    public int getInputSourceType(){
+        return this.inputSourceType;
+    }
+    
     public static WSFInputSource createSourceFromDefaultValue(String defaultValue){
 		
         WSFInputSource is = new WSFInputSource();
 
-        is.inputSource = WSFInputSource.INPUT_FROM_DEFAULT_VALUE;
+        is.inputSourceType = WSFInputSource.INPUT_FROM_FIXED_VALUE;
         is.defaultValue = defaultValue;
 
         is.isEnd = false;
@@ -44,7 +49,8 @@ public class WSFInputSource {
 
         WSFInputSource is = new WSFInputSource();
 
-        is.inputSource = WSFInputSource.INPUT_FROM_DICTIONARY;
+        is.dictionaryName = dictionary.getName();
+        is.inputSourceType = WSFInputSource.INPUT_FROM_DICTIONARY;
         is.words = dictionary.getWords();
         is.counter = 0;
 
@@ -55,9 +61,9 @@ public class WSFInputSource {
     
     public String getNextValue(){
 		
-        switch(inputSource){
+        switch(inputSourceType){
 
-            case WSFInputSource.INPUT_FROM_DEFAULT_VALUE: 
+            case WSFInputSource.INPUT_FROM_FIXED_VALUE: 
                 this.isEnd = true;
                 return defaultValue;
 
@@ -79,4 +85,14 @@ public class WSFInputSource {
         return this.isEnd;
     }
     
+    @Override
+    public String toString(){
+        if(this.inputSourceType == WSFInputSource.INPUT_FROM_FIXED_VALUE)
+            return this.defaultValue;
+        
+        if(this.inputSourceType == WSFInputSource.INPUT_FROM_DICTIONARY)
+            return this.dictionaryName;
+        
+        return null;
+    }
 }

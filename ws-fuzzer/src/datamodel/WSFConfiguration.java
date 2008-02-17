@@ -10,22 +10,24 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Vector;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
+import org.jdesktop.application.AbstractBean;
 import utils.XMLUtils;
 
 /**
  *
  * @author chang
  */
-public class WSFConfiguration {
+public class WSFConfiguration extends AbstractBean{
 
     private int maxNumberOfConnectionsPerHost;
     private int maxNumberOfConnectionsOverall;
     
-    private ArrayList<WSFDictionaryInfo> dictionaries;
+    private Vector<WSFDictionaryInfo> dictionaries;
     
     private File projectsDirectory;
     private ArrayList<WSFProjectInfo> projects;
@@ -38,7 +40,7 @@ public class WSFConfiguration {
         changed = false;
         this.file = file;
         
-        dictionaries = new ArrayList<WSFDictionaryInfo>();
+        dictionaries = new Vector<WSFDictionaryInfo>();
         projects = new ArrayList<WSFProjectInfo>();
     }
     
@@ -46,7 +48,7 @@ public class WSFConfiguration {
         
         WSFConfiguration conf = new WSFConfiguration(file);
         
-        conf.dictionaries = new ArrayList<WSFDictionaryInfo>();
+        conf.dictionaries = new Vector<WSFDictionaryInfo>();
         conf.projects = new ArrayList<WSFProjectInfo>();
         
         OMElement connectionsElement = wsfConfigurationElement.getFirstChildWithName(new QName("","connections"));
@@ -108,11 +110,11 @@ public class WSFConfiguration {
         this.maxNumberOfConnectionsOverall = maxNumberOfConnectionsOverall;
     }
 
-    public ArrayList<WSFDictionaryInfo> getDictionaries() {
+    public Vector<WSFDictionaryInfo> getDictionaries() {
         return dictionaries;
     }
 
-    public void setDictionaries(ArrayList<WSFDictionaryInfo> dictionaries) {
+    public void setDictionaries(Vector<WSFDictionaryInfo> dictionaries) {
         changed = true;
         this.dictionaries = dictionaries;
     }
@@ -135,22 +137,32 @@ public class WSFConfiguration {
         this.projects = projects;
     }
     
+    public int getDictionaryIndex(String dictionaryName){
+        for(int i=0; i<dictionaries.size(); i++)
+            if(dictionaries.get(i).getName().equalsIgnoreCase(dictionaryName))
+                return i;
+        return -1;
+    }
+    
     public void addDictionary(WSFDictionaryInfo dict){
         changed = true;
         this.dictionaries.add(dict);
+        this.firePropertyChange("dictionaries", null, dictionaries);
     }
     
     public void removeDictionary(String name){
         changed = true;
-        for(WSFDictionaryInfo dict : dictionaries ){
-            if(dict.getName().equalsIgnoreCase(name))
-                dictionaries.remove(dict);
+        for(int i=0; i<dictionaries.size(); i++){
+            if(dictionaries.get(i).getName().equalsIgnoreCase(name))
+                dictionaries.remove(i);
         }
+        this.firePropertyChange("dictionaries", null, dictionaries);
     }
     
     public void removeDictionary(int i){
         changed = true;
         dictionaries.remove(i);
+        this.firePropertyChange("dictionaries", null, dictionaries);
     }
     
     public boolean hasDictionary(String name){

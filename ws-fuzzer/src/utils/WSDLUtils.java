@@ -171,10 +171,10 @@ public class WSDLUtils {
                                 op.setBindingRequestSOAPUse(((SOAPBody)e).getUse());
                             }
                             if(e instanceof SOAPHeader){
-                                op.setHeaderRequestMessageQName(((SOAPHeader)e).getMessage());
-                                op.setHeaderRequestMessagePart(((SOAPHeader)e).getPart());
-                                op.setHeaderRequestMessageUse(((SOAPHeader)e).getUse());
-                                op.setHeaderRequestData(this.getDataElement(((SOAPHeader)e).getMessage(), ((SOAPHeader)e).getPart()));
+                                op.setRequestHeaderMessageQName(((SOAPHeader)e).getMessage());
+                                op.setRequestHeaderMessagePart(((SOAPHeader)e).getPart());
+                                op.setRequestHeaderMessageUse(((SOAPHeader)e).getUse());
+                                op.setRequestHeaderData(this.getDataElement(((SOAPHeader)e).getMessage(), ((SOAPHeader)e).getPart()));
                             }
                         }
                         
@@ -184,10 +184,10 @@ public class WSDLUtils {
                                 op.setBindingResponseSOAPUse(((SOAPBody)e).getUse());
                             }
                             if(e instanceof SOAPHeader){
-                                op.setHeaderResponseMessageQName(((SOAPHeader)e).getMessage());
-                                op.setHeaderResponseMessagePart(((SOAPHeader)e).getPart());
-                                op.setHeaderResponseMessageUse(((SOAPHeader)e).getUse());
-                                op.setHeaderResponseData(this.getDataElement(((SOAPHeader)e).getMessage(), ((SOAPHeader)e).getPart()));
+                                op.setResponseHeaderMessageQName(((SOAPHeader)e).getMessage());
+                                op.setResponseHeaderMessagePart(((SOAPHeader)e).getPart());
+                                op.setResponseHeaderMessageUse(((SOAPHeader)e).getUse());
+                                op.setResponseHeaderData(this.getDataElement(((SOAPHeader)e).getMessage(), ((SOAPHeader)e).getPart()));
                             }
                         }
                         
