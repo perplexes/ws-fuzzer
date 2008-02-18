@@ -61,6 +61,13 @@ public class XMLUtils {
     }
     
     public static void saveToFile(OMElement element, File file) throws IOException, XMLStreamException, Exception{
+        
+        if(!file.exists()){
+            if(!file.createNewFile()){
+                return;
+            }
+        }
+        
         if(file.exists() && file.canWrite()){
             FileWriter writer = new FileWriter(file);
             writer.write(toPrettifiedString(element));

@@ -7,6 +7,7 @@ package datamodel;
 
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
@@ -17,6 +18,8 @@ import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
  * @author Chang Shu
  */
 public class WSFDataElement {
+    
+    private boolean isRequest;
     
     private QName name;
     
@@ -146,7 +149,7 @@ public class WSFDataElement {
             omElement = omDOMFactory.createOMElement(this.name, parent);
         
         if(this.simpleType){
-            omElement.setText(isMuster ? "[WSF_INPUT_DEFINITION_BEGINN]" + ( source==null ? "undefined" : (source.getInputSourceType() == WSFInputSource.INPUT_FROM_FIXED_VALUE ? ("FixedValue( " + source.toString() + " )" ) : ("FromDictionary( " + source.toString() + " )" ))) + "[WSF_INPUT_DEFINITION_END]" : ( source.getNextValue() ) );
+            omElement.setText(isMuster ? "[WSF_INPUT_DEFINITION_BEGINN]" + ( source==null ? "undefined" : (source.getInputSourceType() == WSFInputSource.INPUT_FROM_FIXED_VALUE ? ("FixedValue( " + source.toString() + " )" ) : ("FromDictionary( " + source.toString() + " )" ))) + "[WSF_INPUT_DEFINITION_END]" : ( value ) );
             return omElement;
         }
         
@@ -185,9 +188,19 @@ public class WSFDataElement {
     @Override
     public String toString(){
         
-        if(this.simpleType)
-//            return "["+this.minOccurs+".."+this.maxOccurs+"] "+this.name.getLocalPart()+" : "+this.type.getLocalPart()+" { "+ ( source == null ? "undefined" : (source.getInputSourceType() == WSFInputSource.INPUT_FROM_FIXED_VALUE ? "FixedValue("+ source.toString() +")" : "FromDictionary("+ source.toString() +")" ) ) +" }";
-            return "["+this.minOccurs+".."+this.maxOccurs+"] "+this.name.getLocalPart()+" : "+this.type.getLocalPart();
+        if(this.value != null){
+            if(this.simpleType)
+                return this.name.getLocalPart()+" : "+this.type.getLocalPart()+" { "+ value +" }";
+            else
+                return this.name.getLocalPart();
+        }
+        
+        if(this.value == null && this.simpleType){
+            if(this.isRequest)
+                return "["+this.minOccurs+".."+this.maxOccurs+"] "+this.name.getLocalPart()+" : "+this.type.getLocalPart()+" { "+ ( source == null ? "undefined" : (source.getInputSourceType() == WSFInputSource.INPUT_FROM_FIXED_VALUE ? "FixedValue("+ source.toString() +")" : "FromDictionary("+ source.toString() +")" ) ) +" }";
+            else
+                return "["+this.minOccurs+".."+this.maxOccurs+"] "+this.name.getLocalPart()+" : "+this.type.getLocalPart();
+        }
         return "["+this.minOccurs+".."+this.maxOccurs+"] "+this.name.getLocalPart();
     }
     
@@ -223,5 +236,215 @@ public class WSFDataElement {
         }
         
         return true;
+    }
+    
+    public void setIsRequest(boolean isRequest){
+        
+        this.isRequest = isRequest;
+        
+        if(this.isSimpleType()){
+            return;
+        }
+        
+        for(WSFDataAttribute dataAttribute : dataAttributes){
+            // TODO: to support attribute
+        }
+        
+        for(WSFDataElement dataElement : dataElements) {
+            dataElement.setIsRequest(isRequest);
+        }
+    }
+    
+    public void clearInputDefinition(){
+        if(simpleType){
+            this.source = null;
+        }
+        
+        for(WSFDataAttribute dataAttribute : dataAttributes){
+            // TODO: to support attribute
+        }
+        
+        for(WSFDataElement dataElement : dataElements) {
+            dataElement.clearInputDefinition();
+        }
+    }
+    
+    @Override
+    public WSFDataElement clone(){
+        WSFDataElement dataElement = new WSFDataElement();
+        
+        dataElement.isRequest = isRequest;
+        dataElement.name = name;
+        dataElement.simpleType = simpleType;
+        dataElement.source = source;
+        dataElement.type = type;
+        dataElement.value = value;
+
+        dataElement.minOccurs = minOccurs;
+        dataElement.maxOccurs = maxOccurs;
+        
+        if(dataAttributes.size() != 0){
+             for(WSFDataAttribute dataAttribute : dataAttributes){
+                dataElement.addDataAttribute(dataAttribute);
+            }
+        }
+        
+        if(dataElements.size() != 0){
+            for(WSFDataElement element : dataElements) {
+                dataElement.addDataElement(element.clone());
+            }
+        }
+        
+        return dataElement;
+    }
+    
+    public WSFDataElement setValues(){
+        
+        if(simpleType){
+            value = source.getNextValue();
+            return this;
+        }else{
+            value = "";
+        }
+        
+        for(WSFDataAttribute dataAttribute : dataAttributes){
+            // TODO: to support attribute
+        }
+        
+        for(WSFDataElement dataElement : dataElements) {
+            dataElement.setValues();
+        }
+        
+        return this;
+    }
+    
+    
+    
+    public OMElement serializeToOMElement(OMElement parent){
+        OMDOMFactory omDOMFactory = new OMDOMFactory();
+        
+        OMElement data = omDOMFactory.createOMElement(new QName("data"), parent);
+        
+        OMElement omElement1 = null;
+        OMElement omElement2 = null;
+        
+        // isRequest
+        omElement1 = omDOMFactory.createOMElement(new QName("isrequest"), data);
+        omElement1.setText(this.isRequest ? "true" : "false");
+        
+        // name
+        omElement1 = omDOMFactory.createOMElement(new QName("name"), data);
+        omElement2 = omDOMFactory.createOMElement(new QName("uri"), omElement1);        omElement2.setText(this.name.getNamespaceURI());
+        omElement2 = omDOMFactory.createOMElement(new QName("localpart"), omElement1);  omElement2.setText(this.name.getLocalPart());
+        
+        // simpleType
+        omElement1 = omDOMFactory.createOMElement(new QName("simpletype"), data);
+        omElement1.setText(this.simpleType ? "true" : "false");
+        
+        // type
+        if(this.type != null){
+            omElement1 = omDOMFactory.createOMElement(new QName("type"), data);
+            omElement2 = omDOMFactory.createOMElement(new QName("uri"), omElement1);        
+            omElement2.setText(this.type.getNamespaceURI());
+            omElement2 = omDOMFactory.createOMElement(new QName("localpart"), omElement1);  
+            omElement2.setText(this.type.getLocalPart());
+        }
+        
+        // value
+        omElement1 = omDOMFactory.createOMElement(new QName("value"), data);
+        omElement1.setText(value);
+        
+        // minOccurs
+        omElement1 = omDOMFactory.createOMElement(new QName("minoccurs"), data);
+        omElement1.setText(""+minOccurs);
+        
+        // maxOccurs
+        omElement1 = omDOMFactory.createOMElement(new QName("maxoccurs"), data);
+        omElement1.setText(""+minOccurs);
+        
+        // source
+        omElement1 = omDOMFactory.createOMElement(new QName("source"), data);
+        if(source != null){   
+            if(source.getInputSourceType() == WSFInputSource.INPUT_FROM_FIXED_VALUE){
+                omElement2 = omDOMFactory.createOMElement(new QName("fixedvalue"), omElement1);
+                omElement2.setText(source.toString());
+            }else if(source.getInputSourceType() == WSFInputSource.INPUT_FROM_DICTIONARY){
+                omElement2 = omDOMFactory.createOMElement(new QName("fromdictionary"), omElement1);
+                omElement2.setText(source.toString());
+            }
+        }
+        
+        // attributes
+        omElement1 = omDOMFactory.createOMElement(new QName("attribute"), data);
+        
+        // elements
+        omElement1 = omDOMFactory.createOMElement(new QName("elements"), data);
+        
+        if(this.simpleType){
+            return omElement1;
+        }
+        
+        for(WSFDataElement dataElement : dataElements) {
+            dataElement.serializeToOMElement(omElement1);
+        }
+        
+        return data;
+    }
+    
+    public static WSFDataElement deserializeFromOMElement(OMElement omElement){
+        WSFDataElement dataElement = new WSFDataElement();
+        
+        OMElement element = null;
+        OMElement element2 = null;
+        QName qName = null;
+        
+        // isRequest
+        element = omElement.getFirstChildWithName(new QName("isrequest"));
+        dataElement.isRequest = element.getText().equalsIgnoreCase("true") ? true : false;
+        
+        // name
+        element = omElement.getFirstChildWithName(new QName("name"));
+        qName = new QName(element.getFirstChildWithName(new QName("uri")).getText(), element.getFirstChildWithName(new QName("localpart")).getText());
+        dataElement.name = qName;
+        
+        // simpleType
+        element = omElement.getFirstChildWithName(new QName("simpletype"));
+        dataElement.simpleType = element.getText().equalsIgnoreCase("true") ? true : false;
+        
+        // type
+        element = omElement.getFirstChildWithName(new QName("type"));
+        if(element != null){
+            qName = new QName(element.getFirstChildWithName(new QName("uri")).getText(), element.getFirstChildWithName(new QName("localpart")).getText());
+            dataElement.type = qName;
+        }
+        
+        // value
+        element = omElement.getFirstChildWithName(new QName("value"));
+        dataElement.value = element.getText();
+        
+        // minOccurs
+        element = omElement.getFirstChildWithName(new QName("minoccurs"));
+        dataElement.minOccurs = Long.parseLong(element.getText());
+        
+        // maxOccurs
+        element = omElement.getFirstChildWithName(new QName("maxoccurs"));
+        dataElement.maxOccurs = Long.parseLong(element.getText());
+        
+        // source
+        // skiped, should no negativ effect for testcase
+        dataElement.source = null;
+        
+        // attributes
+        // atrribtes is jetzt nicht supported
+        
+        // elements
+        element = omElement.getFirstChildWithName(new QName("elements"));
+        Iterator iterator = element.getChildElements();
+        while(iterator.hasNext()){
+            element2 = (OMElement)iterator.next();
+            dataElement.addDataElement(deserializeFromOMElement(element2));
+        }
+        
+        return dataElement;
     }
 }

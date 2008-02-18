@@ -56,6 +56,7 @@ public class ProjectInfoPanel extends javax.swing.JPanel {
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jPanel1.border.title"))); // NOI18N
         jPanel1.setName("jPanel1"); // NOI18N
 
+        wsdlURILabel.setFont(resourceMap.getFont("wsdlURILabel.font")); // NOI18N
         wsdlURILabel.setText(resourceMap.getString("wsdlURILabel.text")); // NOI18N
         wsdlURILabel.setName("wsdlURILabel"); // NOI18N
 
@@ -118,7 +119,7 @@ public class ProjectInfoPanel extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(294, Short.MAX_VALUE))
+                .addContainerGap(292, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
     

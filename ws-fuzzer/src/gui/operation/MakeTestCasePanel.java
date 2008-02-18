@@ -10,7 +10,9 @@ import datamodel.WSFDataElement;
 import datamodel.WSFDictionaryInfo;
 import datamodel.WSFInputSource;
 import datamodel.WSFOperation;
+import datamodel.WSFTestCase;
 import gui.WSFApplication;
+import gui.WSFApplicationView;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.FileNotFoundException;
@@ -85,8 +87,21 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
     }
     
     @Action
-    public void generateTestCase(){
-        System.out.println("generate test case");
+    public void generateTestCase() throws Exception{
+        WSFTestCase testCase = operation.generateTestCase(operation.getName().getLocalPart());
+        ((WSFApplicationView)WSFApplication.getApplication().getMainView()).addNewTestCaseToTree(testCase);
+        testCase.getProject().saveTestCasesToFile();
+        operation.clearInputdefinition();
+        
+        testCaseNameTextField.setEnabled(false);
+        generateTestCaseButton.setEnabled(false);
+        
+        testCaseNameTextField.setText("");
+        
+        disableInputdefinition();
+        
+        ((DefaultTreeModel)requestMessageTree.getModel()).reload();
+        JTreeUtils.expandAll(requestMessageTree, null);
     }
 
     /** This method is called from within the constructor to
@@ -114,6 +129,8 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
         jPanel2 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         previewTextPane = new javax.swing.JTextPane();
+        testCaseNameTextField = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
 
         setName("Form"); // NOI18N
 
@@ -141,6 +158,7 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
 
         requestMessageTree.setMaximumSize(new java.awt.Dimension(10000, 10000));
         requestMessageTree.setName("requestMessageTree"); // NOI18N
+        requestMessageTree.setPreferredSize(new java.awt.Dimension(100, 57));
         requestMessageTree.setRootVisible(false);
         requestMessageTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
             public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
@@ -261,12 +279,22 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
 
         jSplitPane1.setRightComponent(jPanel2);
 
+        testCaseNameTextField.setText(resourceMap.getString("testCaseNameTextField.text")); // NOI18N
+        testCaseNameTextField.setName("testCaseNameTextField"); // NOI18N
+
+        jLabel1.setText(resourceMap.getString("jLabel1.text")); // NOI18N
+        jLabel1.setName("jLabel1"); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(456, Short.MAX_VALUE)
+                .addContainerGap(125, Short.MAX_VALUE)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(testCaseNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(generateTestCaseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
             .addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 648, Short.MAX_VALUE)
@@ -276,7 +304,10 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 431, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(generateTestCaseButton))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(generateTestCaseButton)
+                    .addComponent(jLabel1)
+                    .addComponent(testCaseNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
     }// </editor-fold>//GEN-END:initComponents
     private void fixedValueRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fixedValueRadioButtonActionPerformed
@@ -326,7 +357,6 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
                     fromDictionaryComboBox.setSelectedIndex(0);
                 }
             } else {
-
                 fixedValueTextField.setText("undefined");
                 enableFixedInputDefinition();
             }
@@ -366,8 +396,8 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
 //        if (targetTreePath == null) {
 //            return;
 //        }
-
-        WSFDataElement element = ((WSFDataElement) ((DefaultMutableTreeNode)requestMessageTree.getSelectionPath().getLastPathComponent()).getUserObject());
+        DefaultMutableTreeNode treeNode = ((DefaultMutableTreeNode)requestMessageTree.getSelectionPath().getLastPathComponent());
+        WSFDataElement element = ((WSFDataElement)treeNode.getUserObject());
 
         if (!element.isSimpleType()) {
             return;
@@ -394,6 +424,8 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
         element.setSource(source);
 
         previewTextPane.setText(operation.getPreview());
+        
+        ((DefaultTreeModel)requestMessageTree.getModel()).reload(treeNode);
         
         tryEnableGenerateTestCaseButton();
     }
@@ -436,6 +468,7 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
     private javax.swing.JRadioButton fromDictionaryRadioButton;
     private javax.swing.JButton generateTestCaseButton;
     private javax.swing.JPanel inputDefinitionPanel;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
@@ -446,6 +479,7 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
     private javax.swing.JTextPane previewTextPane;
     private javax.swing.JTree requestMessageTree;
     private javax.swing.JTree responseMessageTree;
+    private javax.swing.JTextField testCaseNameTextField;
     // End of variables declaration//GEN-END:variables
 
 
@@ -456,10 +490,16 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
     }
     
     private void tryEnableGenerateTestCaseButton(){
-        if(operation.isInputDefinitionComplete())
+        if(operation.isInputDefinitionComplete()){
+            testCaseNameTextField.setEnabled(true);
             generateTestCaseButton.setEnabled(true);
-        else
+            
+            if(testCaseNameTextField.getText().trim().equals(""))
+                testCaseNameTextField.setText(operation.getName().getLocalPart());
+        }else{
+            testCaseNameTextField.setEnabled(false);
             generateTestCaseButton.setEnabled(false);
+        }
     }
     private void setDictionaries() {
 
@@ -468,7 +508,7 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
         for (WSFDictionaryInfo dictInfo : WSFApplication.getApplication().getWSFConfiguration().getDictionaries()) {
             dictionaries.add(dictInfo);
         }
-
+        
         dictionaryComboBoxModel = new DefaultComboBoxModel(dictionaries);
         fromDictionaryComboBox.setModel(dictionaryComboBoxModel);
     }

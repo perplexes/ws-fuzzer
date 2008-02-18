@@ -7,6 +7,7 @@ package utils;
 
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 /**
@@ -16,7 +17,15 @@ import javax.swing.tree.TreePath;
 public class JTreeUtils {
 
     public static void expandAll(JTree tree, TreePath path){
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
+        
+        DefaultMutableTreeNode node = null;
+        
+        if(path == null){
+            node = (DefaultMutableTreeNode)((DefaultTreeModel)tree.getModel()).getRoot();
+        }else{
+            node = (DefaultMutableTreeNode)path.getLastPathComponent();
+        }
+        
         if(!node.isLeaf()){
             tree.expandPath(path);
             for(int i=0; i<node.getChildCount(); i++){

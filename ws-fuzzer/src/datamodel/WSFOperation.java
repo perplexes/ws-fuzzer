@@ -155,6 +155,7 @@ public class WSFOperation {
     }
 
     public void setRequestData(WSFDataElement requestData) {
+        requestData.setIsRequest(true);
         this.requestData = requestData;
     }
 
@@ -163,6 +164,7 @@ public class WSFOperation {
     }
 
     public void setResponseData(WSFDataElement responseData) {
+        responseData.setIsRequest(false);
         this.responseData = responseData;
     }
 
@@ -211,6 +213,7 @@ public class WSFOperation {
     }
 
     public void setRequestHeaderData(WSFDataElement requestHeaderData) {
+        requestHeaderData.setIsRequest(true);
         this.requestHeaderData = requestHeaderData;
     }
 
@@ -243,6 +246,7 @@ public class WSFOperation {
     }
 
     public void setResponseHeaderData(WSFDataElement responseHeaderData) {
+        responseHeaderData.setIsRequest(false);
         this.responseHeaderData = responseHeaderData;
     }
 
@@ -321,7 +325,6 @@ public class WSFOperation {
         if(this.requestData != null){
             requestData.toOMElement(envelop.getBody(), true);
         }
-        
         return StringUtils.prepareXmlForHtml(XMLUtils.toPrettifiedString(envelop));
     }
     
@@ -340,7 +343,29 @@ public class WSFOperation {
         return true;
     }
     
+    public void clearInputdefinition(){
+          if(this.requestData!=null)
+            this.requestData.clearInputDefinition();
+            
+        if(this.requestHeaderData!=null)
+            this.requestHeaderData.clearInputDefinition();
+    }
+    
+    public WSFTestCase generateTestCase(String name){
+        if(name == null){
+            name = this.getName().getLocalPart();
+        }
+        
+        WSFTestCase testCase = new WSFTestCase(name, this);
+        this.getPort().getService().getProject().addTestCase(testCase);
+        testCase.generateInputsVector();
+        return testCase;
+    }
+    
+    @Override
     public String toString() {
         return this.name.getLocalPart();
     }
+    
+    
 }

@@ -14,7 +14,10 @@ import gui.options.OptionsDialog;
 import gui.port.PortPanel;
 import gui.project.NewProjectDialog;
 import gui.project.ProjectPanel;
+import gui.testcase.TestCasePanel;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.stream.XMLStreamException;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
@@ -174,6 +177,29 @@ public class WSFApplicationView extends FrameView {
         return node;
     }
     
+    public void addNewTestCaseToTree(WSFTestCase testCase){
+        WSFProject project = testCase.getProject();
+        
+        DefaultMutableTreeNode projectNode = null;
+        DefaultMutableTreeNode parentNode = null;
+        
+        DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)projectsTreeModel.getRoot();
+        
+        for(int i=0; i<rootNode.getChildCount(); i++){
+            projectNode = (DefaultMutableTreeNode)rootNode.getChildAt(i);
+            if(projectNode.getUserObject() == project){
+                parentNode = (DefaultMutableTreeNode)projectNode.getChildAt(projectNode.getChildCount()-1);
+                break;
+            }
+        }
+        
+        if(parentNode != null){
+            DefaultMutableTreeNode testCaseNode = createTreeNode(testCase, parentNode);
+            projectsTreeModel.reload(parentNode);
+            projectsTree.setSelectionPath(new TreePath(testCaseNode.getPath()));
+        }
+    }
+    
     public void addNewProjectToTree(WSFProject project){
         DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)projectsTreeModel.getRoot();
         DefaultMutableTreeNode projectNode = createTreeNode(project, rootNode);
@@ -239,9 +265,10 @@ public class WSFApplicationView extends FrameView {
         newProjectButton = new javax.swing.JButton();
         optionButton = new javax.swing.JButton();
         jSplitPane1 = new javax.swing.JSplitPane();
+        displayPanel = new javax.swing.JPanel();
+        jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         projectsTree = new javax.swing.JTree();
-        displayPanel = new javax.swing.JPanel();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
@@ -281,14 +308,27 @@ public class WSFApplicationView extends FrameView {
         optionButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar1.add(optionButton);
 
-        jSplitPane1.setDividerLocation(150);
-        jSplitPane1.setDividerSize(2);
+        jSplitPane1.setBackground(resourceMap.getColor("jSplitPane1.background")); // NOI18N
+        jSplitPane1.setDividerLocation(80);
         jSplitPane1.setResizeWeight(0.2);
+        jSplitPane1.setLastDividerLocation(80);
+        jSplitPane1.setMinimumSize(new java.awt.Dimension(50, 100));
         jSplitPane1.setName("jSplitPane1"); // NOI18N
+        jSplitPane1.setOneTouchExpandable(true);
 
+        displayPanel.setName("displayPanel"); // NOI18N
+        displayPanel.setLayout(new java.awt.GridLayout(0, 1));
+        jSplitPane1.setRightComponent(displayPanel);
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        jPanel1.setName("jPanel1"); // NOI18N
+
+        jScrollPane1.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jScrollPane1.border.title"))); // NOI18N
+        jScrollPane1.setAutoscrolls(true);
         jScrollPane1.setName("jScrollPane1"); // NOI18N
         jScrollPane1.setPreferredSize(new java.awt.Dimension(150, 382));
 
+        projectsTree.setAutoscrolls(true);
         projectsTree.setMinimumSize(new java.awt.Dimension(100, 0));
         projectsTree.setName("projectsTree"); // NOI18N
         projectsTree.setPreferredSize(new java.awt.Dimension(150, 76));
@@ -297,13 +337,27 @@ public class WSFApplicationView extends FrameView {
                 projectsTreeMouseClicked(evt);
             }
         });
+        projectsTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
+            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
+                projectsTreeValueChanged(evt);
+            }
+        });
         jScrollPane1.setViewportView(projectsTree);
 
-        jSplitPane1.setLeftComponent(jScrollPane1);
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 201, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE)
+        );
 
-        displayPanel.setName("displayPanel"); // NOI18N
-        displayPanel.setLayout(new java.awt.GridLayout(0, 1));
-        jSplitPane1.setRightComponent(displayPanel);
+        jSplitPane1.setLeftComponent(jPanel1);
 
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
@@ -317,7 +371,7 @@ public class WSFApplicationView extends FrameView {
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE))
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 461, Short.MAX_VALUE))
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -416,31 +470,67 @@ public class WSFApplicationView extends FrameView {
             return;
         }
         
-        TreePath path = projectsTree.getSelectionPath();
+        
+    }//GEN-LAST:event_projectsTreeMouseClicked
+
+    private void projectsTreeValueChanged(javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_projectsTreeValueChanged
+        // TODO add your handling code here:
             
-        if( path!=null && path.getPathCount()==2 && evt.getButton()==1 ){
+        TreePath path = evt.getNewLeadSelectionPath();
+        
+        if( path!=null && path.getPathCount()==2){
             
             WSFProject project = (WSFProject)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
             showProjectPanel(project);
             
         }
         
-        if( path!=null && path.getPathCount()==4 && evt.getButton()==1 ){
+        if( path!=null && path.getPathCount()==4){
+            Object object = ((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
             
-            WSFPort port = (WSFPort)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
-            showPortPanel(port);
-//            port.print();
+            if(object instanceof WSFPort){
+                WSFPort port = (WSFPort)object;
+                showPortPanel(port);
+            }
+            
+            if(object instanceof WSFTestCase){
+                WSFTestCase testCase = (WSFTestCase)object;
+                showTestCasePanel(testCase);
+            }
+            
         }
         
-        if( path!=null && path.getPathCount()==5 && evt.getButton()==1 ){
-            
-            WSFOperation operation = (WSFOperation)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
-            showOperationPanel(operation);
+        if( path!=null && path.getPathCount()==5){
+            try {
+
+                WSFOperation operation = (WSFOperation) ((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
+                showOperationPanel(operation);
+//            operation.print();
+            } catch (Exception ex) {
+//                Logger.getLogger(WSFApplicationView.class.getName()).log(Level.SEVERE, null, ex);
+            }
 //            operation.print();
         }
-    }//GEN-LAST:event_projectsTreeMouseClicked
+        
+    }//GEN-LAST:event_projectsTreeValueChanged
 
-    public void showOperationPanel(WSFOperation operation){
+    public void showTestCasePanel(WSFTestCase testCase){
+        if(testCasePanel == null){
+            testCasePanel = new TestCasePanel(testCase);
+        }else{
+            testCasePanel.setTestCase(testCase);
+        }
+        
+        if(testCasePanel.getParent() != displayPanel){
+            displayPanel.removeAll();
+            displayPanel.add(testCasePanel);
+        }
+        
+        displayPanel.revalidate();
+        displayPanel.repaint();
+    }
+    
+    public void showOperationPanel(WSFOperation operation) throws Exception{
         if(operationPanel == null){
             operationPanel = new OperationPanel(operation);
         }else{
@@ -488,11 +578,11 @@ public class WSFApplicationView extends FrameView {
         displayPanel.repaint();
     }
     
-    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem deleteProjectPopupMenuItem;
     private javax.swing.JMenuItem deleteTestCasePopupMenuItem;
     private javax.swing.JPanel displayPanel;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JToolBar jToolBar1;
@@ -521,4 +611,5 @@ public class WSFApplicationView extends FrameView {
     private ProjectPanel projectPanel;
     private PortPanel portPanel;
     private OperationPanel operationPanel;
+    private TestCasePanel testCasePanel;
 }

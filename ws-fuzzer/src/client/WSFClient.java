@@ -93,10 +93,10 @@ public class WSFClient {
 
             ArrayList<WSFResult> results = new ArrayList<WSFResult>();
             WSFOperation operation = testcase.getOperation();
-            ArrayList<OMElement> payloads = testcase.getInputDataVector();
+            ArrayList<WSFDataElement> payloads = testcase.getInputDataVector();
             
             for (int i = 0; i < payloads.size(); i++) {
-                serviceClient.sendReceiveNonBlocking(operation.getName(), payloads.get(i), new AxisCallbackImpl(hook, results, i, Thread.currentThread()));
+                serviceClient.sendReceiveNonBlocking(operation.getName(), payloads.get(i).toOMElement(null, false), new AxisCallbackImpl(hook, results, i, Thread.currentThread()));
             }
             
             while(true){
@@ -122,7 +122,7 @@ public class WSFClient {
        
     }
     
-    public static void main(String[] args) throws WSDLException, UnSupportedException, FileNotFoundException, IOException, AxisFault, XMLStreamException{
+    public static void main(String[] args) throws WSDLException, UnSupportedException, FileNotFoundException, IOException, AxisFault, XMLStreamException, Exception{
         
         WSFConfiguration config1 = new WSFConfiguration(null);
         config1.setMaxNumberOfConnectionsPerHost(5);

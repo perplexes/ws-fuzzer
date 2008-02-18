@@ -119,6 +119,14 @@ public class WSFPort {
         this.operations.add(op);
     }
 
+    public WSFOperation getOperation(QName name){
+        for(WSFOperation op : this.operations)
+            if(op.getName().equals(name))
+                return op;
+        
+        return null;
+    }
+    
     public boolean isSupported() {
         return supported;
     }

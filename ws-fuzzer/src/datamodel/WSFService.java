@@ -66,6 +66,15 @@ public class WSFService {
         this.ports.add(port);
     }
     
+    public WSFPort getPort(String name){
+        for(WSFPort port : this.ports){
+            if(port.getName().equalsIgnoreCase(name))
+                return port;
+        }
+        
+        return null;
+    }
+    
     public String toString(){
         return this.getName().getLocalPart()+" : Service";
     }

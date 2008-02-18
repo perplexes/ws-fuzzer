@@ -95,4 +95,9 @@ public class WSFInputSource {
         
         return null;
     }
+    
+    public void reset(){
+        this.counter = 0;
+        this.isEnd = false;
+    }
 }

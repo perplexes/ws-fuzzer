@@ -8,15 +8,19 @@ package datamodel;
 import exceptions.UnSupportedException;
 import exceptions.WSFProjectNotFoundException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import javax.wsdl.Definition;
 import javax.wsdl.WSDLException;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
 import utils.WSDLUtils;
 import utils.XMLUtils;
 import utils.XSDUtils;
@@ -83,9 +87,11 @@ public class WSFProject {
         this.testCases = new ArrayList<WSFTestCase>();
         
         setServices(wsdlHelper.getServices());
+        
+        loadTestCasesFromFile();
     }
     
-    public boolean save() throws IOException{
+    public boolean save() throws IOException, Exception{
         if(!path.exists()){
             if(!path.mkdirs()){
                 return false;
@@ -100,6 +106,8 @@ public class WSFProject {
             writer.flush();
             writer.close();
         }
+        
+        saveTestCasesToFile();
         
         return true;
     }
@@ -178,6 +186,14 @@ public class WSFProject {
         }
     }
 
+    public WSFService getService(QName name){
+        for(WSFService service : services){
+            if(service.getName().equals(name))
+                return service;
+        }
+        return null;
+    }
+    
     public ArrayList<WSFTestCase> getTestCases() {
         return testCases;
     }
@@ -216,6 +232,44 @@ public class WSFProject {
     
     public String toString(){
         return this.name;
+    }
+    
+    public OMElement serializeTestCasesToOMElement(OMElement parent){
+        
+        OMDOMFactory omDOMFactory = new OMDOMFactory();
+        
+        OMElement testCasesElement = null;
+        
+        if(parent == null){
+            testCasesElement = omDOMFactory.createOMElement(new QName("testcases"));
+        }else {
+            testCasesElement = omDOMFactory.createOMElement(new QName("testcases"), parent);
+        }
+        
+        for(WSFTestCase testCase : this.testCases){
+            testCase.serializeToOMElement(testCasesElement);
+        }
+        
+        return testCasesElement;
+    }
+    
+    public void deserializeTestCasesFromOMElement(OMElement omElement){
+        
+        Iterator iterator = omElement.getChildElements();
+        while(iterator.hasNext()){
+            OMElement element = (OMElement)iterator.next();
+            testCases.add(WSFTestCase.deserializeFromOMElement(element, this));
+        }
+    }
+    
+    public void saveTestCasesToFile() throws Exception{
+        File testCasesFile = new File(path, "testcases.xml");
+        XMLUtils.saveToFile(serializeTestCasesToOMElement(null), testCasesFile);
+    }
+    
+    public void loadTestCasesFromFile() throws FileNotFoundException, XMLStreamException {
+        File testCasesFile = new File(path, "testcases.xml");
+        deserializeTestCasesFromOMElement(XMLUtils.toOMElement(testCasesFile));
     }
     
 }
