@@ -117,6 +117,16 @@ public class WSFApplication extends SingleFrameApplication {
     public static WSFApplication getApplication() {
         return Application.getInstance(WSFApplication.class);
     }
+    
+    protected void shutdown(){
+        for(WSFProject project : projects){
+            try {
+                project.saveTestCasesToFile();
+            } catch (Exception ex) {
+//                Logger.getLogger(WSFApplication.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
 
     /**
      * Main method launching the application.

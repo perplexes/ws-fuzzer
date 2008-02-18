@@ -9,10 +9,18 @@ package gui.testcase;
 import datamodel.WSFOperation;
 import datamodel.WSFResult;
 import datamodel.WSFTestCase;
+import gui.WSFApplication;
+import java.awt.Color;
+import java.awt.Component;
+import java.util.ArrayList;
+import java.util.HashMap;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
+import javax.swing.JList;
 import javax.swing.border.TitledBorder;
 import javax.swing.tree.DefaultTreeModel;
 import org.jdesktop.application.Action;
+import org.jdesktop.application.Task;
 import utils.JTreeUtils;
 
 /**
@@ -21,12 +29,24 @@ import utils.JTreeUtils;
  */
 public class TestCasePanel extends javax.swing.JPanel {
     private WSFTestCase testCase;
+    private int currentIndex;
+    DefaultListModel indexListModel;
+    
+    private HashMap<WSFTestCase, ExecuteTestCase> executeTestCases;
+    
     /** Creates new form TestCasePanel */
     public TestCasePanel(WSFTestCase testCase) {
         this.testCase = testCase;
         initComponents();
         
+        postInit();
+        
         showTestCase();
+    }
+    
+    private void postInit(){
+        executeTestCases = new HashMap<WSFTestCase, ExecuteTestCase>();
+        indexList.setCellRenderer(new MyCellRenderer());
     }
     
     public void setTestCase(WSFTestCase testCase){
@@ -37,7 +57,7 @@ public class TestCasePanel extends javax.swing.JPanel {
     private void showTestCase(){
         WSFOperation operation = testCase.getOperation();
         
-        DefaultListModel indexListModel = new DefaultListModel();
+        indexListModel = new DefaultListModel();
         for(int i=0; i<testCase.getInputDataVector().size(); i++){
             indexListModel.addElement(i);
         }
@@ -50,11 +70,22 @@ public class TestCasePanel extends javax.swing.JPanel {
         DefaultTreeModel requestTreeModel = new DefaultTreeModel(testCase.getRequestTreeNode(currentIndex));
         requestTree.setModel(requestTreeModel);
         JTreeUtils.expandAll(requestTree, null);
+        
+        showResult(currentIndex);
     }
     
     @Action
-    public void executeTestCase(){
+    public Task executeTestCase(){
+        System.out.println("\n\n\n");
         
+        ExecuteTestCase executeTestCase = new ExecuteTestCase(WSFApplication.getApplication(), testCase, this);
+        executeTestCases.put(testCase, executeTestCase);
+        return executeTestCase;
+    }
+    
+    @Action
+    public void stopExecuteTestCase(){
+        executeTestCases.get(testCase).cancel(true);
     }
     
     /** This method is called from within the constructor to
@@ -69,8 +100,8 @@ public class TestCasePanel extends javax.swing.JPanel {
         jScrollPane1 = new javax.swing.JScrollPane();
         indexList = new javax.swing.JList();
         jToolBar1 = new javax.swing.JToolBar();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        executeButton = new javax.swing.JButton();
+        stopButton = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JToolBar.Separator();
         jPanel2 = new javax.swing.JPanel();
         addFilterButton = new javax.swing.JButton();
@@ -96,6 +127,7 @@ public class TestCasePanel extends javax.swing.JPanel {
 
         jScrollPane1.setName("jScrollPane1"); // NOI18N
 
+        indexList.setFont(resourceMap.getFont("indexList.font")); // NOI18N
         indexList.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { "0", "10", "100", "1000", "10000", "100000", "1000000", "10000000", "99999999" };
             public int getSize() { return strings.length; }
@@ -116,20 +148,21 @@ public class TestCasePanel extends javax.swing.JPanel {
         jToolBar1.setName("jToolBar1"); // NOI18N
 
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getActionMap(TestCasePanel.class, this);
-        jButton1.setAction(actionMap.get("executeTestCase")); // NOI18N
-        jButton1.setText(resourceMap.getString("jButton1.text")); // NOI18N
-        jButton1.setFocusable(false);
-        jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jButton1.setName("jButton1"); // NOI18N
-        jButton1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(jButton1);
+        executeButton.setAction(actionMap.get("executeTestCase")); // NOI18N
+        executeButton.setText(resourceMap.getString("executeButton.text")); // NOI18N
+        executeButton.setFocusable(false);
+        executeButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        executeButton.setName("executeButton"); // NOI18N
+        executeButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(executeButton);
 
-        jButton2.setText(resourceMap.getString("jButton2.text")); // NOI18N
-        jButton2.setFocusable(false);
-        jButton2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jButton2.setName("jButton2"); // NOI18N
-        jButton2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(jButton2);
+        stopButton.setAction(actionMap.get("stopExecuteTestCase")); // NOI18N
+        stopButton.setText(resourceMap.getString("stopButton.text")); // NOI18N
+        stopButton.setFocusable(false);
+        stopButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        stopButton.setName("stopButton"); // NOI18N
+        stopButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(stopButton);
 
         jSeparator1.setName("jSeparator1"); // NOI18N
         jToolBar1.add(jSeparator1);
@@ -258,35 +291,26 @@ public class TestCasePanel extends javax.swing.JPanel {
 
         // TODO add your handling code here:
         int index = indexList.getSelectedIndex();
-        if (index == -1 || index == currentIndex) {
+
+        if(index == currentIndex){
             return;
         }
         
-        currentIndex = index;
+        if(index == -1)
+            index = 0;
         
-        DefaultTreeModel requestTreeModel = new DefaultTreeModel(testCase.getRequestTreeNode(currentIndex));
-        requestTree.setModel(requestTreeModel);
-        JTreeUtils.expandAll(requestTree, null);
-        
-        WSFResult result = testCase.getResults().get(index);
-        if(result.getInputIndex() == -1) {
-            ((TitledBorder)jScrollPane4.getBorder()).setTitle("Response (Raw)");
-            return;
-        }
-        requestTextArea.setText(result.getOutRaw());
-        responseTextArea.setText(result.getInRaw());
-        ((TitledBorder)jScrollPane4.getBorder()).setTitle("Response (Raw) -- Response Time: " + result.getTime() + " ms");
+        showResult(index);
     }//GEN-LAST:event_indexListValueChanged
+    
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addFilterButton;
     private javax.swing.JComboBox addedFilterComboBox;
     private javax.swing.JButton clearFilerButton;
+    private javax.swing.JButton executeButton;
     private javax.swing.JComboBox filterComboBox;
     private javax.swing.JList indexList;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel4;
@@ -300,7 +324,74 @@ public class TestCasePanel extends javax.swing.JPanel {
     private javax.swing.JTextArea requestTextArea;
     private javax.swing.JTree requestTree;
     private javax.swing.JTextArea responseTextArea;
+    private javax.swing.JButton stopButton;
     // End of variables declaration//GEN-END:variables
     
-    private int currentIndex;
+    public void updateIndexList(int index){
+        Object object = indexListModel.get(index);
+        indexListModel.set(index, object);
+    }
+    
+    public void showResult(int index){
+        currentIndex = index;
+        
+        if(indexList.getSelectedIndex() != index)
+            indexList.setSelectedIndex(index);
+        
+        
+        DefaultTreeModel requestTreeModel = new DefaultTreeModel(testCase.getRequestTreeNode(index));
+        requestTree.setModel(requestTreeModel);
+        JTreeUtils.expandAll(requestTree, null);
+        
+        WSFResult result = testCase.getResults().get(index);
+        if(result.getInputIndex() == -1) {
+            ((TitledBorder)jScrollPane4.getBorder()).setTitle("Response (Raw)");
+            
+            requestTextArea.setText("");
+            responseTextArea.setText("");
+            
+            return;
+        }
+        requestTextArea.setText(result.getOutRaw());
+        responseTextArea.setText(result.getInRaw());
+        ((TitledBorder)jScrollPane4.getBorder()).setTitle("Response (Raw) -- Response Time: " + result.getTime() + " ms");
+        jScrollPane4.repaint();
+    }
+    
+    class MyCellRenderer extends DefaultListCellRenderer{
+        
+        final private Color colorForExecutedResult = new Color(112,228,143);
+        final private Color colorForNotExecutedResult = Color.WHITE;
+        final private Color colorForFailed = new Color(226,108,114);
+        final private Color colorForSelection = new Color(134,171,217);
+        
+        public MyCellRenderer(){
+            super();
+            setOpaque(true);
+        }
+        
+        @Override
+        public Component getListCellRendererComponent(JList list, Object object, int index, boolean isSelected, boolean isFocused){
+            
+            ArrayList<WSFResult> results = testCase.getResults();
+            WSFResult result = results.get(index);
+            
+            setText(object.toString());
+            
+            
+            if(isSelected){
+                setBackground( colorForSelection );
+                return this;
+            }
+            
+            if(result.getInputIndex() >= 0){
+                setBackground( colorForExecutedResult );
+            }else {
+                setBackground( colorForNotExecutedResult );
+            }
+            
+            return this;
+        }
+    }
+    
 }

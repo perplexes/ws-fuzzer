@@ -93,6 +93,7 @@
           <SubComponents>
             <Component class="javax.swing.JList" name="indexList">
               <Properties>
+                <Property name="font" type="java.awt.Font" resourceKey="indexList.font"/>
                 <Property name="model" type="javax.swing.ListModel" editor="org.netbeans.modules.form.editors2.ListModelEditor">
                   <StringArray count="9">
                     <StringItem index="0" value="0"/>
@@ -125,24 +126,27 @@
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout"/>
       <SubComponents>
-        <Component class="javax.swing.JButton" name="jButton1">
+        <Component class="javax.swing.JButton" name="executeButton">
           <Properties>
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
               <action class="gui.testcase.TestCasePanel" id="executeTestCase" methodName="executeTestCase"/>
             </Property>
-            <Property name="text" type="java.lang.String" resourceKey="jButton1.text"/>
+            <Property name="text" type="java.lang.String" resourceKey="executeButton.text"/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="horizontalTextPosition" type="int" value="0"/>
-            <Property name="name" type="java.lang.String" value="jButton1" noResource="true"/>
+            <Property name="name" type="java.lang.String" value="executeButton" noResource="true"/>
             <Property name="verticalTextPosition" type="int" value="3"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="jButton2">
+        <Component class="javax.swing.JButton" name="stopButton">
           <Properties>
-            <Property name="text" type="java.lang.String" resourceKey="jButton2.text"/>
+            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+              <action class="gui.testcase.TestCasePanel" id="stopExecuteTestCase" methodName="stopExecuteTestCase"/>
+            </Property>
+            <Property name="text" type="java.lang.String" resourceKey="stopButton.text"/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="horizontalTextPosition" type="int" value="0"/>
-            <Property name="name" type="java.lang.String" value="jButton2" noResource="true"/>
+            <Property name="name" type="java.lang.String" value="stopButton" noResource="true"/>
             <Property name="verticalTextPosition" type="int" value="3"/>
           </Properties>
         </Component>

@@ -32,6 +32,7 @@ public class AxisCallbackImpl implements AxisCallback {
     }
 
     public void onMessage(MessageContext arg0) {
+        System.out.println("AxisCallback -- onMessage: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName());
         saveResult();
 
 
@@ -39,21 +40,25 @@ public class AxisCallbackImpl implements AxisCallback {
     }
 
     public void onFault(MessageContext arg0) {
+        System.out.println("AxisCallback -- onFault: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName());
         saveResult();
 
 //        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void onError(Exception arg0) {
+        System.out.println("AxisCallback -- onError: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName() + " || exception: " + arg0.getClass() + " ++ " + arg0.getMessage());
         saveResult();
 
+        
 //        throw new UnsupportedOperationException("Not supported yet." + );
         arg0.printStackTrace();
     }
 
     public void onComplete() {
+        System.out.println("AxisCallback -- onComplete: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName());
         saveResult();
-
+        
 //        throw new UnsupportedOperationException("Not supported yet.");
 
 
@@ -75,13 +80,13 @@ public class AxisCallbackImpl implements AxisCallback {
                     synchronized(results){
                         results.add(resultCopy);
                     }
+                    System.out.println("AxisCallback -- saveResult: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName());
+                    thread.interrupt();
                 }
 
                 result.clear();
                 this.isResultSaved = true;
                 
-                this.thread.interrupt();
             }
-
     }
 }

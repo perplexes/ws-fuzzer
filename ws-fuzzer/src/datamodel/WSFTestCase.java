@@ -17,6 +17,8 @@ import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
  * @author chang
  */
 public class WSFTestCase {
+    
+    private boolean saveNeeded;
 
     private String name;
     
@@ -77,6 +79,14 @@ public class WSFTestCase {
 
     public ArrayList<WSFDataElement> getInputDataVector() {
         return inputDataVector;
+    }
+    
+    public void setSaveNeeded(boolean isSaveNeeded){
+        this.saveNeeded = isSaveNeeded;
+    }
+    
+    public boolean isSavedNeeded(){
+        return this.saveNeeded;
     }
 
     public void setInputDataVector(ArrayList<WSFDataElement> inputsVector) {
@@ -145,15 +155,24 @@ public class WSFTestCase {
     }
 
     public boolean isExecuted() {
-        return executed;
-    }
-
-    public void setExecuted(boolean executed) {
-        this.executed = executed;
+        for(int i=0; i<results.size(); i++){
+            if(results.get(i).getInputIndex() != -1)
+                return true;
+            if(i>100)
+                return false;
+        }
+        
+        return false;
     }
 
     public boolean isFinished() {
-        return finished;
+        
+        for(int i=0; i<results.size(); i++){
+            if(results.get(i).getInputIndex() == -1)
+                return false;
+        }
+        
+        return true;
     }
 
     public void setFinished(boolean finished) {

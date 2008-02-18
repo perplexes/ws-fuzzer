@@ -5,10 +5,14 @@
 
 package datamodel;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
 import utils.StringUtils;
+import utils.XMLUtils;
 
 /**
  *
@@ -29,7 +33,7 @@ public class WSFResult {
     }
 
     public void setOutRaw(String outRaw) {
-        this.outRaw = outRaw;
+        this.outRaw = prettifyMessage(outRaw);
     }
 
     public String getInRaw() {
@@ -37,7 +41,7 @@ public class WSFResult {
     }
 
     public void setInRaw(String inRaw) {
-        this.inRaw = inRaw;
+        this.inRaw = prettifyMessage(inRaw);
     }
 
     public long getTime() {
@@ -73,6 +77,26 @@ public class WSFResult {
         result.setInputIndex(inputIndex);
         result.setTime(time);
         return result;
+    }
+    
+    private String prettifyMessage(String msg){
+        try {
+            int index = msg.indexOf("<?xml");
+
+            if (index == -1) {
+                return msg;
+            }
+            
+            StringBuffer msgBuffer = new StringBuffer(msg);
+            String xmlString = msgBuffer.substring(index);
+
+            return new String(msgBuffer.replace(index, msgBuffer.length(), XMLUtils.prettify(xmlString)));
+            
+        } catch (XMLStreamException ex) {
+        } catch (Exception ex) {
+        }
+        
+        return msg;
     }
     
     public OMElement serializeToOMElement(OMElement parent){

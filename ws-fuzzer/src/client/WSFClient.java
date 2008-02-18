@@ -17,10 +17,13 @@ import datamodel.WSFProjectInfo;
 import datamodel.WSFResult;
 import datamodel.WSFTestCase;
 import exceptions.UnSupportedException;
+import gui.testcase.ExecuteTestCase;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.wsdl.WSDLException;
 import javax.xml.stream.XMLStreamException;
 import org.apache.axiom.om.OMElement;
@@ -34,6 +37,7 @@ import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpConnection;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.jdesktop.application.Task;
 
 /**
  *
@@ -43,14 +47,17 @@ public class WSFClient {
  
     
     private final Hook hook = new Hook();
-    
+    private ExecuteTestCase executeTestCase;
     private WSFTestCase testcase;
     private ServiceClient serviceClient;
+    private ArrayList<WSFResult> results;
     
     
-    public WSFClient(WSFTestCase testCase, int maxNOCPerHost, int maxNOCOverall) throws AxisFault{
+    public WSFClient(ExecuteTestCase executeTestCase, int maxNOCPerHost, int maxNOCOverall) throws AxisFault{
         
-        this.testcase = testCase;
+        this.executeTestCase = executeTestCase;
+        this.testcase = executeTestCase.getTestCase();
+        this.results = new ArrayList<WSFResult>();
         
         ConfigurationContext configurationContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(System.getProperty("axis2.repo"), System.getProperty("axis2.xml"));
         configurationContext.setProperty(HTTPConstants.REUSE_HTTP_CLIENT, "true");
@@ -88,38 +95,73 @@ public class WSFClient {
         this.testcase = testcase;
     }
     
-   public ArrayList<WSFResult> doJob() throws AxisFault, XMLStreamException{
+   public void doJob() throws AxisFault, XMLStreamException{
         
 
-            ArrayList<WSFResult> results = new ArrayList<WSFResult>();
             WSFOperation operation = testcase.getOperation();
+            ArrayList<WSFDataElement> header = testcase.getInputHeaderVector();
             ArrayList<WSFDataElement> payloads = testcase.getInputDataVector();
             
-            for (int i = 0; i < payloads.size(); i++) {
-                serviceClient.sendReceiveNonBlocking(operation.getName(), payloads.get(i).toOMElement(null, false), new AxisCallbackImpl(hook, results, i, Thread.currentThread()));
-            }
+            int totalNumberOfRequest = payloads.size();
+            int requestCounter = 0;
+            int resultCounter = 0;
             
             while(true){
                 
-                try {
-                
-                    Thread.sleep(1000);
-                
-                } catch (InterruptedException ex) {
-//                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-                }finally{
+                if(Thread.interrupted()){
+                    
+                    if(this.executeTestCase.isCancelled()){
+                        
+                        System.out.println("WSFClient: Task Canceling detected! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+                        break;
+                    }
                     
                     synchronized(results){
-                        if(results.size()==payloads.size())
-                            break;
+
+                        int n = results.size();
+
+                        if(n>0){
+                            for(int i=0; i< n; i++){
+                                WSFResult result = results.remove(0);
+                                executeTestCase.pulishResult(result);
+                                resultCounter++;
+                                System.out.println("WSFClient: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName() + " || id of result: "+ result.getInputIndex());
+                            }
+                        }
                     }
+                }
+                
+                if( requestCounter < totalNumberOfRequest ){
+                    if(requestCounter < header.size())
+                        serviceClient.addHeader(header.get(requestCounter).toOMElement(null, false));
+                    serviceClient.sendReceiveNonBlocking(operation.getName(), payloads.get(requestCounter).toOMElement(null, false), new AxisCallbackImpl(hook, results, requestCounter, Thread.currentThread()));
+                    requestCounter++;
+                    continue;
+                }
+                
+                if( requestCounter == totalNumberOfRequest && resultCounter != requestCounter ){
+                    
+                    try {
+                        
+                        Thread.sleep(1000);
+                        
+                    } catch (InterruptedException ex) {
+                        
+                    } finally{
+                        
+                        Thread.currentThread().interrupt();
+                        continue;
+                    }
+                    
+                }
+                
+                if( requestCounter == totalNumberOfRequest && resultCounter == requestCounter ){
+                    break;
                 }
             }
             
             serviceClient.cleanupTransport();
             serviceClient.cleanup();
-            return results;
-       
     }
     
     public static void main(String[] args) throws WSDLException, UnSupportedException, FileNotFoundException, IOException, AxisFault, XMLStreamException, Exception{
@@ -168,17 +210,18 @@ public class WSFClient {
         
         System.out.println(testCase.getInputDataVector().size());
         
-        WSFClient client = new WSFClient(testCase, config1.getMaxNumberOfConnectionsPerHost(), config1.getMaxNumberOfConnectionsOverall());
-        ArrayList<WSFResult> results = client.doJob();
-        
-        for(WSFResult result : results){
-            System.out.println();
-            System.out.println("Time: " + result.getTime());
-            System.out.println();
-            System.out.println("In:   \n" + result.getInRaw());
-            System.out.println("\n");
-            System.out.println("Out:  \n" + result.getOutRaw());
-            System.out.println();
-        }
+        // 
+//        WSFClient client = new WSFClient(testCase, config1.getMaxNumberOfConnectionsPerHost(), config1.getMaxNumberOfConnectionsOverall());
+//        ArrayList<WSFResult> results = client.doJob();
+//        
+//        for(WSFResult result : results){
+//            System.out.println();
+//            System.out.println("Time: " + result.getTime());
+//            System.out.println();
+//            System.out.println("In:   \n" + result.getInRaw());
+//            System.out.println("\n");
+//            System.out.println("Out:  \n" + result.getOutRaw());
+//            System.out.println();
+//        }
     }
 }

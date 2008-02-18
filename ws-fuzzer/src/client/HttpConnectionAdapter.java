@@ -219,26 +219,32 @@ public class HttpConnectionAdapter extends HttpConnection {
     }
 
     // TODO
+    @Override
     public void releaseConnection() {
         
-//        System.out.println("#####################| " + Thread.currentThread().getId() + " : " +Thread.currentThread().getName());
-//        System.out.println("*******************************\n" + out);
-//        System.out.println("*******************************\n" + in);
-//        System.out.println("*******************************\n");
         
-        
-        String inRaw = new String(this.in.insert(this.in.indexOf("<?xml"), "\n\n"));
-        String outRaw = new String(this.out);
-
         WSFResult result = hook.getResult();
-    //        Result result = hook.getResult();
-        result.setOutRaw(outRaw);
-        result.setInRaw(inRaw);
         result.setTime(System.currentTimeMillis());
+        
+        if(this.in != null){
+            String inRaw = "";
+            if(this.in.indexOf("<?xml") != -1){
+                inRaw = new String(this.in.insert(this.in.indexOf("<?xml"), "\n\n"));
+            }else{
+                inRaw = new String(this.in);
+            }
+                String outRaw = new String(this.out);
 
+            result.setOutRaw(outRaw);
+            result.setInRaw(inRaw);
+            
+        }
+        
         this.in = null;
         this.out = null;
         this.isReleased = true;
+        
+        System.out.println("HttpConnectionAdapter: connection released: " + Thread.currentThread().getName() + " -- " + Thread.currentThread().getId());
         
         wrappedConnection.releaseConnection();
 
