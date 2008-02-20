@@ -196,7 +196,7 @@ public class WSFTestCase {
         
         DefaultMutableTreeNode requestTreeNode = new DefaultMutableTreeNode("Request Message");
 
-        if(operation.getPort().getBindingType().equalsIgnoreCase("SOAPBinding")){
+        if(operation.getPort().getBindingType().equalsIgnoreCase("SOAPBinding") || operation.getPort().getBindingType().equalsIgnoreCase("SOAP12Binding")){
             
             if (headerElement != null) {
                 DefaultMutableTreeNode requestHeaderTreeNode = new DefaultMutableTreeNode("SOAPHeader");
@@ -230,7 +230,6 @@ public class WSFTestCase {
         OMElement root = omDOMFactory.createOMElement(new QName("testcase"), parent);
         OMElement omElement1 = null;
         OMElement omElement2 = null;
-        QName qName = null;
         
         // name
         omElement1 = omDOMFactory.createOMElement(new QName("name"), root);

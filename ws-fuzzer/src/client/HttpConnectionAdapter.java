@@ -244,7 +244,7 @@ public class HttpConnectionAdapter extends HttpConnection {
         this.out = null;
         this.isReleased = true;
         
-        System.out.println("HttpConnectionAdapter: connection released: " + Thread.currentThread().getName() + " -- " + Thread.currentThread().getId());
+//        System.out.println("HttpConnectionAdapter: connection released: " + Thread.currentThread().getName() + " -- " + Thread.currentThread().getId());
         
         wrappedConnection.releaseConnection();
 

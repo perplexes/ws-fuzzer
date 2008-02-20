@@ -35,7 +35,7 @@ public class PortPanel extends javax.swing.JPanel {
             supportedLabel.setText("Supported");
         }else{
             supportedLabel.setBackground(new Color(200,50,0));
-            supportedLabel.setText("Not Supported");
+            supportedLabel.setText("Not Supported: " + port.getCause());
         }
         
         if(port.getBindingType().equalsIgnoreCase("soapbinding")){

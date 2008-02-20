@@ -34,7 +34,7 @@ public class InformationPanel extends javax.swing.JPanel {
             supportedPanel.setText("Supported");
         }else{
             supportedPanel.setBackground(new Color(200,50,0));
-            supportedPanel.setText("Not Supported");
+            supportedPanel.setText("Not Supported: " + operation.getCause());
         }
         
         if(operation.getPort().getBindingType().equalsIgnoreCase("httpbinding")){
@@ -42,7 +42,7 @@ public class InformationPanel extends javax.swing.JPanel {
             return;
         }
         
-        if(operation.getPort().getBindingType().equalsIgnoreCase("soapbinding")){
+        if(operation.getPort().getBindingType().equalsIgnoreCase("soapbinding") || operation.getPort().getBindingType().equalsIgnoreCase("soap12binding") ){
             showSOAPOperationInformationPanel();
             return;
         }

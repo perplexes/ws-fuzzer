@@ -22,6 +22,7 @@ import java.io.StringWriter;
 import java.util.Vector;
 import java.util.logging.Level;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComponent;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -142,6 +143,9 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
     private void initComponents() {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
+        requestMessageTreePopupMenu = new javax.swing.JPopupMenu();
+        disableDataElementPopupMenuItem = new javax.swing.JMenuItem();
+        enableDataElementPopupMenuItem = new javax.swing.JMenuItem();
         generateTestCaseButton = new javax.swing.JButton();
         jSplitPane1 = new javax.swing.JSplitPane();
         jPanel1 = new javax.swing.JPanel();
@@ -161,11 +165,23 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
         testCaseNameTextField = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
 
-        setName("Form"); // NOI18N
+        requestMessageTreePopupMenu.setName("requestMessageTreePopupMenu"); // NOI18N
 
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getActionMap(MakeTestCasePanel.class, this);
-        generateTestCaseButton.setAction(actionMap.get("generateTestCase")); // NOI18N
+        disableDataElementPopupMenuItem.setAction(actionMap.get("disableDataElement")); // NOI18N
         org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getResourceMap(MakeTestCasePanel.class);
+        disableDataElementPopupMenuItem.setText(resourceMap.getString("disableDataElementPopupMenuItem.text")); // NOI18N
+        disableDataElementPopupMenuItem.setName("disableDataElementPopupMenuItem"); // NOI18N
+        requestMessageTreePopupMenu.add(disableDataElementPopupMenuItem);
+
+        enableDataElementPopupMenuItem.setAction(actionMap.get("enableDataElement")); // NOI18N
+        enableDataElementPopupMenuItem.setText(resourceMap.getString("enableDataElementPopupMenuItem.text")); // NOI18N
+        enableDataElementPopupMenuItem.setName("enableDataElementPopupMenuItem"); // NOI18N
+        requestMessageTreePopupMenu.add(enableDataElementPopupMenuItem);
+
+        setName("Form"); // NOI18N
+
+        generateTestCaseButton.setAction(actionMap.get("generateTestCase")); // NOI18N
         generateTestCaseButton.setText(resourceMap.getString("generateTestCaseButton.text")); // NOI18N
         generateTestCaseButton.setName("generateTestCaseButton"); // NOI18N
 
@@ -189,6 +205,11 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
         requestMessageTree.setName("requestMessageTree"); // NOI18N
         requestMessageTree.setPreferredSize(new java.awt.Dimension(100, 57));
         requestMessageTree.setRootVisible(false);
+        requestMessageTree.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                requestMessageTreeMouseClicked(evt);
+            }
+        });
         requestMessageTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
             public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
                 requestMessageTreeValueChanged(evt);
@@ -364,7 +385,7 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
         }
 
         WSFDataElement element = ((WSFDataElement) ((DefaultMutableTreeNode)treePath.getLastPathComponent()).getUserObject());
-        if (element.isSimpleType()) {
+        if (element.isSimpleType() && element.isEnabled()) {
 
             if (element.getSource() != null) {
 
@@ -398,6 +419,33 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
     private void fromDictionaryComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_fromDictionaryComboBoxItemStateChanged
         setInputDefinition();
     }//GEN-LAST:event_fromDictionaryComboBoxItemStateChanged
+
+    private void requestMessageTreeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_requestMessageTreeMouseClicked
+        if(evt.getButton() == 3 ){
+            TreePath path = requestMessageTree.getPathForLocation(evt.getX(), evt.getY());
+            
+            requestMessageTree.setSelectionPath(path);
+            
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
+            
+            WSFDataElement dataElement = (WSFDataElement)node.getUserObject();
+            
+            if(dataElement.getMinOccurs() == 0){
+                if(dataElement.isEnabled()){
+                    disableDataElementPopupMenuItem.setEnabled(true);
+                    enableDataElementPopupMenuItem.setEnabled(false);
+    //                requestMessageTreePopupMenu.removeAll();
+    //                requestMessageTreePopupMenu.add(disableDataElementPopupMenuItem);
+                }else{
+                    disableDataElementPopupMenuItem.setEnabled(false);
+                    enableDataElementPopupMenuItem.setEnabled(true);
+    //                requestMessageTreePopupMenu.removeAll();
+    //                requestMessageTreePopupMenu.add(enableDataElementPopupMenuItem);
+                }
+                requestMessageTreePopupMenu.show((JComponent)evt.getSource(), evt.getX(), evt.getY());
+            }
+        }
+    }//GEN-LAST:event_requestMessageTreeMouseClicked
 
     private void setInputDefinition(){
         try {
@@ -451,6 +499,50 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
             logger.error(sWriter.toString());
         }
     }
+    
+    @Action
+    public void enableDataElement(){
+        try {
+            TreePath treePath = requestMessageTree.getSelectionPath();
+            if (treePath == null) {
+                return;
+            }
+
+            DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) treePath.getLastPathComponent();
+            WSFDataElement element = (WSFDataElement) treeNode.getUserObject();
+
+            element.setEnabled(true);
+
+            previewTextPane.setText(operation.getPreview());
+        } catch (Exception ex) {
+            WSFApplication.showMessage(ex.getMessage());
+            StringWriter sWriter = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sWriter));
+            logger.error(sWriter.toString());
+        }
+    }
+    
+    @Action 
+    public void disableDataElement(){
+        try {
+            TreePath treePath = requestMessageTree.getSelectionPath();
+            if (treePath == null) {
+                return;
+            }
+
+            DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) treePath.getLastPathComponent();
+            WSFDataElement element = (WSFDataElement) treeNode.getUserObject();
+
+            element.setEnabled(false);
+
+            previewTextPane.setText(operation.getPreview());
+        } catch (Exception ex) {
+            WSFApplication.showMessage(ex.getMessage());
+            StringWriter sWriter = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sWriter));
+            logger.error(sWriter.toString());
+        }
+    }
 
     private void enableFixedInputDefinition() {
         fixedValueRadioButton.setEnabled(true);
@@ -484,6 +576,8 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.JMenuItem disableDataElementPopupMenuItem;
+    private javax.swing.JMenuItem enableDataElementPopupMenuItem;
     private javax.swing.JRadioButton fixedValueRadioButton;
     private javax.swing.JTextField fixedValueTextField;
     private javax.swing.JComboBox fromDictionaryComboBox;
@@ -500,6 +594,7 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
     private javax.swing.JSplitPane jSplitPane2;
     private javax.swing.JTextPane previewTextPane;
     private javax.swing.JTree requestMessageTree;
+    private javax.swing.JPopupMenu requestMessageTreePopupMenu;
     private javax.swing.JTree responseMessageTree;
     private javax.swing.JTextField testCaseNameTextField;
     // End of variables declaration//GEN-END:variables

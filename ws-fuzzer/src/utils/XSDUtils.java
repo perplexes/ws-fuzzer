@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import javax.wsdl.WSDLException;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+import org.apache.log4j.Logger;
 import org.apache.ws.commons.schema.XmlSchema;
+import org.apache.ws.commons.schema.XmlSchemaAnnotated;
 import org.apache.ws.commons.schema.XmlSchemaAttribute;
 import org.apache.ws.commons.schema.XmlSchemaChoice;
 import org.apache.ws.commons.schema.XmlSchemaComplexContent;
@@ -37,6 +39,7 @@ import org.apache.ws.commons.schema.XmlSchemaType;
  */
 public class XSDUtils {
     
+    private static Logger logger = Logger.getLogger(XSDUtils.class);
     private ArrayList<XmlSchema> xmlSchemas;
     
     public XSDUtils(ArrayList<XmlSchema> xmlSchemas){
@@ -66,7 +69,7 @@ public class XSDUtils {
                 break;
             }
         }
-            
+        
         return schemaType;
     }
     
@@ -77,32 +80,60 @@ public class XSDUtils {
             return this.createDataElement(xmlSchemaElement);
         }
         
+        XmlSchemaType schemaType = this.getXmlSchemaType(msgQName);
+        if(schemaType != null){
+            return this.createDataElement(schemaType);
+        }
+        
         return null;
     }
 
-    public WSFDataElement createDataElement(XmlSchemaElement schemaElement) throws UnSupportedException {
+    public WSFDataElement createDataElement(XmlSchemaAnnotated xmlSchemaAnnotated) throws UnSupportedException {
 
-        XmlSchemaType schemaType = schemaElement.getSchemaType();
+        XmlSchemaElement schemaElement = null;
+        XmlSchemaType schemaType = null;
+        
+        if(xmlSchemaAnnotated instanceof XmlSchemaElement){
+            schemaElement = (XmlSchemaElement)xmlSchemaAnnotated;
+        }
+        
+        if(xmlSchemaAnnotated instanceof XmlSchemaType){
+            schemaType = (XmlSchemaType)xmlSchemaAnnotated;
+        }
+        
+        XmlSchemaType elementSchemaType = schemaElement != null ? schemaElement.getSchemaType() : schemaType;
 
-        if (schemaType instanceof XmlSchemaSimpleType) {
+        if (elementSchemaType instanceof XmlSchemaSimpleType) {
             return createSimpleTypeDataElement(schemaElement);
         }
 
-        if (schemaType instanceof XmlSchemaComplexType) {
+        if (elementSchemaType instanceof XmlSchemaComplexType) {
             
-            XmlSchemaComplexType complexSchemaType = (XmlSchemaComplexType) schemaType;
+            XmlSchemaComplexType complexSchemaType = (XmlSchemaComplexType) elementSchemaType;
 
-            if (complexSchemaType.isMixed()) {
-                //TODO: throw exception
-                throw new UnSupportedException("UnSupported XmlSchemaType: ComplexType(mixed)");
-            }
-            
             WSFDataElement dataElement = new WSFDataElement();
             dataElement.setSimpleType(false);
-            dataElement.setName(schemaElement.getQName());
-            dataElement.setMinOccurs(schemaElement.getMinOccurs());
-            dataElement.setMaxOccurs(schemaElement.getMaxOccurs());
-                    
+            
+            if (complexSchemaType.isMixed()) {
+                //TODO: throw exception
+//                throw new UnSupportedException("UnSupported XmlSchemaType: ComplexType(mixed)");
+                dataElement.setSimpleType(true);
+                dataElement.setType(new QName("mixed"));
+            }
+            
+            
+            if(schemaElement != null){
+                dataElement.setName(schemaElement.getQName());
+                dataElement.setMinOccurs(schemaElement.getMinOccurs());
+                dataElement.setMaxOccurs(schemaElement.getMaxOccurs());
+            }else{
+                dataElement.setName(elementSchemaType.getQName());
+                dataElement.setMinOccurs(1);
+                dataElement.setMaxOccurs(1);
+            }
+            
+            if(dataElement.getType()!=null && dataElement.isSimpleType()) return dataElement;
+            
             ArrayList<XmlSchemaAttribute> schemaAttributes = getXmlSchemaAttributes(complexSchemaType);
             for(XmlSchemaAttribute xmlSchemaAttribute : schemaAttributes){
                 dataElement.addDataAttribute(createDataAttribute(xmlSchemaAttribute));
@@ -110,13 +141,31 @@ public class XSDUtils {
             
             ArrayList<XmlSchemaElement> schemaElements = getChildrenXmlSchemaElements(complexSchemaType);
             for(XmlSchemaElement xmlSchemaElement : schemaElements){
-//                System.out.println(xmlSchemaElement.getQName());
-                dataElement.addDataElement(createDataElement(xmlSchemaElement));
+                
+                WSFDataElement element = createDataElement(xmlSchemaElement);
+                
+                if(element != null){
+                    dataElement.addDataElement(element);
+                    continue;
+                }
+                
+                element = createDataElement(getXmlSchemaType(xmlSchemaElement.getSchemaTypeName()));
+                
+                if(element != null){
+                    element.setName(xmlSchemaElement.getQName());
+                    dataElement.addDataElement(element);
+                    continue;
+                }
+                
+                if(element == null){
+                    logger.warn("not found: " + xmlSchemaElement.getSchemaTypeName());
+                }
             }
             
             return dataElement;
         }
         
+            
         return null;
     }
 

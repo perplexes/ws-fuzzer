@@ -18,21 +18,28 @@ import utils.XMLUtils;
 public class WSFOperation {
 
     private WSFPort port;
+    
     private boolean supported;
+    private String cause;
+    
     private String bindingOperationType;        // soapOperation ?
     private String bindingSoapAction;           // if soap binding
     private String bindingSOAPStyle;
     private String bindingHttpLocation;         // if httpbinding
+    
     private QName name;
     private String document;
     private String mep;
+    
     private QName requestMessageQName;
     private WSFDataElement requestData;
-    private String bindingRequestSOAPUse;
+    private String requestDataMessageUse;       // soap use
+    
     private QName requestHeaderMessageQName;
     private String requestHeaderMessagePart;
     private String requestHeaderMessageUse;
     private WSFDataElement requestHeaderData;
+    
     private QName responseMessageQName;
     private WSFDataElement responseData;
     private String bindingResponseSOAPUse;
@@ -56,6 +63,14 @@ public class WSFOperation {
 
     public WSFOperation(WSFPort port) {
         this.port = port;
+    }
+    
+    public void setCause(String cause){
+        this.cause = cause;
+    }
+    
+    public String getCause(){
+        return this.cause;
     }
 
     public WSFPort getPort() {
@@ -95,19 +110,22 @@ public class WSFOperation {
     }
 
     public String getBindingSOAPStyle() {
-        return bindingSOAPStyle;
+        return bindingSOAPStyle != null ? bindingSOAPStyle : port.getBindingSOAPStyle();
     }
 
     public void setBindingSOAPStyle(String bindingSOAPStyle) {
         this.bindingSOAPStyle = bindingSOAPStyle;
+        if(port.getBindingSOAPStyle() == null){
+            port.setBindingSOAPStyle(bindingSOAPStyle);
+        }
     }
 
-    public String getBindingRequestSOAPUse() {
-        return bindingRequestSOAPUse;
+    public String getRequestDataMessageUse() {
+        return requestDataMessageUse;
     }
 
-    public void setBindingRequestSOAPUse(String bindingRequestSOAPUse) {
-        this.bindingRequestSOAPUse = bindingRequestSOAPUse;
+    public void setRequestDataMessageUse(String requestDataMessageUse) {
+        this.requestDataMessageUse = requestDataMessageUse;
     }
 
     public String getBindingResponseSOAPUse() {
@@ -254,7 +272,7 @@ public class WSFOperation {
 
         DefaultMutableTreeNode requestTreeNode = new DefaultMutableTreeNode("Request Message");
 
-        if(this.port.getBindingType().equalsIgnoreCase("SOAPBinding")){
+        if(this.port.getBindingType().equalsIgnoreCase("SOAPBinding") || this.port.getBindingType().equalsIgnoreCase("SOAP12Binding")){
             
             if (this.requestHeaderData != null) {
                 DefaultMutableTreeNode requestHeaderTreeNode = new DefaultMutableTreeNode("SOAPHeader");
@@ -285,7 +303,7 @@ public class WSFOperation {
 
         DefaultMutableTreeNode responseTreeNode = new DefaultMutableTreeNode("Response Message");
 
-        if(this.port.getBindingType().equalsIgnoreCase("SOAPBinding")){
+        if(this.port.getBindingType().equalsIgnoreCase("SOAPBinding") || this.port.getBindingType().equalsIgnoreCase("SOAP12Binding")){
             
             if (this.responseHeaderData != null) {
                 DefaultMutableTreeNode responseHeaderTreeNode = new DefaultMutableTreeNode("SOAPHeader");

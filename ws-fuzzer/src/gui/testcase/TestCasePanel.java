@@ -336,6 +336,10 @@ public class TestCasePanel extends javax.swing.JPanel {
     public void updateIndexList(int index){
         Object object = indexListModel.get(index);
         indexListModel.set(index, object);
+        
+        if(currentIndex == index){
+            showResult(index);
+        }
     }
     
     public void showResult(int index){

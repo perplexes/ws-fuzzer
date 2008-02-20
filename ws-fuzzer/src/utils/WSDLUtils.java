@@ -36,6 +36,10 @@ import javax.wsdl.extensions.soap.SOAPBinding;
 import javax.wsdl.extensions.soap.SOAPBody;
 import javax.wsdl.extensions.soap.SOAPHeader;
 import javax.wsdl.extensions.soap.SOAPOperation;
+import javax.wsdl.extensions.soap12.SOAP12Binding;
+import javax.wsdl.extensions.soap12.SOAP12Body;
+import javax.wsdl.extensions.soap12.SOAP12Header;
+import javax.wsdl.extensions.soap12.SOAP12Operation;
 import javax.wsdl.xml.WSDLReader;
 import javax.wsdl.xml.WSDLWriter;
 import javax.xml.namespace.QName;
@@ -133,8 +137,10 @@ public class WSDLUtils {
                     wsfPort.setPortAddressType("HTTPAddress");
                     wsfPort.setPortLocation(((HTTPAddress) element).getLocationURI());
                     wsfPort.setSupported(false);
+                    wsfPort.setCause("Not a SOAPBinding");
                 } else {
                     wsfPort.setSupported(false);
+                    wsfPort.setCause("Not a SOAPBinding");
                 }
                 
                 // set wsdl:binding
@@ -145,12 +151,19 @@ public class WSDLUtils {
                     wsfPort.setBindingSOAPTransport(((SOAPBinding) element).getTransportURI());
                     wsfPort.setBindingSOAPStyle(((SOAPBinding) element).getStyle());
                     wsfPort.setSupported(true);
+                } else if(element instanceof SOAP12Binding){
+                    wsfPort.setBindingType("SOAP12Binding");
+                    wsfPort.setBindingSOAPTransport(((SOAP12Binding) element).getTransportURI());
+                    wsfPort.setBindingSOAPStyle(((SOAP12Binding) element).getStyle());
+                    wsfPort.setSupported(true);
                 } else if (element instanceof HTTPBinding) {
                     wsfPort.setBindingType("HTTPBinding");
                     wsfPort.setBindingHTTPVerb(((HTTPBinding) element).getVerb());
                     wsfPort.setSupported(false);
+                    wsfPort.setCause("Not a SOAPBinding");
                 } else {
                     wsfPort.setSupported(false);
+                    wsfPort.setCause("Not a SOAPBinding");
                 }
                 
                 for (BindingOperation bindingOperation : (List<BindingOperation>) port.getBinding().getBindingOperations()) {
@@ -163,18 +176,19 @@ public class WSDLUtils {
                     if (element instanceof SOAPOperation) {
                         op.setBindingOperationType("SOAPOperation");
                         op.setBindingSoapAction(((SOAPOperation) element).getSoapActionURI());
+                        
                         op.setBindingSOAPStyle(((SOAPOperation) element).getStyle());
                         
                         List<ExtensibilityElement> extensibilityElements = bindingOperation.getBindingInput().getExtensibilityElements();
                         for(ExtensibilityElement e : extensibilityElements){
                             if(e instanceof SOAPBody){
-                                op.setBindingRequestSOAPUse(((SOAPBody)e).getUse());
+                                op.setRequestDataMessageUse(((SOAPBody)e).getUse());
                             }
                             if(e instanceof SOAPHeader){
                                 op.setRequestHeaderMessageQName(((SOAPHeader)e).getMessage());
                                 op.setRequestHeaderMessagePart(((SOAPHeader)e).getPart());
                                 op.setRequestHeaderMessageUse(((SOAPHeader)e).getUse());
-                                op.setRequestHeaderData(this.getDataElement(((SOAPHeader)e).getMessage(), ((SOAPHeader)e).getPart()));
+                                op.setRequestHeaderData(this.getDataElement(((SOAPHeader)e).getMessage(), ((SOAPHeader)e).getPart()));    
                             }
                         }
                         
@@ -192,12 +206,47 @@ public class WSDLUtils {
                         }
                         
                         op.setSupported(true);
-                    } else if (element instanceof HTTPBinding) {
+                    } else if(element instanceof SOAP12Operation){
+                        op.setBindingOperationType("SOAPOperation");
+                        op.setBindingSoapAction(((SOAP12Operation) element).getSoapActionURI());
+                        
+                        op.setBindingSOAPStyle(((SOAP12Operation) element).getStyle());
+                        
+                        List<ExtensibilityElement> extensibilityElements = bindingOperation.getBindingInput().getExtensibilityElements();
+                        for(ExtensibilityElement e : extensibilityElements){
+                            if(e instanceof SOAP12Body){
+                                op.setRequestDataMessageUse(((SOAP12Body)e).getUse());
+                            }
+                            if(e instanceof SOAP12Header){
+                                op.setRequestHeaderMessageQName(((SOAP12Header)e).getMessage());
+                                op.setRequestHeaderMessagePart(((SOAP12Header)e).getPart());
+                                op.setRequestHeaderMessageUse(((SOAP12Header)e).getUse());
+                                op.setRequestHeaderData(this.getDataElement(((SOAP12Header)e).getMessage(), ((SOAP12Header)e).getPart()));    
+                            }
+                        }
+                        
+                        extensibilityElements = bindingOperation.getBindingOutput().getExtensibilityElements();
+                        for(ExtensibilityElement e : extensibilityElements){
+                            if(e instanceof SOAP12Body){
+                                op.setBindingResponseSOAPUse(((SOAP12Body)e).getUse());
+                            }
+                            if(e instanceof SOAP12Header){
+                                op.setResponseHeaderMessageQName(((SOAP12Header)e).getMessage());
+                                op.setResponseHeaderMessagePart(((SOAP12Header)e).getPart());
+                                op.setResponseHeaderMessageUse(((SOAP12Header)e).getUse());
+                                op.setResponseHeaderData(this.getDataElement(((SOAP12Header)e).getMessage(), ((SOAP12Header)e).getPart()));
+                            }
+                        }
+                        
+                        op.setSupported(true);
+                    }else if (element instanceof HTTPOperation) {
                         op.setBindingOperationType("HTTPOperation");
                         op.setBindingHttpLocation(((HTTPOperation) element).getLocationURI());
                         op.setSupported(false);
+                        op.setCause("Not a SOAPBinding");
                     } else {
                         op.setSupported(false);
+                        op.setCause("Not a SOAPBinding");
                     }
 
                     // wsdl:Operaion
@@ -219,6 +268,18 @@ public class WSDLUtils {
                         QName messageQName = operation.getInput().getMessage().getQName();
                         op.setRequestMessageQName(messageQName);
                         op.setRequestData(this.getDataElement(messageQName, null));
+                    }
+                    
+                    if(op.getBindingSOAPStyle()!=null && op.getBindingSOAPStyle().equalsIgnoreCase("rpc")){
+                        if(op.getRequestData()!=null)
+                            op.getRequestData().setName(op.getName());
+                        if(op.getRequestHeaderData()!=null)
+                            op.getRequestHeaderData().setName(op.getName());
+                        
+                        if(op.getRequestDataMessageUse().equalsIgnoreCase("encoded")){
+                            op.setSupported(false);
+                            op.setCause("Unsupported SOAP Format \"rpc/encoded\"");
+                        }
                     }
                     
                     wsfPort.addOperation(op);
@@ -264,13 +325,23 @@ public class WSDLUtils {
     }
     
     private WSFDataElement getDataElement(Part part) throws UnSupportedException{
-        
+        WSFDataElement dataElement = null;
         if(part.getElementName() != null){
-            return this.xsdHelper.createDataElement(part.getElementName());
+            
+            dataElement = this.xsdHelper.createDataElement(part.getElementName());
+            return dataElement;
         }
         
         if(part.getTypeName() != null){
-            WSFDataElement dataElement = new WSFDataElement();
+            
+            dataElement = this.xsdHelper.createDataElement(part.getTypeName());
+            
+            if(dataElement != null){
+                dataElement.setName(new QName("",part.getName()));
+                return dataElement;
+            }
+            
+            dataElement = new WSFDataElement();
             
             dataElement.setName(new QName("",part.getName()));
             
@@ -282,6 +353,7 @@ public class WSDLUtils {
             
             return dataElement;
         }
+        
         
         return null;
     }

@@ -19,6 +19,7 @@ public class WSFPort {
     private String name;
     
     private boolean supported;
+    private String cause;
     
     private String portAddressType;
     private String portLocation;
@@ -49,6 +50,14 @@ public class WSFPort {
     public WSFPort(WSFService service){
         this.service = service;
         operations = new ArrayList<WSFOperation>();
+    }
+    
+    public String getCause(){
+        return this.cause;
+    }
+
+    public void setCause(String cause) {
+        this.cause = cause;
     }
 
     public WSFService getService() {

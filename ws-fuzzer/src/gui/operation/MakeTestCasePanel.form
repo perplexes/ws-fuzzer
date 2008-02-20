@@ -4,6 +4,35 @@
   <NonVisualComponents>
     <Component class="javax.swing.ButtonGroup" name="buttonGroup1">
     </Component>
+    <Container class="javax.swing.JPopupMenu" name="requestMessageTreePopupMenu">
+      <Properties>
+        <Property name="name" type="java.lang.String" value="requestMessageTreePopupMenu" noResource="true"/>
+      </Properties>
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout">
+        <Property name="useNullLayout" type="boolean" value="true"/>
+      </Layout>
+      <SubComponents>
+        <MenuItem class="javax.swing.JMenuItem" name="disableDataElementPopupMenuItem">
+          <Properties>
+            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+              <action class="gui.operation.MakeTestCasePanel" id="disableDataElement" methodName="disableDataElement"/>
+            </Property>
+            <Property name="text" type="java.lang.String" resourceKey="disableDataElementPopupMenuItem.text"/>
+            <Property name="name" type="java.lang.String" value="disableDataElementPopupMenuItem" noResource="true"/>
+          </Properties>
+        </MenuItem>
+        <MenuItem class="javax.swing.JMenuItem" name="enableDataElementPopupMenuItem">
+          <Properties>
+            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+              <action class="gui.operation.MakeTestCasePanel" id="enableDataElement" methodName="enableDataElement"/>
+            </Property>
+            <Property name="text" type="java.lang.String" resourceKey="enableDataElementPopupMenuItem.text"/>
+            <Property name="name" type="java.lang.String" value="enableDataElementPopupMenuItem" noResource="true"/>
+          </Properties>
+        </MenuItem>
+      </SubComponents>
+    </Container>
   </NonVisualComponents>
   <Properties>
     <Property name="name" type="java.lang.String" value="Form" noResource="true"/>
@@ -141,6 +170,7 @@
                         <Property name="rootVisible" type="boolean" value="false"/>
                       </Properties>
                       <Events>
+                        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="requestMessageTreeMouseClicked"/>
                         <EventHandler event="valueChanged" listener="javax.swing.event.TreeSelectionListener" parameters="javax.swing.event.TreeSelectionEvent" handler="requestMessageTreeValueChanged"/>
                       </Events>
                     </Component>

@@ -31,11 +31,13 @@ public class WSFDataElement {
     
     private long minOccurs;
     private long maxOccurs;
+    private boolean enabled;
     
     private ArrayList<WSFDataAttribute> dataAttributes;
     private ArrayList<WSFDataElement> dataElements;
 
     public WSFDataElement(){
+        this.enabled = true;
         dataAttributes = new ArrayList<WSFDataAttribute>();
         dataElements = new ArrayList<WSFDataElement>();
     }
@@ -44,6 +46,14 @@ public class WSFDataElement {
         return name;
     }
 
+    public void setEnabled(boolean enabled){
+        this.enabled = enabled;
+    }
+    
+    public boolean isEnabled(){
+        return this.enabled;
+    }
+    
     public void setName(QName name) {
         this.name = name;
     }
@@ -133,6 +143,8 @@ public class WSFDataElement {
         }
         
         for(WSFDataElement element : dataElements){
+            if(!element.isEnabled())
+                continue;
             element.getAllInputSource(sources);
         }
     }
@@ -143,6 +155,7 @@ public class WSFDataElement {
         OMDOMFactory omDOMFactory = new OMDOMFactory();
         
         OMElement omElement = null;
+        
         if(parent == null)
             omElement = omDOMFactory.createOMElement(this.name);
         else 
@@ -158,7 +171,8 @@ public class WSFDataElement {
         }
         
         for(WSFDataElement dataElement : dataElements) {
-            dataElement.toOMElement(omElement, isMuster);
+            if(dataElement.isEnabled())
+                dataElement.toOMElement(omElement, isMuster);
         }
         
         return omElement;
@@ -231,6 +245,9 @@ public class WSFDataElement {
         }
         
         for(WSFDataElement dataElement : dataElements) {
+            if(!dataElement.isEnabled())
+                continue;
+            
             if(!dataElement.isInputDefinitionComplete())
                 return false;
         }
@@ -251,6 +268,7 @@ public class WSFDataElement {
         }
         
         for(WSFDataElement dataElement : dataElements) {
+//            System.out.println(dataElement);
             dataElement.setIsRequest(isRequest);
         }
     }
@@ -280,6 +298,8 @@ public class WSFDataElement {
         dataElement.type = type;
         dataElement.value = value;
 
+        dataElement.enabled = enabled;
+        
         dataElement.minOccurs = minOccurs;
         dataElement.maxOccurs = maxOccurs;
         
@@ -312,6 +332,8 @@ public class WSFDataElement {
         }
         
         for(WSFDataElement dataElement : dataElements) {
+            if(!dataElement.isEnabled())
+                continue;
             dataElement.setValues();
         }
         
@@ -340,6 +362,10 @@ public class WSFDataElement {
         // simpleType
         omElement1 = omDOMFactory.createOMElement(new QName("simpletype"), data);
         omElement1.setText(this.simpleType ? "true" : "false");
+        
+        // enabled
+        omElement1 = omDOMFactory.createOMElement(new QName("enabled"), data);
+        omElement1.setText(this.enabled ? "true" : "false");
         
         // type
         if(this.type != null){
@@ -410,6 +436,10 @@ public class WSFDataElement {
         // simpleType
         element = omElement.getFirstChildWithName(new QName("simpletype"));
         dataElement.simpleType = element.getText().equalsIgnoreCase("true") ? true : false;
+        
+        // enabled
+        element = omElement.getFirstChildWithName(new QName("enabled"));
+        dataElement.enabled = element.getText().equalsIgnoreCase("true") ? true : false;
         
         // type
         element = omElement.getFirstChildWithName(new QName("type"));
