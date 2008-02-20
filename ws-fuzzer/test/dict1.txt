@@ -1,4 +1,2 @@
 EUR
-USD
-EUR
 JPY
