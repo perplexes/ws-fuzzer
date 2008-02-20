@@ -10,6 +10,7 @@ import datamodel.WSFConfiguration;
 import gui.WSFApplication;
 import java.io.File;
 import javax.swing.JDialog;
+import org.apache.log4j.Logger;
 import org.jdesktop.application.Action;
 
 /**
@@ -17,6 +18,8 @@ import org.jdesktop.application.Action;
  * @author  chang
  */
 public class GeneralPanel extends javax.swing.JPanel {
+    
+    private static Logger logger = Logger.getLogger(GeneralPanel.class);
     
     private boolean changed;
     
@@ -46,6 +49,8 @@ public class GeneralPanel extends javax.swing.JPanel {
         
         WSFConfiguration config = WSFApplication.getApplication().getWSFConfiguration();
         config.setProjectsDirectory(new File(projectsSavePathTextField.getText()));
+        
+        logger.info("Set Project Dir: " + projectsSavePathTextField.getText());
         
         changed = false;
     }

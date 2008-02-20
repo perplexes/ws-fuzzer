@@ -15,6 +15,7 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
+import org.apache.log4j.Logger;
 import org.jdesktop.application.AbstractBean;
 import utils.XMLUtils;
 
@@ -24,6 +25,8 @@ import utils.XMLUtils;
  */
 public class WSFConfiguration extends AbstractBean{
 
+    private static Logger logger = Logger.getLogger(WSFConfiguration.class);
+    
     private int maxNumberOfConnectionsPerHost;
     private int maxNumberOfConnectionsOverall;
     
@@ -239,6 +242,7 @@ public class WSFConfiguration extends AbstractBean{
         if(!this.changed || this.file == null)
             return;
         
+        logger.info("Save Configuration to File: " + this.file.getAbsolutePath());
         XMLUtils.saveToFile(this.toOMElement(null), file);
         
         this.changed = false;

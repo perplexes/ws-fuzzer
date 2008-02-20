@@ -20,7 +20,7 @@ public class OperationPanel extends javax.swing.JPanel {
     private JPanel currentPanel;
     
     /** Creates new form OperationPanel */
-    public OperationPanel(WSFOperation operation) throws Exception {
+    public OperationPanel(WSFOperation operation) {
         this.operation = operation;
         
         initComponents();
@@ -29,12 +29,12 @@ public class OperationPanel extends javax.swing.JPanel {
     }
     
     
-    public void setOperation(WSFOperation operation) throws Exception{
+    public void setOperation(WSFOperation operation) {
         this.operation = operation;
         showOperation();
     }
     
-    private void showOperation() throws Exception{
+    private void showOperation() {
         if(!operation.isSupported()){
             showInformationPanel();
             simpleTestButton.setEnabled(false);
@@ -70,7 +70,7 @@ public class OperationPanel extends javax.swing.JPanel {
     }
     
     @Action
-    public void showMakeTestCasePanel() throws Exception{
+    public void showMakeTestCasePanel() {
         
         if(makeTestCasePanel == null){
             makeTestCasePanel = new MakeTestCasePanel(operation);

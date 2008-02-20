@@ -21,6 +21,7 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
+import org.apache.log4j.Logger;
 import utils.WSDLUtils;
 import utils.XMLUtils;
 import utils.XSDUtils;
@@ -30,6 +31,8 @@ import utils.XSDUtils;
  * @author chang
  */
 public class WSFProject {
+    
+    private static Logger logger = Logger.getLogger(WSFProject.class);
     
     private String name;
     private File path;
@@ -72,6 +75,8 @@ public class WSFProject {
             throw new WSFProjectNotFoundException("Directory for Project \""+this.name+"\" doesn't exist!");
         }
         
+        logger.info("Load Project: " + this.name);
+        
         this.wsdlURI = projectInfo.getWSDLURI();
         
         File wsdlFile = new File(path, name+".wsdl");
@@ -97,6 +102,8 @@ public class WSFProject {
                 return false;
             }
         }
+        
+        logger.info("Save Project: " + this.name);
         
         File wsdlFile = new File(path, name+".wsdl");
         
@@ -264,11 +271,14 @@ public class WSFProject {
     
     public void saveTestCasesToFile() throws Exception{
         File testCasesFile = new File(path, "testcases.xml");
+        logger.info("Save TestCases to File: " + testCasesFile.getAbsolutePath());
         XMLUtils.saveToFile(serializeTestCasesToOMElement(null), testCasesFile);
     }
     
     public void loadTestCasesFromFile() throws FileNotFoundException, XMLStreamException {
+        
         File testCasesFile = new File(path, "testcases.xml");
+        logger.info("Load TestCases from File: " + testCasesFile.getAbsolutePath());
         deserializeTestCasesFromOMElement(XMLUtils.toOMElement(testCasesFile));
     }
     

@@ -13,21 +13,27 @@ import java.awt.Dimension;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.wsdl.WSDLException;
 import javax.xml.stream.XMLStreamException;
+import org.apache.log4j.Level;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
 import utils.FileUtils;
+
+import org.apache.log4j.Logger;
+
 
 /**
  * The main class of the application.
  */
 public class WSFApplication extends SingleFrameApplication {
 
+    static Logger logger = Logger.getLogger(WSFApplication.class);
     
     private final String configurationFilePath = "./configuration.xml";
     private WSFConfiguration configuration;
@@ -45,11 +51,12 @@ public class WSFApplication extends SingleFrameApplication {
     
     @Override
     protected void initialize(String[] args){
+        logger.info("Initialize");
         try {
             File configurationFile = new File(configurationFilePath);
+            logger.info("Load configuration from File: " + configurationFile.getAbsolutePath());
             configuration = WSFConfiguration.createWSFConfigruation(configurationFile);
             projects = new ArrayList<WSFProject>() {
-
                 @Override
                 public String toString() {
                     return "WSFProjects";
@@ -62,16 +69,16 @@ public class WSFApplication extends SingleFrameApplication {
                     WSFProject project = new WSFProject(projectInfo, configuration.getProjectsDirectory());
                     projects.add(project);
                 } catch (WSDLException ex) {
-//                    Logger.getLogger(WSFApplication.class.getName()).log(Level.SEVERE, null, ex);
+                    logger.debug(ex);
                 } catch (UnSupportedException ex) {
-//                    Logger.getLogger(WSFApplication.class.getName()).log(Level.SEVERE, null, ex);
+                    logger.debug(ex);
                 } catch (WSFProjectNotFoundException ex) {
                     projectInfosToDelete.add(projectInfo.getName());
-//                    Logger.getLogger(WSFApplication.class.getName()).log(Level.SEVERE, null, ex);
+                    logger.debug(ex);
                 } catch (XMLStreamException ex) {
-//                    Logger.getLogger(WSFApplication.class.getName()).log(Level.SEVERE, null, ex);
+                    logger.debug(ex);
                 } catch (Exception ex) {
-//                    Logger.getLogger(WSFApplication.class.getName()).log(Level.SEVERE, null, ex);
+                    logger.debug(ex);
                 }
             }
 
@@ -81,9 +88,9 @@ public class WSFApplication extends SingleFrameApplication {
                 }
             }
         } catch (FileNotFoundException ex) {
-//            Logger.getLogger(WSFApplication.class.getName()).log(Level.SEVERE, null, ex);
+                    logger.debug(ex);
         } catch (XMLStreamException ex) {
-//            Logger.getLogger(WSFApplication.class.getName()).log(Level.SEVERE, null, ex);
+                    logger.debug(ex);
         }
           
     }
@@ -96,8 +103,8 @@ public class WSFApplication extends SingleFrameApplication {
      * At startup create and show the main frame of the application.
      */
     @Override protected void startup() {
+        logger.info("Start GUI");
         WSFApplicationView appView = new WSFApplicationView(this);
-        
         appView.getFrame().setPreferredSize(new Dimension(800,600));
         show(appView);
     }
@@ -119,19 +126,32 @@ public class WSFApplication extends SingleFrameApplication {
     }
     
     protected void shutdown(){
+        logger.info("Shutdown the Application");
         for(WSFProject project : projects){
             try {
                 project.saveTestCasesToFile();
             } catch (Exception ex) {
-//                Logger.getLogger(WSFApplication.class.getName()).log(Level.SEVERE, null, ex);
+                StringWriter writer = new StringWriter();
+                ex.printStackTrace(new PrintWriter(writer));
+                logger.debug(writer.toString());
             }
         }
     }
 
+    public static void showMessage(String msg) {
+        JOptionPane.showMessageDialog(getApplication().getMainFrame(), msg, "Information", JOptionPane.INFORMATION_MESSAGE);
+    }
+    
     /**
      * Main method launching the application.
      */
     public static void main(String[] args) {
+        Logger.getLogger("org.apache.axiom.om.util.StAXUtils").setLevel(Level.INFO);
+        logger.info("\n\n");
+        logger.info("*************************************************");
+        logger.info("***                WS - FUZZER                ***");
+        logger.info("*************************************************");
+        logger.info("Launch the application");
         launch(WSFApplication.class, args);
     }
     

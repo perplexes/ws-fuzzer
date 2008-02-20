@@ -8,13 +8,14 @@ package gui.options;
 
 import datamodel.WSFConfiguration;
 import gui.WSFApplication;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author  chang
  */
 public class NetworkPanel extends javax.swing.JPanel {
-    
+    private static Logger logger = Logger.getLogger(NetworkPanel.class);
     private boolean changed;
     
     /** Creates new form NetworkPanel */
@@ -41,6 +42,8 @@ public class NetworkPanel extends javax.swing.JPanel {
         WSFConfiguration config = WSFApplication.getApplication().getWSFConfiguration();
         config.setMaxNumberOfConnectionsPerHost((Integer)maxNOCPerHostSpinner.getValue());
         config.setMaxNumberOfConnectionsOverall((Integer)maxNOCOverallSpinner.getValue());
+        
+        logger.info("Set Network Option: " + maxNOCPerHostSpinner.getValue() + " - " + maxNOCOverallSpinner.getValue());
         
         changed = false;
     }

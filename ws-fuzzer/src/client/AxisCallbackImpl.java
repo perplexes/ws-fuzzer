@@ -9,6 +9,7 @@ import datamodel.WSFResult;
 import java.util.ArrayList;
 import org.apache.axis2.client.async.AxisCallback;
 import org.apache.axis2.context.MessageContext;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -16,12 +17,13 @@ import org.apache.axis2.context.MessageContext;
  */
 public class AxisCallbackImpl implements AxisCallback {
 
+    private static Logger logger = Logger.getLogger(AxisCallbackImpl.class);
+    
     private Hook hook;
     private ArrayList<WSFResult> results;
     private boolean isResultSaved;
     private int inputIndex;
     private Thread thread;
-//    private ServiceClient serviceClient;
     
     AxisCallbackImpl(Hook hook, ArrayList<WSFResult> results, int inputIndex, Thread thread) {
         this.hook = hook;
@@ -32,36 +34,23 @@ public class AxisCallbackImpl implements AxisCallback {
     }
 
     public void onMessage(MessageContext arg0) {
-        System.out.println("AxisCallback -- onMessage: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName());
+        logger.debug("Axis2: onMessage");
         saveResult();
-
-
-//        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void onFault(MessageContext arg0) {
-        System.out.println("AxisCallback -- onFault: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName());
+        logger.debug("Axis2: onFault");
         saveResult();
-
-//        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void onError(Exception arg0) {
-        System.out.println("AxisCallback -- onError: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName() + " || exception: " + arg0.getClass() + " ++ " + arg0.getMessage());
+        logger.error("Axis2: onError: " + arg0);
         saveResult();
-
-        
-//        throw new UnsupportedOperationException("Not supported yet." + );
-        arg0.printStackTrace();
     }
 
     public void onComplete() {
-        System.out.println("AxisCallback -- onComplete: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName());
+        logger.debug("Axis2: onComplete");
         saveResult();
-        
-//        throw new UnsupportedOperationException("Not supported yet.");
-
-
     }
 
     private void saveResult() {
@@ -80,7 +69,7 @@ public class AxisCallbackImpl implements AxisCallback {
                     synchronized(results){
                         results.add(resultCopy);
                     }
-                    System.out.println("AxisCallback -- saveResult: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName());
+                    logger.info("Receive Response: index " + result.getInputIndex() + "in " + result.getTime() + " ms");
                     thread.interrupt();
                 }
 

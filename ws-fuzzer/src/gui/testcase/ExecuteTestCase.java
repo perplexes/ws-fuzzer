@@ -10,9 +10,10 @@ import datamodel.WSFConfiguration;
 import datamodel.WSFResult;
 import datamodel.WSFTestCase;
 import gui.WSFApplication;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 import org.jdesktop.application.Task;
 
 /**
@@ -21,6 +22,7 @@ import org.jdesktop.application.Task;
  */
 public class ExecuteTestCase extends Task<Void, WSFResult> {
 
+    private static Logger logger = Logger.getLogger(ExecuteTestCase.class);
     private TestCasePanel testCasePanel;
     private WSFTestCase testCase;
 
@@ -36,6 +38,7 @@ public class ExecuteTestCase extends Task<Void, WSFResult> {
 
     @Override
     protected Void doInBackground() throws Exception {
+        logger.info("Start the Execution: " + testCase.getName());
         testCase.setSaveNeeded(true);
         WSFConfiguration config = WSFApplication.getApplication().getWSFConfiguration();
         WSFClient client = new WSFClient(this, config.getMaxNumberOfConnectionsPerHost(), config.getMaxNumberOfConnectionsOverall());
@@ -45,41 +48,41 @@ public class ExecuteTestCase extends Task<Void, WSFResult> {
 
     @Override
     protected void succeeded(Void v){
-        System.out.println("succeeded: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName());
+        logger.info("The Execution is done successfully");
     }
 
     @Override
     protected void process(List<WSFResult> results){
         for(WSFResult result : results){
+            logger.info("process result: index " + result.getInputIndex());
             testCase.getResults().set(result.getInputIndex(), result);
             testCasePanel.updateIndexList(result.getInputIndex());
-            System.out.println("process: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName() + "  | id of result: " + result.getInputIndex());
         }
     }
 
     @Override
     protected void failed(Throwable cause){
-        
-        System.out.println("failed: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName());
-        
-        cause.printStackTrace();
+        WSFApplication.showMessage(cause.getMessage());
+        StringWriter sWriter = new StringWriter();
+        cause.printStackTrace(new PrintWriter(sWriter));
+        logger.error(sWriter.toString());
     }
 
     @Override
     protected void cancelled(){
-        System.out.println("canceled: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName());
+        logger.info("The execution is canceled: " + testCase.getName());
     }
 
     @Override
     protected void interrupted(InterruptedException e){
         super.interrupted(e);
-        System.out.println("interrupted: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName());
+        logger.info("The execution is interruppted: " + e);
     }
 
     @Override
     protected void finished(){
-        System.out.println("finished: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName());
-        
+        logger.info("Execution finished: " + testCase.getName());
+//        System.out.println("finished: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName());
     }
     
     public void pulishResult(WSFResult result){

@@ -19,6 +19,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.border.TitledBorder;
 import javax.swing.tree.DefaultTreeModel;
+import org.apache.log4j.Logger;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.Task;
 import utils.JTreeUtils;
@@ -28,6 +29,9 @@ import utils.JTreeUtils;
  * @author  chang
  */
 public class TestCasePanel extends javax.swing.JPanel {
+    
+    private static Logger logger = Logger.getLogger(TestCasePanel.class);
+    
     private WSFTestCase testCase;
     private int currentIndex;
     DefaultListModel indexListModel;
@@ -76,7 +80,8 @@ public class TestCasePanel extends javax.swing.JPanel {
     
     @Action
     public Task executeTestCase(){
-        System.out.println("\n\n\n");
+        
+        logger.info("executeTestCase: "+testCase.getProject().getName()+"/"+testCase.getName());
         
         ExecuteTestCase executeTestCase = new ExecuteTestCase(WSFApplication.getApplication(), testCase, this);
         executeTestCases.put(testCase, executeTestCase);
@@ -85,6 +90,7 @@ public class TestCasePanel extends javax.swing.JPanel {
     
     @Action
     public void stopExecuteTestCase(){
+        logger.info("Try to stop the executing TestCase"+testCase.getName());
         executeTestCases.get(testCase).cancel(true);
     }
     

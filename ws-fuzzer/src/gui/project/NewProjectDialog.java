@@ -8,16 +8,19 @@ package gui.project;
 
 import datamodel.WSFProject;
 import datamodel.WSFProjectInfo;
+import exceptions.UnSupportedException;
 import gui.WSFApplication;
 import gui.WSFApplicationView;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.wsdl.WSDLException;
 import javax.xml.stream.XMLStreamException;
+import org.apache.log4j.Logger;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.Task;
 
@@ -26,6 +29,8 @@ import org.jdesktop.application.Task;
  * @author  chang
  */
 public class NewProjectDialog extends javax.swing.JDialog {
+    
+    private static Logger logger = Logger.getLogger(NewProjectDialog.class);
     
     /** Creates new form NewProjectDialog */
     public NewProjectDialog(java.awt.Frame parent, boolean modal) {
@@ -49,6 +54,8 @@ public class NewProjectDialog extends javax.swing.JDialog {
     
     @Action
     public Task creatProject() {
+        logger.info("Create Project: name: " + projectNameTextField.getText());
+        logger.info("Create Project: wsdl: " + wsdlURLTextField.getText());
         this.okButton.setEnabled(false);
         this.cancelButton.setEnabled(false);
         return new CreateProject(WSFApplication.getApplication());
@@ -75,7 +82,7 @@ public class NewProjectDialog extends javax.swing.JDialog {
         }
 
         @Override
-        protected WSFProject doInBackground() throws Exception {
+        protected WSFProject doInBackground() throws WSDLException, UnSupportedException, XMLStreamException, Exception {
             return new WSFProject(projectName, path, wsdlURL);
         }
 
@@ -87,12 +94,13 @@ public class NewProjectDialog extends javax.swing.JDialog {
                 app.getProjects().add(project);
                 app.getWSFConfiguration().saveChanges();
                 ((WSFApplicationView)app.getMainView()).addNewProjectToTree(project);
+                logger.info("Create Project: created");
             } catch (IOException ex) {
-//                Logger.getLogger(NewProjectDialog.class.getName()).log(Level.SEVERE, null, ex);
+                logger.debug(ex);
             } catch (XMLStreamException ex) {
-//                Logger.getLogger(NewProjectDialog.class.getName()).log(Level.SEVERE, null, ex);
+                logger.debug(ex);
             } catch (Exception ex) {
-//                Logger.getLogger(NewProjectDialog.class.getName()).log(Level.SEVERE, null, ex);
+                logger.debug(ex);
             } 
             
             close();
@@ -100,7 +108,13 @@ public class NewProjectDialog extends javax.swing.JDialog {
 
         @Override
         protected void failed(Throwable cause) {
-            showMessage("Unexpected Error occured!");
+            
+            logger.error(cause.getMessage());
+            showMessage("Unexpected Error occured!" + cause.getMessage());
+            StringWriter sWriter = new StringWriter();
+            cause.printStackTrace(new PrintWriter(sWriter));
+            logger.error(sWriter.toString());
+            
             okButton.setEnabled(true);
             cancelButton.setEnabled(true);
         }
@@ -226,7 +240,6 @@ public class NewProjectDialog extends javax.swing.JDialog {
 
     private void wsdlURLTextFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_wsdlURLTextFieldFocusLost
 
-            // TODO add your handling code here:
             String name = projectNameTextField.getText();
             String path = wsdlURLTextField.getText();
             
@@ -243,12 +256,10 @@ public class NewProjectDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_wsdlURLTextFieldFocusLost
 
     private void wsdlURLTextFieldKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_wsdlURLTextFieldKeyTyped
-        // TODO add your handling code here:
         enableOKButton();
     }//GEN-LAST:event_wsdlURLTextFieldKeyTyped
 
     private void projectNameTextFieldKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_projectNameTextFieldKeyTyped
-        // TODO add your handling code here:
         enableOKButton();
     }//GEN-LAST:event_projectNameTextFieldKeyTyped
     

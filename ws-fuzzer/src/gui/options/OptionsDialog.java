@@ -9,8 +9,10 @@ package gui.options;
 import datamodel.WSFConfiguration;
 import gui.WSFApplication;
 import java.io.IOException;
-import javax.swing.JPanel;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import javax.xml.stream.XMLStreamException;
+import org.apache.log4j.Logger;
 import org.jdesktop.application.Action;
 
 /**
@@ -18,6 +20,8 @@ import org.jdesktop.application.Action;
  * @author  chang
  */
 public class OptionsDialog extends javax.swing.JDialog {
+    
+    private static Logger logger = Logger.getLogger(OptionsDialog.class);
     
     /** Creates new form OptionsDialog */
     public OptionsDialog(java.awt.Frame parent, boolean modal) {
@@ -143,25 +147,45 @@ public class OptionsDialog extends javax.swing.JDialog {
 }//GEN-LAST:event_cancelButtonActionPerformed
     
     @Action
-    public void okButtonPressed() throws IOException, XMLStreamException, Exception{
+    public void okButtonPressed() {
         applyChanges();
         this.dispose();
     }
     
     @Action
-    public void applyChanges() throws IOException, XMLStreamException, Exception{
+    public void applyChanges() {
         
-        if(networkPanel!=null)
+        if (networkPanel != null) {
             networkPanel.saveChanges();
-        
-        if(dictionariesPanel!=null)
+        }
+        if (dictionariesPanel != null) {
             dictionariesPanel.saveChanges();
-        
-        if(generalPanel!=null)
+        }
+        if (generalPanel != null) {
             generalPanel.saveChanges();
-        
+        }
         WSFConfiguration config = WSFApplication.getApplication().getWSFConfiguration();
-        config.saveChanges();
+
+        try {
+            config.saveChanges();
+            
+        } catch (IOException ex) {
+            WSFApplication.showMessage(ex.getMessage());
+            StringWriter sWriter = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sWriter));
+            logger.error(sWriter.toString());
+        } catch (XMLStreamException ex) {
+            WSFApplication.showMessage(ex.getMessage());
+            StringWriter sWriter = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sWriter));
+            logger.error(sWriter.toString());
+        } catch (Exception ex) {
+            WSFApplication.showMessage(ex.getMessage());
+            StringWriter sWriter = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sWriter));
+            logger.error(sWriter.toString());
+            
+        }
     }
     
     private void showNetworkOptions(){

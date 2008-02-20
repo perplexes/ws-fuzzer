@@ -15,10 +15,6 @@ import gui.port.PortPanel;
 import gui.project.NewProjectDialog;
 import gui.project.ProjectPanel;
 import gui.testcase.TestCasePanel;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.xml.stream.XMLStreamException;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
@@ -26,20 +22,26 @@ import org.jdesktop.application.FrameView;
 import org.jdesktop.application.TaskMonitor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import org.apache.log4j.Logger;
 
 /**
  * The application's main frame.
  */
 public class WSFApplicationView extends FrameView {
+    
+    private static Logger logger = Logger.getLogger(WSFApplicationView.class);
 
     private DefaultTreeModel projectsTreeModel;
     
@@ -208,16 +210,23 @@ public class WSFApplicationView extends FrameView {
     
     @Action
     public void showNewProjectDialog(){
+        
+        logger.info("Show Component: New Project Dialog");
+        
         if(newProjectDialog == null){
             JFrame mainFrame = WSFApplication.getApplication().getMainFrame();
             newProjectDialog = new NewProjectDialog(mainFrame, true);
             newProjectDialog.setLocationRelativeTo(mainFrame);
         }
         WSFApplication.getApplication().show(newProjectDialog);
+        
     }
     
     @Action
     public void showOptionsDialog(){
+        
+        logger.info("Show Component: Options Dialog");
+        
         if(optionsDialog == null){
             JFrame mainFrame = WSFApplication.getApplication().getMainFrame();
             optionsDialog = new OptionsDialog(mainFrame, true);
@@ -228,6 +237,9 @@ public class WSFApplicationView extends FrameView {
     
     @Action
     public void showAboutBox() {
+        
+        logger.info("Show Component: About Box");
+        
         if (aboutBox == null) {
             JFrame mainFrame = WSFApplication.getApplication().getMainFrame();
             aboutBox = new WSFApplicationAboutBox(mainFrame);
@@ -237,18 +249,33 @@ public class WSFApplicationView extends FrameView {
     }
 
     @Action
-    public void deleteSelectedProject() throws IOException, XMLStreamException, Exception{
-        if(projectsTree.getSelectionCount()==0)
-            return;
+    public void deleteSelectedProject(){
         
+        if (projectsTree.getSelectionCount() == 0) {
+            return;
+        }
         TreePath treePath = projectsTree.getSelectionPath();
-        DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)treePath.getPath()[0];
-        DefaultMutableTreeNode projectNode = (DefaultMutableTreeNode)treePath.getPath()[1];
+        DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) treePath.getPath()[0];
+        DefaultMutableTreeNode projectNode = (DefaultMutableTreeNode) treePath.getPath()[1];
         rootNode.remove(projectNode);
         projectsTreeModel.reload();
-        
-        WSFProject project = (WSFProject)projectNode.getUserObject();
-        WSFApplication.getApplication().deleteProject(project);
+
+        WSFProject project = (WSFProject) projectNode.getUserObject();
+
+        logger.info("Delete Project : " + project.getName());
+            
+        try {
+             
+            WSFApplication.getApplication().deleteProject(project);
+            
+        } catch (Exception ex) {
+            
+            WSFApplication.showMessage("Exception occurred: " + ex.getMessage());
+            
+            StringWriter sWriter = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sWriter));
+            logger.error(sWriter.toString());
+        }
         
     }
     
@@ -448,7 +475,6 @@ public class WSFApplicationView extends FrameView {
     }// </editor-fold>//GEN-END:initComponents
 
     private void projectsTreeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_projectsTreeMouseClicked
-        // TODO add your handling code here:
             
         if(evt.getButton()==3){
             
@@ -474,7 +500,6 @@ public class WSFApplicationView extends FrameView {
     }//GEN-LAST:event_projectsTreeMouseClicked
 
     private void projectsTreeValueChanged(javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_projectsTreeValueChanged
-        // TODO add your handling code here:
             
         TreePath path = evt.getNewLeadSelectionPath();
         
@@ -482,7 +507,7 @@ public class WSFApplicationView extends FrameView {
             
             WSFProject project = (WSFProject)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
             showProjectPanel(project);
-            
+            logger.info("Show Project: " + project.getName());
         }
         
         if( path!=null && path.getPathCount()==4){
@@ -491,25 +516,21 @@ public class WSFApplicationView extends FrameView {
             if(object instanceof WSFPort){
                 WSFPort port = (WSFPort)object;
                 showPortPanel(port);
+                logger.info("Show Port: " + port.getService().getProject().getName() + "/" + port.getService().getName().getLocalPart() + "/" + port.getName());
             }
             
             if(object instanceof WSFTestCase){
                 WSFTestCase testCase = (WSFTestCase)object;
                 showTestCasePanel(testCase);
+                logger.info("Show TestCase: " + testCase.getProject().getName() + "/" + testCase.getName());
             }
             
         }
         
         if( path!=null && path.getPathCount()==5){
-            try {
-
-                WSFOperation operation = (WSFOperation) ((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
-                showOperationPanel(operation);
-//            operation.print();
-            } catch (Exception ex) {
-//                Logger.getLogger(WSFApplicationView.class.getName()).log(Level.SEVERE, null, ex);
-            }
-//            operation.print();
+            WSFOperation operation = (WSFOperation) ((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
+            showOperationPanel(operation);
+            logger.info("Show Operation: " + operation.getPort().getService().getProject().getName() + "/" + operation.getPort().getService().getName().getLocalPart() + "/" + operation.getPort().getName() + "/" + operation.getName().getLocalPart());
         }
         
     }//GEN-LAST:event_projectsTreeValueChanged
@@ -530,11 +551,20 @@ public class WSFApplicationView extends FrameView {
         displayPanel.repaint();
     }
     
-    public void showOperationPanel(WSFOperation operation) throws Exception{
-        if(operationPanel == null){
-            operationPanel = new OperationPanel(operation);
-        }else{
-            operationPanel.setOperation(operation);
+    public void showOperationPanel(WSFOperation operation) {
+        try{
+            if(operationPanel == null){
+                operationPanel = new OperationPanel(operation);
+            }else{
+                operationPanel.setOperation(operation);
+            }
+        }catch(Exception ex){
+            
+            WSFApplication.showMessage("Exception: " + ex.getMessage());
+            
+            StringWriter sWriter = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sWriter));
+            logger.error(sWriter.toString());
         }
         
         if(operationPanel.getParent() != displayPanel){
@@ -577,6 +607,7 @@ public class WSFApplicationView extends FrameView {
         displayPanel.revalidate();
         displayPanel.repaint();
     }
+    
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem deleteProjectPopupMenuItem;

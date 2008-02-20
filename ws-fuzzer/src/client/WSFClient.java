@@ -22,11 +22,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.wsdl.WSDLException;
 import javax.xml.stream.XMLStreamException;
-import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
@@ -37,7 +34,7 @@ import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpConnection;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.jdesktop.application.Task;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -45,6 +42,7 @@ import org.jdesktop.application.Task;
  */
 public class WSFClient {
  
+    private static Logger logger = Logger.getLogger(WSFClient.class);
     
     private final Hook hook = new Hook();
     private ExecuteTestCase executeTestCase;
@@ -112,7 +110,7 @@ public class WSFClient {
                     
                     if(this.executeTestCase.isCancelled()){
                         
-                        System.out.println("WSFClient: Task Canceling detected! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+                        logger.info("Task Canceling detected! stop the execution: " + testcase.getName());
                         break;
                     }
                     
@@ -123,9 +121,9 @@ public class WSFClient {
                         if(n>0){
                             for(int i=0; i< n; i++){
                                 WSFResult result = results.remove(0);
+                                logger.info("Publish result (index "+result.getInputIndex()+") to EDT");
                                 executeTestCase.pulishResult(result);
                                 resultCounter++;
-                                System.out.println("WSFClient: " + Thread.currentThread().getId() + " -- " + Thread.currentThread().getName() + " || id of result: "+ result.getInputIndex());
                             }
                         }
                     }
@@ -135,6 +133,7 @@ public class WSFClient {
                     if(requestCounter < header.size())
                         serviceClient.addHeader(header.get(requestCounter).toOMElement(null, false));
                     serviceClient.sendReceiveNonBlocking(operation.getName(), payloads.get(requestCounter).toOMElement(null, false), new AxisCallbackImpl(hook, results, requestCounter, Thread.currentThread()));
+                    logger.info("Send Request: index " + requestCounter);
                     requestCounter++;
                     continue;
                 }

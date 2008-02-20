@@ -7,13 +7,13 @@
 package gui.options;
 
 import datamodel.WSFConfiguration;
-import datamodel.WSFDictionary;
 import datamodel.WSFDictionaryInfo;
 import gui.WSFApplication;
 import java.io.File;
 import java.util.Stack;
 import java.util.Vector;
 import javax.swing.table.DefaultTableModel;
+import org.apache.log4j.Logger;
 import org.jdesktop.application.Action;
 
 /**
@@ -21,6 +21,8 @@ import org.jdesktop.application.Action;
  * @author  chang
  */
 public class DictionariesPanel extends javax.swing.JPanel {
+    
+    private static Logger logger = Logger.getLogger(DictionariesPanel.class);
     
     /** Creates new form DictionariesPanel */
     public DictionariesPanel() {
@@ -99,8 +101,9 @@ public class DictionariesPanel extends javax.swing.JPanel {
             int i = indexes.pop();
             model.removeRow(i);
             config.removeDictionary(i);
-            System.out.println("remove: "+ i);
+            logger.info("Delete Dict: " + i );
         }
+        
     }
     
     @Action
@@ -123,6 +126,9 @@ public class DictionariesPanel extends javax.swing.JPanel {
         dictionaryNameTextField.setText("");
         dictionaryPathTextField.setText("");
         enableAddButton();
+        
+        logger.info("Add Dict: Name: " + name );
+        logger.info("Add Dict: Path: " + path );
     }
     
     public void enableAddButton(){

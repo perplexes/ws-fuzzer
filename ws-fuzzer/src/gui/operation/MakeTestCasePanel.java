@@ -17,15 +17,18 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Vector;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import javax.xml.stream.XMLStreamException;
+import org.apache.log4j.Logger;
 import org.jdesktop.application.Action;
 import utils.JTreeUtils;
 
@@ -35,12 +38,14 @@ import utils.JTreeUtils;
  */
 public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyChangeListener {
 
+    private static Logger logger = Logger.getLogger(MakeTestCasePanel.class);
+    
+
     private WSFOperation operation;
     private DefaultComboBoxModel dictionaryComboBoxModel;
-    private HTMLDocument styledDocument;
 
     /** Creates new form MakeTestCasePanel */
-    public MakeTestCasePanel(WSFOperation operation) throws Exception {
+    public MakeTestCasePanel(WSFOperation operation) {
         initComponents();
         this.operation = operation;
 
@@ -62,12 +67,12 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
         previewTextPane.setEditorKit(new HTMLEditorKit() );
     }
 
-    public void setOperation(WSFOperation operation) throws Exception {
+    public void setOperation(WSFOperation operation) {
         this.operation = operation;
         showOperation();
     }
 
-    private void showOperation() throws Exception {
+    private void showOperation() {
         DefaultMutableTreeNode requestTreeNode = operation.getRequestTreeNode();
         DefaultMutableTreeNode responseTreeNode = operation.getResponseTreeNode();
 
@@ -81,27 +86,51 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
         JTreeUtils.expandAll(responseMessageTree, new TreePath(responseTreeNode.getPath()));
 
         disableInputdefinition();
+        
+        logger.info("Input Definition: Operation Name: " + operation.getName().getLocalPart());
 
-        previewTextPane.setText(operation.getPreview());
+        try{
+            previewTextPane.setText(operation.getPreview());
+        }catch(Exception ex){
+            logger.warn("Could not get Preview");
+            previewTextPane.setText("Could not get Preview");
+        }
+        
         tryEnableGenerateTestCaseButton();
     }
     
     @Action
-    public void generateTestCase() throws Exception{
-        WSFTestCase testCase = operation.generateTestCase(operation.getName().getLocalPart());
-        ((WSFApplicationView)WSFApplication.getApplication().getMainView()).addNewTestCaseToTree(testCase);
-        testCase.getProject().saveTestCasesToFile();
-        operation.clearInputdefinition();
-        
-        testCaseNameTextField.setEnabled(false);
-        generateTestCaseButton.setEnabled(false);
-        
-        testCaseNameTextField.setText("");
-        
-        disableInputdefinition();
-        
-        ((DefaultTreeModel)requestMessageTree.getModel()).reload();
-        JTreeUtils.expandAll(requestMessageTree, null);
+    public void generateTestCase() {
+        try {
+            
+            WSFTestCase testCase = operation.generateTestCase(testCaseNameTextField.getText());
+            ((WSFApplicationView) WSFApplication.getApplication().getMainView()).addNewTestCaseToTree(testCase);
+            testCase.getProject().saveTestCasesToFile();
+            operation.clearInputdefinition();
+
+            testCaseNameTextField.setEnabled(false);
+            generateTestCaseButton.setEnabled(false);
+
+            logger.info("Generate TestCase: \n Input Definition:");
+            WSFDataElement header = operation.getRequestHeaderData();
+            if (header != null) {
+                logger.info("header:\n" + header.toOMElement(null, true).toStringWithConsume());
+            }
+            logger.info("body:\n" + operation.getRequestData().toOMElement(null, true).toStringWithConsume());
+
+            testCaseNameTextField.setText("");
+
+            disableInputdefinition();
+
+            ((DefaultTreeModel) requestMessageTree.getModel()).reload();
+            JTreeUtils.expandAll(requestMessageTree, null);
+            
+        } catch (Exception ex) {
+            WSFApplication.showMessage("Exception: " + ex.getMessage());
+            StringWriter sWriter = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sWriter));
+            logger.error(sWriter.toString());
+        }
     }
 
     /** This method is called from within the constructor to
@@ -311,22 +340,19 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
         );
     }// </editor-fold>//GEN-END:initComponents
     private void fixedValueRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fixedValueRadioButtonActionPerformed
-        // TODO add your handling code here:
         fixedValueTextField.setEnabled(true);
         fixedValueTextField.grabFocus();
         fromDictionaryComboBox.setEnabled(false);
     }//GEN-LAST:event_fixedValueRadioButtonActionPerformed
 
     private void fromDictionaryRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fromDictionaryRadioButtonActionPerformed
-        // TODO add your handling code here:
         fixedValueTextField.setEnabled(false);
         fromDictionaryComboBox.setEnabled(true);
         fromDictionaryComboBox.grabFocus();
     }//GEN-LAST:event_fromDictionaryRadioButtonActionPerformed
 
     private void requestMessageTreeValueChanged(javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_requestMessageTreeValueChanged
-        // TODO add your handling code here:
-
+        
         TreePath treePath = evt.getNewLeadSelectionPath();
         
         if(treePath == null)    
@@ -366,68 +392,64 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
     }//GEN-LAST:event_requestMessageTreeValueChanged
 
     private void fixedValueTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fixedValueTextFieldActionPerformed
-        // TODO add your handling code here:
-        try {
-            setInputDefinition();
-        } catch (FileNotFoundException ex) {
-//            Logger.getLogger(MakeTestCasePanel.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-//            Logger.getLogger(MakeTestCasePanel.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-//            Logger.getLogger(MakeTestCasePanel.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        setInputDefinition();
     }//GEN-LAST:event_fixedValueTextFieldActionPerformed
 
     private void fromDictionaryComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_fromDictionaryComboBoxItemStateChanged
-        // TODO add your handling code here:
-        try {
-            setInputDefinition();
-        } catch (FileNotFoundException ex) {
-//            Logger.getLogger(MakeTestCasePanel.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-//            Logger.getLogger(MakeTestCasePanel.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-//            Logger.getLogger(MakeTestCasePanel.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        setInputDefinition();
     }//GEN-LAST:event_fromDictionaryComboBoxItemStateChanged
 
-    private void setInputDefinition() throws FileNotFoundException, IOException, Exception {
+    private void setInputDefinition(){
+        try {
 
-//        if (targetTreePath == null) {
-//            return;
-//        }
-        DefaultMutableTreeNode treeNode = ((DefaultMutableTreeNode)requestMessageTree.getSelectionPath().getLastPathComponent());
-        WSFDataElement element = ((WSFDataElement)treeNode.getUserObject());
+            DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) requestMessageTree.getSelectionPath().getLastPathComponent();
+            WSFDataElement element = (WSFDataElement) treeNode.getUserObject();
 
-        if (!element.isSimpleType()) {
-            return;
-        }
-
-        WSFInputSource source = null;
-
-        if (fixedValueTextField.isEnabled()) {
-            String fixedValue = fixedValueTextField.getText().trim();
-            if (fixedValue.equalsIgnoreCase("") || fixedValue.equalsIgnoreCase("undefined")) {
-                source = null;
-            } else {
-                source = WSFInputSource.createSourceFromDefaultValue(fixedValue);
+            if (!element.isSimpleType()) {
+                return;
             }
-        }
 
-        if (fromDictionaryComboBox.isEnabled()) {
-            if (fromDictionaryComboBox.getSelectedIndex() == -1 || fromDictionaryComboBox.getSelectedIndex() == 0) {
-                source = null;
-            } else {
-                source = WSFInputSource.createInputSourceFromDictionary(((WSFDictionaryInfo) fromDictionaryComboBox.getSelectedItem()).getDictionary());
+            WSFInputSource source = null;
+
+            if (fixedValueTextField.isEnabled()) {
+                String fixedValue = fixedValueTextField.getText().trim();
+                if (fixedValue.equalsIgnoreCase("") || fixedValue.equalsIgnoreCase("undefined")) {
+                    source = null;
+                } else {
+                    source = WSFInputSource.createSourceFromDefaultValue(fixedValue);
+                }
             }
-        }
-        element.setSource(source);
 
-        previewTextPane.setText(operation.getPreview());
-        
-        ((DefaultTreeModel)requestMessageTree.getModel()).reload(treeNode);
-        
-        tryEnableGenerateTestCaseButton();
+            if (fromDictionaryComboBox.isEnabled()) {
+                if (fromDictionaryComboBox.getSelectedIndex() == -1 || fromDictionaryComboBox.getSelectedIndex() == 0) {
+                    source = null;
+                } else {
+                    source = WSFInputSource.createInputSourceFromDictionary(((WSFDictionaryInfo) fromDictionaryComboBox.getSelectedItem()).getDictionary());
+                }
+            }
+            element.setSource(source);
+
+            previewTextPane.setText(operation.getPreview());
+
+            ((DefaultTreeModel) requestMessageTree.getModel()).reload(treeNode);
+
+            tryEnableGenerateTestCaseButton();
+        } catch (FileNotFoundException ex) {
+            WSFApplication.showMessage(ex.getMessage());
+            StringWriter sWriter = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sWriter));
+            logger.error(sWriter.toString());
+        } catch (IOException ex) {
+            WSFApplication.showMessage(ex.getMessage());
+            StringWriter sWriter = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sWriter));
+            logger.error(sWriter.toString());
+        }catch (Exception ex) {
+            WSFApplication.showMessage(ex.getMessage());
+            StringWriter sWriter = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sWriter));
+            logger.error(sWriter.toString());
+        }
     }
 
     private void enableFixedInputDefinition() {
