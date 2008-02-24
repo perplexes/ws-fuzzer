@@ -34,9 +34,7 @@ public class TestCasePanel extends javax.swing.JPanel {
     
     private WSFTestCase testCase;
     private int currentIndex;
-    DefaultListModel indexListModel;
-    
-    private HashMap<WSFTestCase, ExecuteTestCase> executeTestCases;
+    private DefaultListModel indexListModel;
     
     /** Creates new form TestCasePanel */
     public TestCasePanel(WSFTestCase testCase) {
@@ -49,7 +47,6 @@ public class TestCasePanel extends javax.swing.JPanel {
     }
     
     private void postInit(){
-        executeTestCases = new HashMap<WSFTestCase, ExecuteTestCase>();
         indexList.setCellRenderer(new MyCellRenderer());
     }
     
@@ -76,22 +73,76 @@ public class TestCasePanel extends javax.swing.JPanel {
         JTreeUtils.expandAll(requestTree, null);
         
         showResult(currentIndex);
+        
+        setButtons();
     }
     
     @Action
-    public Task executeTestCase(){
+    public Task execute(){
+        return executeTestCases(-1);
+    }
+    
+    // set index to -1, to execute all 
+    private Task executeTestCases(int index){
         
-        logger.info("executeTestCase: "+testCase.getProject().getName()+"/"+testCase.getName());
+        logger.info("executeTestCase: "+testCase.getProject().getName()+"/"+testCase.getName() + " -- " + (index == -1 ? "ALL" : "index: "+index));
         
-        ExecuteTestCase executeTestCase = new ExecuteTestCase(WSFApplication.getApplication(), testCase, this);
-        executeTestCases.put(testCase, executeTestCase);
+        ExecuteTestCase executeTestCase = new ExecuteTestCase(WSFApplication.getApplication(), testCase, index, this);
+        testCase.setExecutor(executeTestCase);
+        this.setButtons();
         return executeTestCase;
     }
     
     @Action
     public void stopExecuteTestCase(){
         logger.info("Try to stop the executing TestCase"+testCase.getName());
-        executeTestCases.get(testCase).cancel(true);
+        testCase.getExecutor().cancel(true);
+        testCase.setExecutor(null);
+        setButtons();
+    }
+    
+    @Action 
+    public void clearExecution(){
+        testCase.clearResults();
+        this.setTestCase(testCase);
+    }
+    
+    public void setButtons(){
+        
+        switch(testCase.getStatus()){
+            
+            case WSFTestCase.PRE_EXECUTION:
+                executeButton.setEnabled(true);
+                executeButton.setText("Execute");
+                stopButton.setEnabled(false);
+                clearButton.setEnabled(false);
+                break;
+                
+            case WSFTestCase.EXECUTION:
+                if(testCase.getExecutor() != null){     // now executing !
+                    executeButton.setEnabled(false);
+                    stopButton.setEnabled(true);
+                    clearButton.setEnabled(false);
+                }else{
+                    executeButton.setEnabled(true);
+                    executeButton.setText("Continue");
+                    stopButton.setEnabled(false);
+                    clearButton.setEnabled(true);
+                }
+                break;
+            
+            case WSFTestCase.FINISHED:
+                executeButton.setEnabled(false);
+                executeButton.setText("Execute");
+                stopButton.setEnabled(false);
+                clearButton.setEnabled(true);
+                break;
+        }
+    }
+    
+    public void tryUpdateButtons(WSFTestCase testCase){
+        if(this.testCase == testCase)
+            setButtons();
     }
     
     /** This method is called from within the constructor to
@@ -102,59 +153,33 @@ public class TestCasePanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        indexList = new javax.swing.JList();
         jToolBar1 = new javax.swing.JToolBar();
         executeButton = new javax.swing.JButton();
         stopButton = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JToolBar.Separator();
+        clearButton = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
-        addFilterButton = new javax.swing.JButton();
-        filterComboBox = new javax.swing.JComboBox();
+        jSplitPane2 = new javax.swing.JSplitPane();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        requestTree = new javax.swing.JTree();
         jSplitPane1 = new javax.swing.JSplitPane();
         jScrollPane3 = new javax.swing.JScrollPane();
         requestTextArea = new javax.swing.JTextArea();
         jScrollPane4 = new javax.swing.JScrollPane();
         responseTextArea = new javax.swing.JTextArea();
-        jPanel4 = new javax.swing.JPanel();
-        clearFilerButton = new javax.swing.JButton();
-        addedFilterComboBox = new javax.swing.JComboBox();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        requestTree = new javax.swing.JTree();
+        jPanel1 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        indexList = new javax.swing.JList();
 
         setName("Form"); // NOI18N
-
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getResourceMap(TestCasePanel.class);
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jPanel1.border.title"))); // NOI18N
-        jPanel1.setMinimumSize(new java.awt.Dimension(66, 0));
-        jPanel1.setName("jPanel1"); // NOI18N
-        jPanel1.setLayout(new java.awt.GridLayout(0, 1));
-
-        jScrollPane1.setName("jScrollPane1"); // NOI18N
-
-        indexList.setFont(resourceMap.getFont("indexList.font")); // NOI18N
-        indexList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "0", "10", "100", "1000", "10000", "100000", "1000000", "10000000", "99999999" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
-        });
-        indexList.setName("indexList"); // NOI18N
-        indexList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
-            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
-                indexListValueChanged(evt);
-            }
-        });
-        jScrollPane1.setViewportView(indexList);
-
-        jPanel1.add(jScrollPane1);
 
         jToolBar1.setFloatable(false);
         jToolBar1.setRollover(true);
         jToolBar1.setName("jToolBar1"); // NOI18N
 
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getActionMap(TestCasePanel.class, this);
-        executeButton.setAction(actionMap.get("executeTestCase")); // NOI18N
+        executeButton.setAction(actionMap.get("execute")); // NOI18N
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(gui.WSFApplication.class).getContext().getResourceMap(TestCasePanel.class);
         executeButton.setText(resourceMap.getString("executeButton.text")); // NOI18N
         executeButton.setFocusable(false);
         executeButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -173,41 +198,42 @@ public class TestCasePanel extends javax.swing.JPanel {
         jSeparator1.setName("jSeparator1"); // NOI18N
         jToolBar1.add(jSeparator1);
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jPanel2.border.title"))); // NOI18N
+        clearButton.setAction(actionMap.get("clearExecution")); // NOI18N
+        clearButton.setText(resourceMap.getString("clearButton.text")); // NOI18N
+        clearButton.setFocusable(false);
+        clearButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        clearButton.setName("clearButton"); // NOI18N
+        clearButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(clearButton);
+
         jPanel2.setName("jPanel2"); // NOI18N
 
-        addFilterButton.setText(resourceMap.getString("addFilterButton.text")); // NOI18N
-        addFilterButton.setName("addFilterButton"); // NOI18N
+        jSplitPane2.setDividerLocation(200);
+        jSplitPane2.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        jSplitPane2.setResizeWeight(0.2);
+        jSplitPane2.setName("jSplitPane2"); // NOI18N
+        jSplitPane2.setOneTouchExpandable(true);
 
-        filterComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        filterComboBox.setName("filterComboBox"); // NOI18N
+        jScrollPane2.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jScrollPane2.border.title"))); // NOI18N
+        jScrollPane2.setName("jScrollPane2"); // NOI18N
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addComponent(filterComboBox, 0, 201, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(addFilterButton, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(addFilterButton)
-                .addComponent(filterComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
+        requestTree.setName("requestTree"); // NOI18N
+        requestTree.setRootVisible(false);
+        jScrollPane2.setViewportView(requestTree);
 
-        jSplitPane1.setDividerSize(4);
+        jSplitPane2.setTopComponent(jScrollPane2);
+
         jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
         jSplitPane1.setResizeWeight(0.5);
+        jSplitPane1.setMinimumSize(new java.awt.Dimension(300, 300));
         jSplitPane1.setName("jSplitPane1"); // NOI18N
+        jSplitPane1.setOneTouchExpandable(true);
 
         jScrollPane3.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jScrollPane3.border.title"))); // NOI18N
         jScrollPane3.setName("jScrollPane3"); // NOI18N
 
         requestTextArea.setColumns(20);
+        requestTextArea.setEditable(false);
         requestTextArea.setRows(5);
         requestTextArea.setName("requestTextArea"); // NOI18N
         jScrollPane3.setViewportView(requestTextArea);
@@ -218,78 +244,71 @@ public class TestCasePanel extends javax.swing.JPanel {
         jScrollPane4.setName("jScrollPane4"); // NOI18N
 
         responseTextArea.setColumns(20);
+        responseTextArea.setEditable(false);
         responseTextArea.setRows(5);
         responseTextArea.setName("responseTextArea"); // NOI18N
         jScrollPane4.setViewportView(responseTextArea);
 
         jSplitPane1.setRightComponent(jScrollPane4);
 
-        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jPanel4.border.title"))); // NOI18N
-        jPanel4.setName("jPanel4"); // NOI18N
+        jSplitPane2.setRightComponent(jSplitPane1);
 
-        clearFilerButton.setText(resourceMap.getString("clearFilerButton.text")); // NOI18N
-        clearFilerButton.setName("clearFilerButton"); // NOI18N
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jPanel1.border.title"))); // NOI18N
+        jPanel1.setMinimumSize(new java.awt.Dimension(66, 0));
+        jPanel1.setName("jPanel1"); // NOI18N
+        jPanel1.setLayout(new java.awt.GridLayout(0, 1));
 
-        addedFilterComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        addedFilterComboBox.setName("addedFilterComboBox"); // NOI18N
+        jScrollPane1.setName("jScrollPane1"); // NOI18N
 
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addComponent(addedFilterComboBox, 0, 201, Short.MAX_VALUE)
+        indexList.setFont(resourceMap.getFont("indexList.font")); // NOI18N
+        indexList.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "0", "10", "100", "1000", "10000", "100000", "1000000", "10000000", "99999999" };
+            public int getSize() { return strings.length; }
+            public Object getElementAt(int i) { return strings[i]; }
+        });
+        indexList.setName("indexList"); // NOI18N
+        indexList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                indexListMouseClicked(evt);
+            }
+        });
+        indexList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                indexListValueChanged(evt);
+            }
+        });
+        jScrollPane1.setViewportView(indexList);
+
+        jPanel1.add(jScrollPane1);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(clearFilerButton, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addComponent(jSplitPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 441, Short.MAX_VALUE))
         );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(clearFilerButton)
-                .addComponent(addedFilterComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 509, Short.MAX_VALUE)
+            .addComponent(jSplitPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 509, Short.MAX_VALUE)
         );
-
-        jScrollPane2.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jScrollPane2.border.title"))); // NOI18N
-        jScrollPane2.setName("jScrollPane2"); // NOI18N
-
-        requestTree.setName("requestTree"); // NOI18N
-        requestTree.setRootVisible(false);
-        jScrollPane2.setViewportView(requestTree);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 270, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 562, Short.MAX_VALUE)))
-            .addComponent(jToolBar1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 648, Short.MAX_VALUE)
+            .addComponent(jToolBar1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 537, Short.MAX_VALUE)
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 499, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jScrollPane2, 0, 0, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 371, Short.MAX_VALUE))))
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -307,25 +326,32 @@ public class TestCasePanel extends javax.swing.JPanel {
         
         showResult(index);
     }//GEN-LAST:event_indexListValueChanged
-    
+
+    private void indexListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_indexListMouseClicked
+        if(evt.getButton() == 1 && evt.getClickCount() == 2){
+            if(testCase.getExecutor()!=null)
+                return;
+            
+            Task task = executeTestCases(indexList.getSelectedIndex());
+            task.execute();
+        }
+    }//GEN-LAST:event_indexListMouseClicked
+
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton addFilterButton;
-    private javax.swing.JComboBox addedFilterComboBox;
-    private javax.swing.JButton clearFilerButton;
+    private javax.swing.JButton clearButton;
     private javax.swing.JButton executeButton;
-    private javax.swing.JComboBox filterComboBox;
     private javax.swing.JList indexList;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JToolBar.Separator jSeparator1;
     private javax.swing.JSplitPane jSplitPane1;
+    private javax.swing.JSplitPane jSplitPane2;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JTextArea requestTextArea;
     private javax.swing.JTree requestTree;
@@ -333,8 +359,12 @@ public class TestCasePanel extends javax.swing.JPanel {
     private javax.swing.JButton stopButton;
     // End of variables declaration//GEN-END:variables
     
-    public void updateIndexList(int index){
+    public void updateIndexList(WSFResult result){
+        
+        int index = result.getInputIndex();
+        
         Object object = indexListModel.get(index);
+        
         indexListModel.set(index, object);
         
         if(currentIndex == index){
@@ -347,7 +377,6 @@ public class TestCasePanel extends javax.swing.JPanel {
         
         if(indexList.getSelectedIndex() != index)
             indexList.setSelectedIndex(index);
-        
         
         DefaultTreeModel requestTreeModel = new DefaultTreeModel(testCase.getRequestTreeNode(index));
         requestTree.setModel(requestTreeModel);
@@ -370,9 +399,9 @@ public class TestCasePanel extends javax.swing.JPanel {
     
     class MyCellRenderer extends DefaultListCellRenderer{
         
-        final private Color colorForExecutedResult = new Color(112,228,143);
-        final private Color colorForNotExecutedResult = Color.WHITE;
-        final private Color colorForFailed = new Color(226,108,114);
+        final private Color colorForFinishedResultIndex = new Color(112,228,143);
+        final private Color colorForNotPlaceHolderResultIndex = Color.WHITE;
+        final private Color colorForNotFinishedResultIndex = new Color(226,108,114);
         final private Color colorForSelection = new Color(134,171,217);
         
         public MyCellRenderer(){
@@ -388,20 +417,25 @@ public class TestCasePanel extends javax.swing.JPanel {
             
             setText(object.toString());
             
-            
             if(isSelected){
                 setBackground( colorForSelection );
                 return this;
             }
             
-            if(result.getInputIndex() >= 0){
-                setBackground( colorForExecutedResult );
-            }else {
-                setBackground( colorForNotExecutedResult );
+            if(result.getStatus() == WSFResult.FINISHED){
+                setBackground( colorForFinishedResultIndex );
+            }else if(result.getStatus() == WSFResult.NOTFINISHED){
+                setBackground( colorForNotFinishedResultIndex );
+            }else{
+                setBackground( colorForNotPlaceHolderResultIndex );
             }
             
             return this;
         }
+    }
+    
+    public WSFTestCase getTestCase(){
+        return this.testCase;
     }
     
 }

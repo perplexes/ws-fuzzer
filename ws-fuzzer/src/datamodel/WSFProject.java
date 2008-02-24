@@ -47,6 +47,8 @@ public class WSFProject {
     private WSDLUtils wsdlHelper;
     private XSDUtils xsdHelper;
     
+    private boolean saveTestCaseNeeded;
+    
     public WSFProject(String name, File path, String wsdlURI) throws WSDLException, UnSupportedException, XMLStreamException, Exception{
         
         this.name = name;
@@ -64,6 +66,8 @@ public class WSFProject {
         this.testCases = new ArrayList<WSFTestCase>();
         
         setServices(wsdlHelper.getServices());
+        
+        saveTestCaseNeeded = true;
     }
     
     public WSFProject(WSFProjectInfo projectInfo, File parentDirectory) throws WSDLException, UnSupportedException, WSFProjectNotFoundException, XMLStreamException, Exception{
@@ -94,6 +98,8 @@ public class WSFProject {
         setServices(wsdlHelper.getServices());
         
         loadTestCasesFromFile();
+        
+        saveTestCaseNeeded = false;
     }
     
     public boolean save() throws IOException, Exception{
@@ -114,9 +120,14 @@ public class WSFProject {
             writer.close();
         }
         
-        saveTestCasesToFile();
+        if(saveTestCaseNeeded)
+            saveTestCasesToFile();
         
         return true;
+    }
+    
+    public void setSaveTestCaseNeeded(boolean needed){
+        this.saveTestCaseNeeded = needed;
     }
     
     public static void main(String[] args) throws MalformedURLException, URISyntaxException{
@@ -210,6 +221,7 @@ public class WSFProject {
         for(WSFTestCase testCase : testCases){
             testCase.setProject(this);
         }
+        saveTestCaseNeeded = true;
     }
 
     public XSDUtils getXsdHelper() {
@@ -226,6 +238,12 @@ public class WSFProject {
     
     public void addTestCase(WSFTestCase testCase){
         this.testCases.add(testCase);
+        saveTestCaseNeeded = true;
+    }
+    
+    public void removeTestCase(WSFTestCase testCase){
+        this.testCases.remove(testCase);
+        saveTestCaseNeeded = true;
     }
     
     public void print(){
@@ -270,9 +288,15 @@ public class WSFProject {
     }
     
     public void saveTestCasesToFile() throws Exception{
+        
+        if(!saveTestCaseNeeded)
+            return ;
+        
         File testCasesFile = new File(path, "testcases.xml");
         logger.info("Save TestCases to File: " + testCasesFile.getAbsolutePath());
         XMLUtils.saveToFile(serializeTestCasesToOMElement(null), testCasesFile);
+        
+        saveTestCaseNeeded = false;
     }
     
     public void loadTestCasesFromFile() throws FileNotFoundException, XMLStreamException {

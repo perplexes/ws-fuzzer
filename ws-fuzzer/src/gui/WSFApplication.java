@@ -32,12 +32,11 @@ import org.apache.log4j.Logger;
  * The main class of the application.
  */
 public class WSFApplication extends SingleFrameApplication {
-
-    static Logger logger = Logger.getLogger(WSFApplication.class);
     
-    private final String configurationFilePath = "./configuration.xml";
+    private final String configurationFilePath = "configuration.xml";
     private WSFConfiguration configuration;
     private ArrayList<WSFProject> projects;
+    private Logger logger;
     
     public ArrayList<WSFProject> getProjects(){
         return projects;
@@ -51,6 +50,9 @@ public class WSFApplication extends SingleFrameApplication {
     
     @Override
     protected void initialize(String[] args){
+        if(logger == null)
+            logger = Logger.getLogger(WSFApplication.class);
+        
         logger.info("Initialize");
         try {
             File configurationFile = new File(configurationFilePath);
@@ -102,10 +104,15 @@ public class WSFApplication extends SingleFrameApplication {
     /**
      * At startup create and show the main frame of the application.
      */
-    @Override protected void startup() {
+    @Override 
+    protected void startup() {
+        
+        if(logger == null)
+            logger = Logger.getLogger(WSFApplication.class);
+        
         logger.info("Start GUI");
         WSFApplicationView appView = new WSFApplicationView(this);
-        appView.getFrame().setPreferredSize(new Dimension(800,600));
+        appView.getFrame().setPreferredSize(new Dimension(900,700));
         show(appView);
     }
 
@@ -125,7 +132,9 @@ public class WSFApplication extends SingleFrameApplication {
         return Application.getInstance(WSFApplication.class);
     }
     
+    @Override
     protected void shutdown(){
+        
         logger.info("Shutdown the Application");
         for(WSFProject project : projects){
             try {
@@ -146,7 +155,17 @@ public class WSFApplication extends SingleFrameApplication {
      * Main method launching the application.
      */
     public static void main(String[] args) {
-        Logger.getLogger("org.apache.axiom.om.util.StAXUtils").setLevel(Level.INFO);
+        
+        String log4jFile = System.getProperty("log4j.configuration");
+        
+        File file = new File(log4jFile);
+        
+        System.setProperty("log4j.configuration", file.toURI().toString());
+        
+        Logger logger = Logger.getLogger(WSFApplication.class);
+        
+        Logger.getLogger("org.apache").setLevel(Level.WARN);
+        Logger.getLogger("org.apache.axiom.om.util.StAXUtils").setLevel(Level.WARN);
         logger.info("\n\n");
         logger.info("*************************************************");
         logger.info("***                WS - FUZZER                ***");

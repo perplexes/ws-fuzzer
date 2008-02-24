@@ -165,7 +165,17 @@ public class XSDUtils {
             return dataElement;
         }
         
-            
+        if((xmlSchemaAnnotated instanceof XmlSchemaElement) && schemaElement.getSchemaTypeName() == null){
+            schemaElement = (XmlSchemaElement)xmlSchemaAnnotated;
+            WSFDataElement dataElement = new WSFDataElement();
+            dataElement.setSimpleType(false);
+            dataElement.setType(new QName("empty"));
+            dataElement.setName(schemaElement.getQName());
+            dataElement.setMinOccurs(1);
+            dataElement.setMaxOccurs(1);
+            return dataElement;
+        }
+        
         return null;
     }
 

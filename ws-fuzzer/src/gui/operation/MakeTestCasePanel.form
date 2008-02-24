@@ -285,6 +285,7 @@
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="fixedValueTextFieldActionPerformed"/>
+                    <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="fixedValueTextFieldKeyReleased"/>
                   </Events>
                 </Component>
                 <Component class="javax.swing.JRadioButton" name="fromDictionaryRadioButton">
@@ -346,6 +347,7 @@
                         <EmptyBorder/>
                       </Border>
                     </Property>
+                    <Property name="editable" type="boolean" value="false"/>
                     <Property name="name" type="java.lang.String" value="previewTextPane" noResource="true"/>
                   </Properties>
                 </Component>

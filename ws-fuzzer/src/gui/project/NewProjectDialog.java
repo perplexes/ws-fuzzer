@@ -17,6 +17,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.wsdl.WSDLException;
 import javax.xml.stream.XMLStreamException;
@@ -182,8 +183,8 @@ public class NewProjectDialog extends javax.swing.JDialog {
         projectNameTextField.setText(resourceMap.getString("projectNameTextField.text")); // NOI18N
         projectNameTextField.setName("projectNameTextField"); // NOI18N
         projectNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                projectNameTextFieldKeyTyped(evt);
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                projectNameTextFieldKeyReleased(evt);
             }
         });
 
@@ -259,9 +260,9 @@ public class NewProjectDialog extends javax.swing.JDialog {
         enableOKButton();
     }//GEN-LAST:event_wsdlURLTextFieldKeyTyped
 
-    private void projectNameTextFieldKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_projectNameTextFieldKeyTyped
+    private void projectNameTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_projectNameTextFieldKeyReleased
         enableOKButton();
-    }//GEN-LAST:event_projectNameTextFieldKeyTyped
+    }//GEN-LAST:event_projectNameTextFieldKeyReleased
     
     /**
      * @param args the command line arguments
@@ -283,6 +284,14 @@ public class NewProjectDialog extends javax.swing.JDialog {
     public void enableOKButton(){
         String name = projectNameTextField.getText();
         String path = wsdlURLTextField.getText();
+        
+        ArrayList<WSFProject> projects = WSFApplication.getApplication().getProjects();
+        for(WSFProject project : projects){
+            if(project.getName().equalsIgnoreCase(name)){
+                okButton.setEnabled(false);
+                return;
+            }
+        }
         
         if(!name.equalsIgnoreCase("") && !path.equalsIgnoreCase(""))
             okButton.setEnabled(true);

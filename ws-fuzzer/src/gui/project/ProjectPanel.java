@@ -147,4 +147,8 @@ public class ProjectPanel extends javax.swing.JPanel {
     
     private ProjectInfoPanel projectInfoPanel;
     private WSDLRawPanel wsdlRawPanel;
+    
+    public WSFProject getProject(){
+        return this.project;
+    }
 }

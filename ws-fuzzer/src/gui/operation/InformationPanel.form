@@ -18,8 +18,8 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="supportedPanel" alignment="0" pref="525" max="32767" attributes="0"/>
-          <Component id="displayPanel" alignment="0" pref="525" max="32767" attributes="0"/>
+          <Component id="supportedPanel" alignment="0" pref="607" max="32767" attributes="0"/>
+          <Component id="displayPanel" alignment="0" pref="607" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
@@ -27,7 +27,7 @@
           <Group type="102" alignment="0" attributes="0">
               <Component id="supportedPanel" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="displayPanel" pref="345" max="32767" attributes="0"/>
+              <Component id="displayPanel" pref="393" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>

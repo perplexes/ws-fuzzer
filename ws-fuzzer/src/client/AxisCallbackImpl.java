@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package client;
 
 import datamodel.WSFResult;
@@ -18,13 +17,12 @@ import org.apache.log4j.Logger;
 public class AxisCallbackImpl implements AxisCallback {
 
     private static Logger logger = Logger.getLogger(AxisCallbackImpl.class);
-    
     private Hook hook;
     private ArrayList<WSFResult> results;
     private boolean isResultSaved;
     private int inputIndex;
     private Thread thread;
-    
+
     AxisCallbackImpl(Hook hook, ArrayList<WSFResult> results, int inputIndex, Thread thread) {
         this.hook = hook;
         this.results = results;
@@ -44,7 +42,7 @@ public class AxisCallbackImpl implements AxisCallback {
     }
 
     public void onError(Exception arg0) {
-        logger.error("Axis2: onError: " + arg0);
+        logger.error("Axis2: onError: " + arg0 + "\n failed index: " + this.inputIndex);
         saveResult();
     }
 
@@ -54,28 +52,27 @@ public class AxisCallbackImpl implements AxisCallback {
     }
 
     private void saveResult() {
-        
+
         hook.getHttpConnection().releaseConnection();
 
-            if (!this.isResultSaved) {
-                WSFResult result = hook.getResult();
+        if (!this.isResultSaved) {
+            WSFResult result = hook.getResult();
 
-                if (result.getOutRaw() != null) {
-                    
-                    result.setInputIndex(inputIndex);
-                    
-                    WSFResult resultCopy = result.clone();
-                    
-                    synchronized(results){
-                        results.add(resultCopy);
-                    }
-                    logger.info("Receive Response: index " + result.getInputIndex() + "in " + result.getTime() + " ms");
-                    thread.interrupt();
+            if (result.getOutRaw() != null) {
+
+                result.setInputIndex(inputIndex);
+
+                synchronized (results) {
+                    System.out.println("------------->: " + inputIndex);
+                    results.add(result);
                 }
-
-                result.clear();
-                this.isResultSaved = true;
-                
+                logger.info("Receive Response: index " + result.getInputIndex() + " in " + result.getTime() + " ms");
+                thread.interrupt();
             }
+
+            hook.setResult(new WSFResult(inputIndex));
+            this.isResultSaved = true;
+
+        }
     }
 }

@@ -7,6 +7,7 @@ package client;
 
 import datamodel.WSFResult;
 import java.util.HashMap;
+import org.apache.axis2.client.ServiceClient;
 import org.apache.commons.httpclient.HttpConnection;
 
 /**
@@ -16,18 +17,16 @@ import org.apache.commons.httpclient.HttpConnection;
 public class Hook {
     private HashMap<Long, WSFResult> buffer;
     private HashMap<Long, HttpConnection> connections;
+    private HashMap<Long, ServiceClient> serviceClients;
 
     public Hook(){
         buffer = new HashMap<Long, WSFResult>();
         connections = new HashMap<Long, HttpConnection>();
+        serviceClients = new HashMap<Long, ServiceClient>();
     }
     
     public WSFResult getResult() {
         Long key = new Long(Thread.currentThread().getId());
-        
-        if(!buffer.containsKey(key))
-            buffer.put(key, new WSFResult());
-        
         return buffer.get(key);
     }
 
@@ -39,6 +38,21 @@ public class Hook {
     public boolean hasResult(){
         Long key = new Long(Thread.currentThread().getId());
         return buffer.containsKey(key);
+    }
+    
+    public ServiceClient getClient(){
+        Long key = new Long(Thread.currentThread().getId());
+        return serviceClients.get(key);
+    }
+    
+    public void setClient(ServiceClient client){
+        Long key = new Long(Thread.currentThread().getId());
+        serviceClients.put(key, client);
+    }
+    
+    public boolean hasClient(){
+        Long key = new Long(Thread.currentThread().getId());
+        return serviceClients.containsKey(key);
     }
     
     public HttpConnection getHttpConnection(){

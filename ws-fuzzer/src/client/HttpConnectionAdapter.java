@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.ArrayList;
 
 import org.apache.commons.httpclient.HttpConnection;
 import org.apache.commons.httpclient.HttpConnectionManager;
@@ -37,7 +36,9 @@ public class HttpConnectionAdapter extends HttpConnection {
      *            the connection to be wrapped
      */
     public HttpConnectionAdapter(HttpConnection connection, Hook hook) {
+        
         super(connection.getHost(), connection.getPort(), connection.getProtocol());
+        
         this.wrappedConnection = connection;
 
         if (this.out == null) {
@@ -181,12 +182,10 @@ public class HttpConnectionAdapter extends HttpConnection {
      */
     public void print(String data) throws IOException,
             IllegalStateException {
-//        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$ --> 0");
         wrappedConnection.print(data);
     }
 
     public void printLine() throws IOException, IllegalStateException {
-//        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$ --> 1");
         wrappedConnection.printLine();
     }
 
@@ -195,7 +194,6 @@ public class HttpConnectionAdapter extends HttpConnection {
      */
     public void printLine(String data) throws IOException,
             IllegalStateException {
-//        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$ --> 2");
         wrappedConnection.printLine(data);
     }
 
@@ -203,18 +201,18 @@ public class HttpConnectionAdapter extends HttpConnection {
      * @deprecated
      */
     public String readLine() throws IOException, IllegalStateException {
-//        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$ --> 3");
         return wrappedConnection.readLine();
     }
 
     public String readLine(String charset) throws IOException,
             IllegalStateException {
-//        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$ --> 4");
-//        System.out.println("#####################| " + Thread.currentThread().getId() + " : " +Thread.currentThread().getName());
 
         String str = this.wrappedConnection.readLine(charset);
 
-        this.in.append(str);
+        if(str != null){
+            this.in.append(str);
+        }
+        
         return str;
     }
 
@@ -222,29 +220,30 @@ public class HttpConnectionAdapter extends HttpConnection {
     @Override
     public void releaseConnection() {
         
-        
         WSFResult result = hook.getResult();
-        result.setTime(System.currentTimeMillis());
         
         if(this.in != null){
+            
             String inRaw = "";
+            
             if(this.in.indexOf("<?xml") != -1){
                 inRaw = new String(this.in.insert(this.in.indexOf("<?xml"), "\n\n"));
             }else{
                 inRaw = new String(this.in);
             }
-                String outRaw = new String(this.out);
-
-            result.setOutRaw(outRaw);
+            
             result.setInRaw(inRaw);
             
+        }else{
+            result.setInRaw("");
         }
+        
+        String outRaw = new String(this.out);
+        result.setOutRaw(outRaw);
         
         this.in = null;
         this.out = null;
         this.isReleased = true;
-        
-//        System.out.println("HttpConnectionAdapter: connection released: " + Thread.currentThread().getName() + " -- " + Thread.currentThread().getId());
         
         wrappedConnection.releaseConnection();
 
@@ -306,27 +305,24 @@ public class HttpConnectionAdapter extends HttpConnection {
 
     public void write(byte[] data, int offset, int length)
             throws IOException, IllegalStateException {
-//        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$ --> 5");
         wrappedConnection.write(data, offset, length);
     }
 
     public void write(byte[] data) throws IOException,
             IllegalStateException {
-//        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$ --> 6");
         wrappedConnection.write(data);
     }
 
     public void writeLine() throws IOException, IllegalStateException {
-
-//        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$ --> 7");
-//        System.out.println("#####################| " + Thread.currentThread().getId() + " : " +Thread.currentThread().getName());
+        
         this.out.append("\n");
+        
         wrappedConnection.writeLine();
     }
 
     public void writeLine(byte[] data) throws IOException,
             IllegalStateException {
-//        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$ --> 8");
+        
         wrappedConnection.writeLine(data);
     }
 
@@ -388,13 +384,9 @@ public class HttpConnectionAdapter extends HttpConnection {
         
         if(isReleased){
             WSFResult result = this.hook.getResult();
-            result.setTime(System.currentTimeMillis());
             isReleased = false;
         }
         
-//        System.out.println(Thread.currentThread().getId());
-//        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$ --> 9");
-//        System.out.println("#####################| " + Thread.currentThread().getId() + " : " +Thread.currentThread().getName());
         wrappedConnection.print(data, charset);
     }
 
@@ -406,8 +398,6 @@ public class HttpConnectionAdapter extends HttpConnection {
      */
     public void printLine(String data, String charset) throws IOException,
             IllegalStateException {
-
-//        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$ --> 10");
         wrappedConnection.printLine(data, charset);
     }
 

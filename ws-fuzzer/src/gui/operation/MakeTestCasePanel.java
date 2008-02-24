@@ -13,6 +13,8 @@ import datamodel.WSFOperation;
 import datamodel.WSFTestCase;
 import gui.WSFApplication;
 import gui.WSFApplicationView;
+import java.awt.Color;
+import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.FileNotFoundException;
@@ -20,15 +22,15 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Vector;
-import java.util.logging.Level;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
-import javax.swing.text.html.HTMLDocument;
+import javax.swing.JTree;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-import javax.xml.stream.XMLStreamException;
 import org.apache.log4j.Logger;
 import org.jdesktop.application.Action;
 import utils.JTreeUtils;
@@ -65,6 +67,8 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
         WSFConfiguration config = WSFApplication.getApplication().getWSFConfiguration();
         config.addPropertyChangeListener("dictionaries", this);
 
+        requestMessageTree.setCellRenderer(new MyCellRenderer());
+        
         previewTextPane.setEditorKit(new HTMLEditorKit() );
     }
 
@@ -74,6 +78,7 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
     }
 
     private void showOperation() {
+        
         DefaultMutableTreeNode requestTreeNode = operation.getRequestTreeNode();
         DefaultMutableTreeNode responseTreeNode = operation.getResponseTreeNode();
 
@@ -125,6 +130,8 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
 
             ((DefaultTreeModel) requestMessageTree.getModel()).reload();
             JTreeUtils.expandAll(requestMessageTree, null);
+            
+            operation.getPort().getService().getProject().setSaveTestCaseNeeded(true);
             
         } catch (Exception ex) {
             WSFApplication.showMessage("Exception: " + ex.getMessage());
@@ -257,6 +264,11 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
                 fixedValueTextFieldActionPerformed(evt);
             }
         });
+        fixedValueTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                fixedValueTextFieldKeyReleased(evt);
+            }
+        });
 
         fromDictionaryRadioButton.setName("fromDictionaryRadioButton"); // NOI18N
         fromDictionaryRadioButton.addActionListener(new java.awt.event.ActionListener() {
@@ -313,6 +325,7 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
         jScrollPane3.setName("jScrollPane3"); // NOI18N
 
         previewTextPane.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        previewTextPane.setEditable(false);
         previewTextPane.setName("previewTextPane"); // NOI18N
         jScrollPane3.setViewportView(previewTextPane);
 
@@ -446,6 +459,11 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
             }
         }
     }//GEN-LAST:event_requestMessageTreeMouseClicked
+
+    private void fixedValueTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_fixedValueTextFieldKeyReleased
+        // TODO add your handling code here:
+        setInputDefinition();
+    }//GEN-LAST:event_fixedValueTextFieldKeyReleased
 
     private void setInputDefinition(){
         try {
@@ -628,5 +646,65 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
         
         dictionaryComboBoxModel = new DefaultComboBoxModel(dictionaries);
         fromDictionaryComboBox.setModel(dictionaryComboBoxModel);
+    }
+    
+    class MyCellRenderer extends DefaultTreeCellRenderer{
+        
+        
+        final private Color colorForDisabledElement = new Color(193, 193, 193);
+        final private Color colorForNormalElement = Color.WHITE;
+        final private Color colorForSelection = new Color(134,171,217);
+        
+        public MyCellRenderer(){
+            super();
+            setOpaque(true);
+        }
+        
+        @Override
+        public Component getTreeCellRendererComponent(
+                                                JTree tree, 
+                                                Object value,
+                                                boolean sel, 
+                                                boolean expanded,
+                                                boolean leaf,
+                                                int row,
+                                                boolean hasFocus){
+                    
+            DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode)value;
+            TreeNode[] pathNodes = treeNode.getPath();
+            TreePath treePath = new TreePath(pathNodes);
+            
+            Object userObject = treeNode.getUserObject();
+            
+            setText(value.toString());
+            
+            if(sel){
+                this.setBackground(colorForSelection);
+                return this;
+            }
+            
+            boolean enabled = true;
+            for(TreeNode node : pathNodes){
+                
+                userObject = ((DefaultMutableTreeNode)node).getUserObject();
+                
+                if(!(userObject instanceof WSFDataElement))
+                    continue;
+                
+                if(!((WSFDataElement)(userObject)).isEnabled()){
+                    enabled =false;
+                    break;
+                }
+            }
+            
+            if(enabled){
+                this.setBackground(colorForNormalElement);
+            }else{
+                this.setBackground(colorForDisabledElement);
+            }
+            
+            return this;
+            
+        }
     }
 }

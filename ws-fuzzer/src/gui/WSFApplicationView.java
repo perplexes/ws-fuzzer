@@ -14,6 +14,7 @@ import gui.options.OptionsDialog;
 import gui.port.PortPanel;
 import gui.project.NewProjectDialog;
 import gui.project.ProjectPanel;
+import gui.testcase.ExecuteTestCase;
 import gui.testcase.TestCasePanel;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
@@ -109,9 +110,19 @@ public class WSFApplicationView extends FrameView {
     
     private void postInit(){
         ArrayList<WSFProject> projects = WSFApplication.getApplication().getProjects();
-        projectsTreeModel = new DefaultTreeModel(createTreeNode(projects, null));
+        DefaultMutableTreeNode rootNode = createTreeNode(projects, null);
+        
+        projectsTreeModel = new DefaultTreeModel(rootNode);
         projectsTree.setModel(projectsTreeModel);
         projectsTree.setRootVisible(false);
+        
+        for(int i =0 ; i < rootNode.getChildCount(); i++){
+            DefaultMutableTreeNode childNode = (DefaultMutableTreeNode)rootNode.getChildAt(i);
+            TreePath treePath = new TreePath(childNode.getPath());
+            projectsTree.expandPath(treePath);
+        }
+        
+        this.getFrame().setTitle("WS-Fuzzer");
     }
     
     // object should be one of 
@@ -233,6 +244,8 @@ public class WSFApplicationView extends FrameView {
             optionsDialog.setLocationRelativeTo(mainFrame);
         }
         WSFApplication.getApplication().show(optionsDialog);
+        optionsDialog.setSize(640, 400);
+        optionsDialog.repaint();
     }
     
     @Action
@@ -247,6 +260,42 @@ public class WSFApplicationView extends FrameView {
         }
         WSFApplication.getApplication().show(aboutBox);
     }
+    
+    @Action
+    public void deleteSelectedTestCase(){
+        
+        TreePath treePath = projectsTree.getSelectionPath();
+        
+        if (treePath.getPathCount() != 4) {
+            return;
+        }
+        
+        DefaultMutableTreeNode projectNode = (DefaultMutableTreeNode) treePath.getPath()[1];
+        DefaultMutableTreeNode testCasesNode = (DefaultMutableTreeNode) treePath.getPath()[2];
+        DefaultMutableTreeNode testCaseNode = (DefaultMutableTreeNode) treePath.getPath()[3];
+        
+        testCasesNode.remove(testCaseNode);
+        projectsTreeModel.reload(testCasesNode);
+        
+        WSFProject project = (WSFProject) projectNode.getUserObject();
+        WSFTestCase testCase = (WSFTestCase) testCaseNode.getUserObject();
+        
+        project.removeTestCase(testCase);
+        
+        ExecuteTestCase executor = testCase.getExecutor();
+        if(executor != null){
+            executor.cancel(true);
+        }
+        
+        if(displayPanel == testCasePanel.getParent() && testCasePanel.getTestCase() == testCase){
+            displayPanel.removeAll();
+            displayPanel.revalidate();
+            displayPanel.repaint();
+        }
+        
+        logger.info("Delete TestCase : " + testCase.getName());
+        
+    }
 
     @Action
     public void deleteSelectedProject(){
@@ -254,6 +303,7 @@ public class WSFApplicationView extends FrameView {
         if (projectsTree.getSelectionCount() == 0) {
             return;
         }
+        
         TreePath treePath = projectsTree.getSelectionPath();
         DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) treePath.getPath()[0];
         DefaultMutableTreeNode projectNode = (DefaultMutableTreeNode) treePath.getPath()[1];
@@ -263,7 +313,21 @@ public class WSFApplicationView extends FrameView {
         WSFProject project = (WSFProject) projectNode.getUserObject();
 
         logger.info("Delete Project : " + project.getName());
-            
+        
+        for(WSFTestCase testCase : project.getTestCases()){
+            ExecuteTestCase executor = testCase.getExecutor();
+            if(executor != null){
+                executor.cancel(true);
+            }
+        }
+        
+        
+        if(displayPanel == projectPanel.getParent()){
+            displayPanel.removeAll();
+            displayPanel.revalidate();
+            displayPanel.repaint();
+        }
+        
         try {
              
             WSFApplication.getApplication().deleteProject(project);
@@ -336,12 +400,12 @@ public class WSFApplicationView extends FrameView {
         jToolBar1.add(optionButton);
 
         jSplitPane1.setBackground(resourceMap.getColor("jSplitPane1.background")); // NOI18N
-        jSplitPane1.setDividerLocation(80);
+        jSplitPane1.setDividerLocation(100);
         jSplitPane1.setResizeWeight(0.2);
-        jSplitPane1.setLastDividerLocation(80);
         jSplitPane1.setMinimumSize(new java.awt.Dimension(50, 100));
         jSplitPane1.setName("jSplitPane1"); // NOI18N
         jSplitPane1.setOneTouchExpandable(true);
+        jSplitPane1.setPreferredSize(null);
 
         displayPanel.setName("displayPanel"); // NOI18N
         displayPanel.setLayout(new java.awt.GridLayout(0, 1));
@@ -375,13 +439,11 @@ public class WSFApplicationView extends FrameView {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 201, Short.MAX_VALUE))
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 454, Short.MAX_VALUE)
         );
 
         jSplitPane1.setLeftComponent(jPanel1);
@@ -398,7 +460,7 @@ public class WSFApplicationView extends FrameView {
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 461, Short.MAX_VALUE))
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 456, Short.MAX_VALUE))
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -431,6 +493,7 @@ public class WSFApplicationView extends FrameView {
         statusAnimationLabel.setName("statusAnimationLabel"); // NOI18N
 
         progressBar.setName("progressBar"); // NOI18N
+        progressBar.setStringPainted(true);
 
         javax.swing.GroupLayout statusPanelLayout = new javax.swing.GroupLayout(statusPanel);
         statusPanel.setLayout(statusPanelLayout);
@@ -465,7 +528,7 @@ public class WSFApplicationView extends FrameView {
         deleteProjectPopupMenuItem.setName("deleteProjectPopupMenuItem"); // NOI18N
         projectsTreePopupMenu.add(deleteProjectPopupMenuItem);
 
-        deleteTestCasePopupMenuItem.setText(resourceMap.getString("deleteTestCasePopupMenuItem.text")); // NOI18N
+        deleteTestCasePopupMenuItem.setAction(actionMap.get("deleteSelectedTestCase")); // NOI18N
         deleteTestCasePopupMenuItem.setName("deleteTestCasePopupMenuItem"); // NOI18N
         projectsTreePopupMenu.add(deleteTestCasePopupMenuItem);
 
@@ -485,11 +548,11 @@ public class WSFApplicationView extends FrameView {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
             
             if(node.getUserObject() instanceof WSFTestCase){
-                projectsTreePopupMenu.removeAll();
-                projectsTreePopupMenu.add(deleteTestCasePopupMenuItem);
+                deleteTestCasePopupMenuItem.setEnabled(true);
+                deleteProjectPopupMenuItem.setEnabled(false);
             }else{
-                projectsTreePopupMenu.removeAll();
-                projectsTreePopupMenu.add(deleteProjectPopupMenuItem);
+                deleteTestCasePopupMenuItem.setEnabled(false);
+                deleteProjectPopupMenuItem.setEnabled(true);
             }
             projectsTreePopupMenu.show((JComponent)evt.getSource(), evt.getX(), evt.getY());
             
@@ -503,11 +566,19 @@ public class WSFApplicationView extends FrameView {
             
         TreePath path = evt.getNewLeadSelectionPath();
         
-        if( path!=null && path.getPathCount()==2){
+        if( path!=null && path.getPathCount()==3){
             
-            WSFProject project = (WSFProject)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
-            showProjectPanel(project);
-            logger.info("Show Project: " + project.getName());
+            Object object = ((DefaultMutableTreeNode)path.getPathComponent(2)).getUserObject();
+            
+            if(object instanceof WSFTestCase){
+                
+            }
+            
+            if(object instanceof WSFService){
+                WSFService service = (WSFService)object;
+                showProjectPanel(service.getProject());
+                logger.info("Show Project: " + service.getName());
+            }
         }
         
         if( path!=null && path.getPathCount()==4){
@@ -643,4 +714,8 @@ public class WSFApplicationView extends FrameView {
     private PortPanel portPanel;
     private OperationPanel operationPanel;
     private TestCasePanel testCasePanel;
+    
+    public void setProgressBarMessage(String msg){
+        progressBar.setString(msg);
+    }
 }

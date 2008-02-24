@@ -83,8 +83,18 @@ public class WSFConfiguration extends AbstractBean{
     }
     
     public static WSFConfiguration createWSFConfigruation(File xmlFile) throws FileNotFoundException, XMLStreamException{
-        OMElement wsfConfigurationElement = XMLUtils.toOMElement(xmlFile);
-        return createWSFConfiguration(wsfConfigurationElement, xmlFile);
+        if(xmlFile.exists()){
+            OMElement wsfConfigurationElement = XMLUtils.toOMElement(xmlFile);
+            return createWSFConfiguration(wsfConfigurationElement, xmlFile);
+        }else{
+            WSFConfiguration config = new WSFConfiguration(xmlFile);
+            config.setChanged(true);
+            config.setMaxNumberOfConnectionsPerHost(5);
+            config.setMaxNumberOfConnectionsOverall(10);
+            config.setProjectsDirectory(new File("projects"));
+            return config;
+        }
+        
     }
 
     public boolean isChanged(){

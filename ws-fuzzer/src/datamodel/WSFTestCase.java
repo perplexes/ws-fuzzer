@@ -5,6 +5,7 @@
 
 package datamodel;
 
+import gui.testcase.ExecuteTestCase;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -17,6 +18,12 @@ import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
  * @author chang
  */
 public class WSFTestCase {
+    
+    final public static int PRE_EXECUTION = 0;
+    final public static int EXECUTION = 1;
+    final public static int FINISHED = 2;
+    
+    private int status;
     
     private boolean saveNeeded;
 
@@ -32,10 +39,9 @@ public class WSFTestCase {
     
     private ArrayList<WSFResult> results;
     
-    private boolean executed;
-    private boolean finished;
-    
     private WSFStatistic statistic;
+    
+    private ExecuteTestCase executor;
     
     public WSFTestCase(String name, WSFOperation operation){
         this.name = name;
@@ -44,6 +50,7 @@ public class WSFTestCase {
         inputHeaderVector = new ArrayList<WSFDataElement>();
         inputDataVector = new ArrayList<WSFDataElement>();
         results = new ArrayList<WSFResult>();
+        this.status = WSFTestCase.PRE_EXECUTION;
     }
     
     private WSFTestCase(WSFProject project){
@@ -51,6 +58,14 @@ public class WSFTestCase {
         inputHeaderVector = new ArrayList<WSFDataElement>();
         inputDataVector = new ArrayList<WSFDataElement>();
         results = new ArrayList<WSFResult>();
+    }
+    
+    public void setExecutor(ExecuteTestCase executor){
+        this.executor = executor;
+    }
+    
+    public ExecuteTestCase getExecutor(){
+        return this.executor;
     }
     
     public String getName() {
@@ -117,6 +132,14 @@ public class WSFTestCase {
         this.statistic = statistic;
     }
     
+    public int getStatus(){
+        return this.status;
+    }
+    
+    public void setStatus(int status){
+        this.status = status;
+    }
+    
     public void generateInputsVector(){
         
         ArrayList<WSFInputSource> sources = new ArrayList<WSFInputSource>();
@@ -147,36 +170,24 @@ public class WSFTestCase {
                 break;
         }
         
-        WSFResult result = new WSFResult();
-        result.setInputIndex(-1);
+        WSFResult result = new WSFResult(WSFResult.PLACEHOLDER);
+        result.setInputIndex(0);
         for(int i=0; i<inputDataVector.size(); i++){
             this.results.add(result);
         }
     }
-
-    public boolean isExecuted() {
-        for(int i=0; i<results.size(); i++){
-            if(results.get(i).getInputIndex() != -1)
-                return true;
-            if(i>100)
-                return false;
+    
+    public void clearResults(){
+        this.results.clear();
+        WSFResult result = new WSFResult(WSFResult.PLACEHOLDER);
+        result.setInputIndex(0);
+        for(int i=0; i<inputDataVector.size(); i++){
+            this.results.add(result);
         }
         
-        return false;
-    }
-
-    public boolean isFinished() {
-        
-        for(int i=0; i<results.size(); i++){
-            if(results.get(i).getInputIndex() == -1)
-                return false;
-        }
-        
-        return true;
-    }
-
-    public void setFinished(boolean finished) {
-        this.finished = finished;
+        this.status = WSFTestCase.PRE_EXECUTION;
+        this.saveNeeded = true;
+        this.project.setSaveTestCaseNeeded(true);
     }
     
     public String toString(){
@@ -230,6 +241,10 @@ public class WSFTestCase {
         OMElement root = omDOMFactory.createOMElement(new QName("testcase"), parent);
         OMElement omElement1 = null;
         OMElement omElement2 = null;
+        
+        // status
+        omElement1 = omDOMFactory.createOMElement(new QName("status"), root);
+        omElement1.setText(""+this.status);
         
         // name
         omElement1 = omDOMFactory.createOMElement(new QName("name"), root);
@@ -297,6 +312,10 @@ public class WSFTestCase {
         WSFTestCase testCase = new WSFTestCase(project);
         
         OMElement element = null;
+        
+        // status
+        element = omElement.getFirstChildWithName(new QName("status"));
+        testCase.status = Integer.parseInt(element.getText());
         
         // name
         element = omElement.getFirstChildWithName(new QName("name"));

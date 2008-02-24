@@ -13,7 +13,7 @@ import java.io.File;
  */
 public class FileUtils {
 
-    static public boolean deleteDirectory(File path) {
+    public static boolean deleteDirectory(File path) {
         if (path.exists()) {
             File[] files = path.listFiles();
             for (int i = 0; i < files.length; i++) {
@@ -26,4 +26,5 @@ public class FileUtils {
         }
         return (path.delete());
     }
+    
 }

@@ -5,8 +5,6 @@
 
 package datamodel;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import org.apache.axiom.om.OMElement;
@@ -19,6 +17,14 @@ import utils.XMLUtils;
  * @author chang
  */
 public class WSFResult {
+    
+    public static int PENDING = 0;
+    public static int NOTFINISHED = 1;
+    public static int FINISHED = 2;
+    public static int PLACEHOLDER = 3;
+    
+    private int status;
+    
     private int inputIndex;
     
     private String outRaw;
@@ -27,13 +33,28 @@ public class WSFResult {
     // in ms
     private long time;
     
+    private WSFResult(){
+    }
+    
+    public WSFResult(int inputIndex){
+        this.status = WSFResult.PENDING;
+        this.inputIndex = inputIndex;
+    }
+    
+    public int getStatus(){
+        return this.status;
+    }
+    
+    public void setStatus(int status){
+        this.status = status;
+    }
 
     public String getOutRaw() {
         return outRaw;
     }
 
     public void setOutRaw(String outRaw) {
-        this.outRaw = prettifyMessage(outRaw);
+        this.outRaw = outRaw;
     }
 
     public String getInRaw() {
@@ -41,7 +62,8 @@ public class WSFResult {
     }
 
     public void setInRaw(String inRaw) {
-        this.inRaw = prettifyMessage(inRaw);
+//        this.inRaw = inRaw;
+        this.inRaw = inRaw;
     }
 
     public long getTime() {
@@ -72,6 +94,7 @@ public class WSFResult {
     @Override
     public WSFResult clone(){
         WSFResult result = new WSFResult();
+        result.setStatus(status);
         result.setInRaw(inRaw);
         result.setOutRaw(outRaw);
         result.setInputIndex(inputIndex);
@@ -99,12 +122,30 @@ public class WSFResult {
         return msg;
     }
     
+    public void prettify(){
+        if(this.inRaw != null){
+            this.inRaw = prettifyMessage(this.inRaw);
+        }else{
+            this.inRaw = "";
+        }
+        
+        if(this.outRaw != null){
+            this.outRaw = prettifyMessage(this.outRaw);
+        }else{
+            this.outRaw = "";
+        }
+    }
+    
     public OMElement serializeToOMElement(OMElement parent){
         OMDOMFactory omDOMFactory = new OMDOMFactory();
         
         OMElement result = omDOMFactory.createOMElement(new QName("result"), parent);
         
         OMElement omElement1 = null;
+        
+        // status
+        omElement1 = omDOMFactory.createOMElement(new QName("status"), result);
+        omElement1.setText(""+this.status);
         
         // index
         omElement1 = omDOMFactory.createOMElement(new QName("inputindex"), result);
@@ -131,6 +172,10 @@ public class WSFResult {
         WSFResult result = new WSFResult();
         
         OMElement element = null;
+        
+        // status
+        element = omElement.getFirstChildWithName(new QName("status"));
+        result.status = Integer.parseInt(element.getText());
         
         // index
         element = omElement.getFirstChildWithName(new QName("inputindex"));
