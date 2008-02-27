@@ -468,7 +468,11 @@ public class MakeTestCasePanel extends javax.swing.JPanel implements PropertyCha
     private void setInputDefinition(){
         try {
 
-            DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) requestMessageTree.getSelectionPath().getLastPathComponent();
+            TreePath treePath = requestMessageTree.getSelectionPath();
+            if(treePath == null)
+                return;
+            
+            DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) treePath.getLastPathComponent();
             WSFDataElement element = (WSFDataElement) treeNode.getUserObject();
 
             if (!element.isSimpleType()) {

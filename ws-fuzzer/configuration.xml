@@ -1,32 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wsfconfiguration>
     <connections>
-        <perhost>18</perhost>
-        <overall>20</overall>
+        <perhost>1</perhost>
+        <overall>10</overall>
     </connections>
     <dictionaries>
         <dictionary>
-            <name>dict1.txt</name>
-            <path>/home/chang/work/netbeans/ws-fuzzer/test/dict1.txt</path>
+            <name>SQLInjection</name>
+            <path>/home/chang/work/netbeans/ws-fuzzer/test/SQLInjection</path>
         </dictionary>
         <dictionary>
-            <name>dict2.txt</name>
-            <path>/home/chang/work/netbeans/ws-fuzzer/test/dict2.txt</path>
+            <name>GeneralAttackStrings</name>
+            <path>/home/chang/work/netbeans/ws-fuzzer/test/GeneralAttackStrings</path>
+        </dictionary>
+        <dictionary>
+            <name>LDAP Injection</name>
+            <path>/home/chang/work/netbeans/ws-fuzzer/test/LDAP Injection</path>
+        </dictionary>
+        <dictionary>
+            <name>MetaCharacters</name>
+            <path>/home/chang/work/netbeans/ws-fuzzer/test/MetaCharacters</path>
+        </dictionary>
+        <dictionary>
+            <name>XMLContentAttackStrings</name>
+            <path>/home/chang/work/netbeans/ws-fuzzer/test/XMLContentAttackStrings</path>
+        </dictionary>
+        <dictionary>
+            <name>XPathInjection</name>
+            <path>/home/chang/work/netbeans/ws-fuzzer/test/XPathInjection</path>
+        </dictionary>
+        <dictionary>
+            <name>XSSAttackStrings</name>
+            <path>/home/chang/work/netbeans/ws-fuzzer/test/XSSAttackStrings</path>
         </dictionary>
     </dictionaries>
     <projects>
         <directory>/home/chang/work/netbeans/ws-fuzzer/projects</directory>
         <project>
-            <name>CurrencyConvertor</name>
-            <wsdluri>http://localhost/~chang/tmp/CurrencyConvertor.asmx%3fwsdl</wsdluri>
-        </project>
-        <project>
-            <name>AmortizationCalculator</name>
-            <wsdluri>http://localhost/~chang/tmp/AmortizationCalculator.cfc%3fwsdl</wsdluri>
-        </project>
-        <project>
-            <name>xwatchlists</name>
-            <wsdluri>http://localhost/~chang/tmp/xwatchlists.asmx%3fWSDL</wsdluri>
+            <name>SimpleService</name>
+            <wsdluri>http://campus7.panorama.sth.ac.at/SimpleService/SimpleService.wsdl</wsdluri>
         </project>
     </projects>
 </wsfconfiguration>
